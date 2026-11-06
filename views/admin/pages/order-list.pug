@@ -1,0 +1,109 @@
+extends ../layouts/layout-default.pug
+
+block main
+  h1.box-title Quản lý đơn hàng 
+
+  //- Section 4
+  .section-4 
+    .inner-wrap
+      .inner-item.inner-label
+        <i class="fa-solid fa-filter"></i> Bộ lọc
+      .inner-item
+        select
+          option(value="") Trạng thái
+          option(value="") Hoạt động 
+          option(value="") Tạm dừng
+      .inner-item.inner-date
+        input(type="date")
+        span -
+        input(type="date")
+      .inner-item
+        select
+          option(value="") Phương thức thanh toán
+          option(value="") Ví Momo
+          option(value="") VNPay
+          option(value="") ZaloPay
+      .inner-item
+        select
+          option(value="") Trạng thái thanh toán
+          option(value="") Đã thanh toán
+          option(value="") Chưa thanh toán
+      .inner-item.inner-reset
+        <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
+  //- End Section 4
+
+  //- Section 5
+  .section-5 
+    .inner-wrap
+      .inner-search
+        <i class="fa-solid fa-magnifying-glass"></i>
+        input(type="text" placeholder="Tìm kiếm")
+  //- End Section 5
+
+  //- Section 6
+  .section-6 
+    .table-2 
+      table
+        thead 
+          tr 
+            th Mã
+            th Thông tin khách
+            th Danh sách tour
+            th Thanh toán
+            th Trạng thái
+            th.inner-text-right Ngày đặt
+            th.inner-text-right Hành động 
+        tbody
+          each orderDetail in orderList
+            tr
+              td
+                .inner-code #{orderDetail.code}
+              td
+                .inner-info
+                  div Họ tên: #{orderDetail.fullName}
+                  div SĐT: #{orderDetail.phoneNumber}
+                  div Ghi chú: #{orderDetail.note}
+              td
+                .inner-list
+                  each item in orderDetail.items
+                    .inner-item
+                      .inner-image 
+                        img(src=item.avatar, alt=item.name)
+                      .inner-content
+                        .inner-main #{item.name}
+                        if(item.quantityAdult > 0)
+                          .inner-quantity Người lớn: #{item.quantityAdult} x #{item.newPriceAdult.toLocaleString("vi-VN")}đ
+                        if(item.quantityChildren > 0)
+                          .inner-quantity Trẻ em: #{item.quantityChildren} x #{item.newPriceChildren.toLocaleString("vi-VN")}đ
+                        if(item.quantityBaby > 0)
+                          .inner-quantity Em bé: #{item.quantityBaby} x #{item.newPriceBaby.toLocaleString("vi-VN")}đ
+              td 
+                div Tổng tiền: #{orderDetail.subTotal.toLocaleString("vi-VN")}đ
+                div Giảm 0đ
+                div Mã giảm: 0
+                div Thanh toán #{orderDetail.total.toLocaleString("vi-VN")}đ
+                div PTTT: #{orderDetail.paymentMethodName}
+                div TTTT: #{orderDetail.paymentStatusName}
+              td
+                div(class=`badge badge-${orderDetail.statusColor}`) #{orderDetail.statusName}
+              td.inner-text-right 
+                div #{orderDetail.createdAtFormatTime}
+                div #{orderDetail.createdAtFormatDate}
+              td.inner-text-right
+                .inner-buttons
+                  a(href=`/${pathAdmin}/order/edit/${orderDetail.id}` class="inner-edit") <i class="fa-regular fa-pen-to-square"></i> 
+                  button(
+                    class="inner-delete"
+                    button-delete 
+                    data-api=`/${pathAdmin}/order/delete/${orderDetail.id}`
+                  ) <i class="fa-regular fa-trash-can"></i>
+  //- End Section 6
+
+  //- Section 7
+  .section-7  
+    span.inner-label Hiển thị 1 - 9 của 78
+    select(class="inner-pagination")
+      option Trang 1
+      option Trang 2
+      option Trang 3
+  //- End Section 7

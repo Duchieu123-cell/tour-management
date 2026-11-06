@@ -1,0 +1,222 @@
+extends ../layouts/default.pug
+include ../mixins/box-breadcrumb.pug
+include ../mixins/product-item.pug
+
+block main 
+  // Box Breadcrumb
+  //- -
+  //-   var breadcrumb = {
+  //-     image: '/assets/images/image 131.jpg',
+  //-     title: 'Tour nước ngoài',
+  //-     list: [
+  //-       {
+  //-         link: '/',
+  //-         title: 'Trang chủ'
+  //-       },
+  //-       {
+  //-         link: '/tours',
+  //-         title: 'Tour nước ngoài'
+  //-       }
+  //-     ]
+  //-   };
+
+  +box-breadcrumb(breadcrumb)
+  // End Box Breadcrumb
+
+
+  // Section 9
+  //- -
+  //-   var productListSection9 = [
+  //-     {
+  //-       image: '/assets/images/product-1.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'HÀ NỘI - LÀO CAI - SAPA 4N3Đ',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00001',
+  //-       departureDate: '22/07/2024',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 4,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-2.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'TOUR 2024 PHÚ QUỐC - THIÊN ĐƯỜNG ĐẢO NGỌC (3N2Đ)',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00002',
+  //-       departureDate: '22/07/2024',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 3,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-3.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'COMBO ĐÀ NẴNG 2024: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00003',
+  //-       departureDate: '22/07/2024',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 2,
+  //-       ratingTotal: 5,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-1.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'HÀ NỘI - LÀO CAI - SAPA 4N3Đ',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00001',
+  //-       departureDate: '22/07/2024',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 4,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-2.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'TOUR 2024 PHÚ QUỐC - THIÊN ĐƯỜNG ĐẢO NGỌC (3N2Đ)',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00002',
+  //-       departureDate: '22/07/2024',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 3,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-3.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'COMBO ĐÀ NẴNG 2024: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00003',
+  //-       departureDate: '22/07/2024',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 2,
+  //-       ratingTotal: 5,
+  //-       stock: 10
+  //-     }
+  //-   ]
+
+  .section-9
+    .container
+      .inner-wrap
+        .inner-left
+          // Box Filter
+          .box-filter
+            .inner-head
+              .inner-title Bộ lọc
+              i.fa-solid.fa-filter
+            .inner-body
+              .inner-group
+                lable.inner-lable(for="") Điểm đi
+                select(name="locationFrom")
+                  option(value="") -- Chọn điểm đi --
+                  each item in cityList
+                    option(value=item.id) #{item.name}
+              .inner-group
+                lable.inner-lable(for="") Điểm đến
+                select(name="locationTo")
+                  option(value="") -- Chọn điểm đến --
+                  each item in cityList
+                    option(value=item.name) #{item.name}
+              .inner-group
+                lable.inner-lable(for="") Ngày khởi hành
+                input(
+                  name="departureDate" 
+                  type="date"
+                  )
+              .inner-group
+                lable.inner-lable(for="") Số lượng hành khách
+                .inner-input-list
+                  .inner-input-item
+                    span Người lớn:
+                    input(
+                      value="0" 
+                      name="stockAdult" 
+                      type="number"
+                      )
+                  .inner-input-item
+                    span Trẻ em:
+                    input(
+                      value="0" 
+                      name="stockChildren" 
+                      type="number"
+                      )
+                  .inner-input-item
+                    span Em bé:
+                    input(
+                      value="0" 
+                      name="stockBaby" 
+                      type="number"
+                      )
+              .inner-group
+                lable.inner-lable(for="") Mức giá
+                select(name="price")
+                  option(value="") -- Chọn khoảng giá ---
+                  option(value="0-999999") Dưới 1 triệu
+                  option(value="1000000-3000000") Từ 1 triệu đến 3 triệu
+                  option(value="3000000-6000000") Từ 3 triệu đến 6 triệu
+                  option(value="6000000-10000000") Từ 6 triệu đến 10 triệu
+                  option(value="10000000-1000000000") Trên 10 triệu
+              .inner-group
+                button.inner-button Áp dụng
+          // End Box Filter
+          .inner-overlay
+        .inner-right
+          .inner-info-1
+            h2.inner-title #{category.name}
+            .inner-desc
+              | !{category.description}
+          .inner-info-2
+            .inner-sort
+              .inner-label Sắp xếp:
+              .inner-list
+                button
+                  | Giá tăng dần
+                  i.fa-solid.fa-square-caret-up
+                button
+                  | Giá giảm dần
+                  i.fa-solid.fa-square-caret-down
+                button.active
+                  | Khuyến mãi hot
+                  i.fa-solid.fa-tag
+                button
+                  | Xem nhiều
+                  i.fa-solid.fa-eye
+            .inner-count-record
+              | Tất cả:
+              b #{tourListSection9.length} Tour
+            button.inner-filter-mobile
+              span.inner-title Bộ lọc
+              i.fa-solid.fa-filter
+          .inner-list-tour
+            each item in tourListSection9
+              +product-item(item)
+          // Pagination
+          .box-pagination
+            button
+              i.fa-solid.fa-angles-left
+            button.active 1
+            button 2
+            button 3
+            button 4
+            button
+              i.fa-solid.fa-angles-right
+          // End Pagination
+  // End Section 9

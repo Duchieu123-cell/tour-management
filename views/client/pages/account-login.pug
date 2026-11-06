@@ -1,0 +1,26 @@
+extends ../layouts/default-new.pug
+
+block main
+  .customer-auth-page
+    .customer-auth-card
+      h1 Đăng nhập
+      p.inner-desc Đăng nhập vào tài khoản khách hàng của bạn
+      if registered
+        .alert.alert-success Đăng ký thành công. Bạn có thể đăng nhập.
+      form#customer-login-form(action="/account/login" method="post")
+        .customer-auth-field
+          label(for="customer-email") Email
+          input#customer-email(type="email" name="email" autocomplete="email" required)
+        .customer-auth-field
+          label(for="customer-password") Mật khẩu
+          input#customer-password(type="password" name="password" autocomplete="current-password" required)
+        label.customer-auth-remember
+          input(type="checkbox" name="rememberPassword")
+          | Nhớ đăng nhập trong 30 ngày
+        button(type="submit") Đăng nhập
+      p.customer-auth-switch
+        | Chưa có tài khoản?
+        a(href="/account/register") Đăng ký
+      p.customer-auth-error#customer-auth-error(role="alert" hidden)
+
+  script(src="/assets/js/customer-account.js")

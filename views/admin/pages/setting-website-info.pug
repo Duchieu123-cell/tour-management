@@ -1,0 +1,37 @@
+extends ../layouts/layout-default.pug
+
+block main
+  h1.box-title Thông tin website
+
+  //- Section 8
+  .section-8  
+    form#setting-website-info-form
+      .inner-group
+        label(for="websiteName" class="inner-label") Tên website 
+        input(type="text" id="websiteName" name="websiteName" value=settingWebsiteInfo.websiteName)
+      .inner-group
+        label(for="phoneNumber" class="inner-label") Số điện thoại
+        input(type="number" id="phoneNumber" name="phoneNumber" value=settingWebsiteInfo.phoneNumber)
+      .inner-group
+        label(for="email" class="inner-label") Email 
+        input(type="text" id="email" name="email" value=settingWebsiteInfo.email)
+      .inner-group
+        label(for="address" class="inner-label") Địa chỉ
+        input(type="text" id="address" name="address" value=settingWebsiteInfo.address)
+      .inner-group
+        label(for="clockExpire" class="inner-label") Đồng hồ đếm ngược
+        input(type="datetime-local" id="clockExpire" name="clockExpire" value=settingWebsiteInfo.clockExpire)
+      .inner-group
+      .inner-group
+        label(for="logo" class="inner-label") Logo
+        div(class="inner-upload-image" image-default=settingWebsiteInfo.logo) 
+          input(type="file" id="logo" name="logo" accept="image/*" filepond-image) 
+      .inner-group
+        label(for="favicon" class="inner-label") Favicon
+        div(class="inner-upload-image" image-default=settingWebsiteInfo.favicon) 
+          input(type="file" id="favicon" name="favicon" accept="image/*" filepond-image) 
+      .inner-button.inner-two-col
+        button Cập nhật
+    .inner-back
+      a(href=`/${pathAdmin}/setting/list`) Quay lại danh sách
+  //- End Section 8

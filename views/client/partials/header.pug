@@ -1,0 +1,73 @@
+// Top Header
+.top-header
+  .container
+    .inner-wrap
+      if(websiteInfo.phoneNumber)
+        .inner-item
+          i.fa-solid.fa-phone
+          | #{websiteInfo.phoneNumber}
+      if(websiteInfo.email)
+        .inner-item
+          i.fa-solid.fa-envelope
+          | #{websiteInfo.email}
+      if(websiteInfo.address)
+        .inner-item
+          i.fa-solid.fa-building
+          | #{websiteInfo.address}
+// End Top Header
+// Header
+header.header
+  .container
+    .inner-wrap
+      button.inner-menu-mobile
+        i.fa-solid.fa-bars
+      .inner-logo
+        a(href="/")
+          img(
+            alt=websiteInfo.websiteName
+            src=websiteInfo.logo
+            )
+      nav.inner-menu
+        ul
+          li
+            a.active(href="/") Trang chủ
+          each item in categoryTree 
+            li
+              a(href=`/category/${item.slug}`) #{item.name}
+              if(item.children)
+                i.fa-solid.fa-caret-down
+                ul
+                  each itemChild in item.children
+                    li
+                      a(href=`/category/${itemChild.slug}`) #{itemChild.name}
+          //- li
+          //-   a(href="#") Tin tức
+          //- li
+          //-   a(href="#") Liên hệ
+        .inner-overlay
+      .header-account
+        if customer
+          .header-account-profile
+            .header-account-avatar
+              img(
+                src=customer.avatar || "/assets/images/icon-user.svg"
+                alt=`Ảnh đại diện của ${customer.fullName}`
+              )
+            .header-account-info
+              span.header-account-greeting Xin chào,
+              span.header-account-name #{customer.fullName}
+            form(action="/account/logout" method="post")
+              button(type="submit")
+                i.fa-solid.fa-arrow-right-from-bracket
+                | Đăng xuất
+        else
+          a.header-account-login(href="/account/login") Đăng nhập
+          a.header-account-register(href="/account/register") Đăng ký
+      .inner-cart
+        a(href="/cart")
+          img(
+            alt="Cart" 
+            src="/assets/images/icon-cart.svg"
+            )
+          span(mini-cart) 0
+// End Header

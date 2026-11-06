@@ -1,0 +1,25 @@
+extends ../layouts/default-new.pug
+
+block main
+  .customer-auth-page
+    .customer-auth-card
+      h1 Tạo tài khoản
+      p.inner-desc Đăng ký tài khoản khách hàng
+      form#customer-register-form(action="/account/register" method="post")
+        .customer-auth-field
+          label(for="customer-full-name") Họ tên
+          input#customer-full-name(type="text" name="fullName" autocomplete="name" minlength="3" maxlength="50" required)
+        .customer-auth-field
+          label(for="customer-email") Email
+          input#customer-email(type="email" name="email" autocomplete="email" required)
+        .customer-auth-field
+          label(for="customer-password") Mật khẩu
+          input#customer-password(type="password" name="password" autocomplete="new-password" minlength="8" required)
+          small Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).
+        button(type="submit") Đăng ký
+      p.customer-auth-switch
+        | Đã có tài khoản?
+        a(href="/account/login") Đăng nhập
+      p.customer-auth-error#customer-auth-error(role="alert" hidden)
+
+  script(src="/assets/js/customer-account.js")

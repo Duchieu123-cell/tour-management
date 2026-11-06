@@ -1,0 +1,522 @@
+extends ../layouts/default.pug
+include ../mixins/product-item.pug
+
+block main 
+  // Section 1
+  .section-1
+    .container
+      .inner-wrap
+        h1.inner-title(
+          data-aos-duration="800" 
+          data-aos="fade-up"
+          )
+          | SmartTour
+          br
+          | Al-Assisted Catalog Tour Booking Platform
+        p.inner-desc(
+          data-aos-delay="150" 
+          data-aos-duration="800" 
+          data-aos="fade-up"
+          )
+          | Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis
+          |   earum iste nesciunt eveniet facilis! Incidunt dolorum fugiat ipsa
+          |   esse provident molestias molestiae ea sit. Illum consequatur non
+          |   doloremque consectetur similique.
+        form.ai-search-box#ai-search-form
+          label(for="ai-tour-request")
+            i.fa-solid.fa-wand-magic-sparkles
+            | Tìm tour bằng AI
+          textarea#ai-tour-request(
+            name="aiTourRequest"
+            maxlength="500"
+            placeholder="Ví dụ: Tôi muốn tour du lịch đi Nha Trang, 3 ngày 2 đêm, giá 5 - 10 triệu."
+          )
+          button.ai-search-button(type="submit")
+            i.fa-solid.fa-wand-magic-sparkles
+            | Tìm tour
+        section.ai-tour-results(ai-tour-results hidden aria-live="polite")
+          p.ai-tour-results-message(ai-tour-message)
+          .ai-tour-suggestions(ai-tour-suggestions)
+  // End Section 1
+
+  // Section 2
+  //- -
+  //-   var productListSection2 = [
+  //-     {
+  //-       image: '/assets/images/product-1.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'HÀ NỘI - LÀO CAI - SAPA 4N3Đ',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00001',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 4,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-2.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'TOUR 2026 PHÚ QUỐC - THIÊN ĐƯỜNG ĐẢO NGỌC (3N2Đ)',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00002',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 3,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-3.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'COMBO ĐÀ NẴNG 2026: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00003',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 2,
+  //-       ratingTotal: 5,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-1.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'HÀ NỘI - LÀO CAI - SAPA 4N3Đ',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00001',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 4,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-2.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'TOUR 2026 PHÚ QUỐC - THIÊN ĐƯỜNG ĐẢO NGỌC (3N2Đ)',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00002',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 3,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-3.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'COMBO ĐÀ NẴNG 2026: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00003',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 2,
+  //-       ratingTotal: 5,
+  //-       stock: 10
+  //-     }
+  //-   ]
+
+
+  .section-2(
+    data-aos-duration="800" 
+    data-aos="fade-up"
+    )
+    .container
+      .inner-wrap
+        .inner-info
+          h2.inner-title
+            | ƯU ĐÃI 2026
+            br
+            | TOUR GIỜ CHÓT
+          p.inner-desc Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          .inner-clock-title Kết thúc sau
+          .inner-clock-number(clock-expire=clockExpire)
+            .inner-item
+              .inner-number 00
+              .inner-label Ngày
+            .inner-item
+              .inner-number 00
+              .inner-label Giờ
+            .inner-item
+              .inner-number 00
+              .inner-label Phút
+            .inner-item
+              .inner-number 00
+              .inner-label Giây
+          .inner-discount-title GIẢM ĐẾN
+          .inner-discount-price
+            | 990.000
+            span.inner-unit đ
+        .inner-list
+          .swiper.swiper-section-2
+            .swiper-wrapper
+              each item in tourListSection2
+                .swiper-slide
+                  +product-item(item)
+              
+  // End Section 2
+  // Section 3
+  .section-3
+    .container
+      h2.box-title(
+        data-aos-duration="800" 
+        data-aos="fade-up"
+        ) Khuyến Mãi Bùng Nổ - Đánh Tan Nóng Bức
+      .inner-wrap(
+        data-aos-delay="150" 
+        data-aos-duration="800" 
+        data-aos="fade-up"
+        )
+        .swiper.swiper-section-3
+          .swiper-wrapper
+            .swiper-slide
+              .inner-item
+                a(href="#")
+                  img(
+                    alt="" 
+                    src="/assets/images/image 126.jpg"
+                    )
+            .swiper-slide
+              .inner-item
+                a(href="#")
+                  img(
+                    alt="" 
+                    src="/assets/images/image 127.jpg"
+                    )
+            .swiper-slide
+              .inner-item
+                a(href="#")
+                  img(
+                    alt="" 
+                    src="/assets/images/image 128.jpg"
+                    )
+            .swiper-slide
+              .inner-item
+                a(href="#")
+                  img(
+                    alt="" 
+                    src="/assets/images/image 126.jpg"
+                    )
+            .swiper-slide
+              .inner-item
+                a(href="#")
+                  img(
+                    alt="" 
+                    src="/assets/images/image 127.jpg"
+                    )
+          .swiper-pagination
+  // End Section 3
+  // Section 4
+  //- -
+  //-   var productListSection4 = [
+  //-     {
+  //-       image: '/assets/images/product-1.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'HÀ NỘI - LÀO CAI - SAPA 4N3Đ',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00001',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 4,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-2.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'TOUR 2026 PHÚ QUỐC - THIÊN ĐƯỜNG ĐẢO NGỌC (3N2Đ)',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00002',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 3,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-3.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'COMBO ĐÀ NẴNG 2026: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00003',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 2,
+  //-       ratingTotal: 5,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-1.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'HÀ NỘI - LÀO CAI - SAPA 4N3Đ',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00001',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 4,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-2.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'TOUR 2026 PHÚ QUỐC - THIÊN ĐƯỜNG ĐẢO NGỌC (3N2Đ)',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00002',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 3,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-3.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'COMBO ĐÀ NẴNG 2026: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00003',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 2,
+  //-       ratingTotal: 5,
+  //-       stock: 10
+  //-     }
+  //-   ]
+
+  .section-4
+    .container
+      h2.box-title(
+        data-aos-duration="800" 
+        data-aos="fade-up"
+        ) Tour trong nước
+      .inner-wrap(
+        data-aos-delay="150" 
+        data-aos-duration="800" 
+        data-aos="fade-up"
+        )
+        each item in tourListSection4 
+          +product-item(item)
+  // End Section 4
+  // Section 5
+  .section-5(
+    data-aos-duration="800" 
+    data-aos="fade-up"
+    )
+    .container
+      .inner-image
+        a(href="#")
+          img(
+            alt="" 
+            src="/assets/images/image 129.jpg"
+            )
+  // End Section 5
+  // Section 6
+  //- -
+  //-   var productListSection6 = [
+  //-     {
+  //-       image: '/assets/images/product-1.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'HÀ NỘI - LÀO CAI - SAPA 4N3Đ',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00001',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 4,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-2.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'TOUR 2026 PHÚ QUỐC - THIÊN ĐƯỜNG ĐẢO NGỌC (3N2Đ)',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00002',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 3,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-3.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'COMBO ĐÀ NẴNG 2026: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00003',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 2,
+  //-       ratingTotal: 5,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-1.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'HÀ NỘI - LÀO CAI - SAPA 4N3Đ',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00001',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 4,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-2.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'TOUR 2026 PHÚ QUỐC - THIÊN ĐƯỜNG ĐẢO NGỌC (3N2Đ)',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00002',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 3,
+  //-       ratingTotal: 20,
+  //-       stock: 10
+  //-     },
+  //-     {
+  //-       image: '/assets/images/product-3.jpg',
+  //-       slug: '#',
+  //-       discount: 30,
+  //-       name: 'COMBO ĐÀ NẴNG 2026: ĐÀ NẴNG - HỘI AN - BÀ NÀ HILL',
+  //-       priceOld: 13650000,
+  //-       priceNew: 2590000,
+  //-       code: 'TOUR00003',
+  //-       departureDate: '22/07/2026',
+  //-       time: '10 ngày 9 đêm',
+  //-       ratingStars: 2,
+  //-       ratingTotal: 5,
+  //-       stock: 10
+  //-     }
+  //-   ]
+  .section-4
+    .container
+      h2.box-title(
+        data-aos-duration="800" 
+        data-aos="fade-up"
+        ) Tour nước ngoài
+      .inner-wrap(
+        data-aos-delay="150" 
+        data-aos-duration="800" 
+        data-aos="fade-up"
+        )
+        each item in tourListSection6 
+          +product-item(item)
+  // End Section 6
+  // Section 7
+  .section-5(
+    data-aos-duration="800" 
+    data-aos="fade-up"
+    )
+    .container
+      .inner-image
+        a(href="#")
+          img(
+            alt="" 
+            src="/assets/images/image 130.jpg"
+            )
+  // End Section 7
+  // Section 8
+  .section-8
+    .container
+      h2.box-title(
+        data-aos-duration="800" 
+        data-aos="fade-up"
+        ) Tin Tức Mới
+      .inner-wrap(
+        data-aos-delay="150" 
+        data-aos-duration="800" 
+        data-aos="fade-up"
+        )
+        .blog-item-1
+          a(href="#")
+            .inner-image
+              img.inner-image(
+                alt="" 
+                src="/assets/images/blog-1.jpg"
+                )
+            .inner-content
+              .inner-date 23/05/2026
+              h3.inner-title Homestay "cổ tích" giữa Đà Lạt mộng mơ
+        .blog-item-2
+          a(href="#")
+            .inner-image
+              img(
+                alt="" 
+                src="/assets/images/blog-2.jpg"
+                )
+            .inner-content
+              .inner-date 23/05/2026
+              h3.inner-title Top 5 điểm check in độc đáo tại Singapore
+              .inner-desc
+                | Nếu bạn nghĩ du lịch Singapore rất nhàm chán vì chỉ mãi quanh
+                |   quẩn trong những khối bê tông vô cảm thì bạn “chắc chưa?”. Tuy
+                |   đảo quốc Sư Tử không phải là một quốc gia rộng lớn nhưng các
+                |   địa điểm du lịch tại Singapore chưa từng đánh mất sức hút đối
+                |   với cộng đồng xê dịch quốc tế.
+        .blog-item-1
+          a(href="#")
+            .inner-image
+              img.inner-image(
+                alt="" 
+                src="/assets/images/blog-3.jpg"
+                )
+            .inner-content
+              .inner-date 23/05/2026
+              h3.inner-title Đặc sản không thể bỏ qua khi đến với Đà Nẵng – Hội An
+        .blog-item-1
+          a(href="#")
+            .inner-image
+              img.inner-image(
+                alt="" 
+                src="/assets/images/blog-4.jpg"
+                )
+            .inner-content
+              .inner-date 23/05/2026
+              h3.inner-title Đảo Phú Quý Bình Thuận hot trend năm 2026
+        .blog-item-1
+          a(href="#")
+            .inner-image
+              img.inner-image(
+                alt="" 
+                src="/assets/images/blog-5.jpg"
+                )
+            .inner-content
+              .inner-date 23/05/2026
+              h3.inner-title
+                | Trekking cắm trại tại Đà Lạt- Cảm nhận Đà Lạt qua từng bước
+                |   chân
+  // End Section 8

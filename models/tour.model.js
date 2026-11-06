@@ -1,0 +1,46 @@
+const mongoose = require('mongoose');
+const slug = require('mongoose-slug-updater');
+mongoose.plugin(slug);
+
+const schema = new mongoose.Schema({
+  name: String,
+  slug: { 
+    type: String, 
+    slug: "name",
+    unique: true 
+  },
+  category: String,
+  position: Number,
+  avatar: String,
+  images: Array,
+  status: String,
+  priceAdult: Number,
+  priceChildren: Number,
+  priceBaby: Number,
+  newPriceAdult: Number,
+  newPriceChildren: Number,
+  newPriceBaby: Number,
+  stockAdult: Number,
+  stockChildren: Number,
+  stockBaby: Number,
+  locations: Array,
+  time: String,
+  vehicle: String,
+  departureDate: Date,
+  information: String,
+  schedules: Array,
+  createdBy: String,
+  updatedBy: String,
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedBy: String,
+  deletedAt: Date,
+}, {
+  timestamps: true // Tự động sinh ra createdAt, updatedAt
+})
+
+const Tour = mongoose.model('Tour', schema, "tours");
+
+module.exports = Tour;
