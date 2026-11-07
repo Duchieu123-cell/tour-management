@@ -26,11 +26,18 @@ module.exports.searchPost = async (req, res) => {
     }
 
     const searchParams = new URLSearchParams();
+    searchParams.set('ai', '1');
     if (criteria.name) {
       searchParams.set('locationTo', criteria.name);
     }
     if (criteria.time) {
       searchParams.set('time', criteria.time);
+    }
+    if (criteria.priceMin > 0) {
+      searchParams.set('priceMin', String(criteria.priceMin));
+    }
+    if (criteria.priceMax > 0) {
+      searchParams.set('priceMax', String(criteria.priceMax));
     }
     if (criteria.priceAdult > 0) {
       searchParams.set('priceAdult', String(criteria.priceAdult));
@@ -38,7 +45,7 @@ module.exports.searchPost = async (req, res) => {
 
     return res.json({
       code: 'SUCCESS',
-      message: 'Đã phân tích xong yêu cầu. Đang mở danh sách tour phù hợp.',
+      message: 'Đã phân tích xong yêu cầu. Đang mở danh sách tour phù hợp nhất.',
       criteria,
       searchUrl: `/search?${searchParams.toString()}`
     });
