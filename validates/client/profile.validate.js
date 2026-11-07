@@ -32,7 +32,7 @@ module.exports.updateProfile = (req, res, next) => {
       .messages({
         'string.pattern.base': 'Số điện thoại không đúng định dạng (VD: 0912345678)'
       }),
-    avatar: Joi.string().allow(''),
+    // avatar: Joi.string().allow(''),
     dob: Joi.date()
       .iso()
       .max('now')

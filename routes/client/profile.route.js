@@ -18,7 +18,7 @@ router.get('/', profileController.detail);
 // Cập nhật thông tin profile
 router.patch(
   '/', 
-  upload.single('avatar'), 
+  upload.single('avatar'),
   profileValidate.updateProfile,
   profileController.update
 );
