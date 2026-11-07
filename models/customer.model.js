@@ -24,18 +24,19 @@ const schema = new mongoose.Schema({
   status: {
     type: String,
     default: 'active'
-  }
-  ,
+  },
   dob: {
     type: Date
   },
+  phone: {
+    type: String
+  },
   gender: {
-    type: String,
-    enum: ['male', 'female', 'other'],
+    type: String
   },
   address: {
-    type: String,
-  }
+    type: String
+  },
 }, {
   timestamps: true
 });
