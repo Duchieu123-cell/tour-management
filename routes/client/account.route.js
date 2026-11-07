@@ -25,10 +25,10 @@ router.post(
 );
 
 // /account được mount trước requireCustomer nên route này phải tự chặn
-router.get('/profile', authMiddleware.requireCustomer, accountController.profile);
+// router.get('/profile', authMiddleware.requireCustomer, accountController.profile);
 router.patch(
   '/profile',
-  authMiddleware.requireCustomerApi,
+  authMiddleware.requireCustomer,
   upload.single('avatar'),
   profileValidate.updateProfile,
   profileController.update

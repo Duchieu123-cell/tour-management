@@ -73,28 +73,7 @@ module.exports.update = async (req, res) => {
       updateData.address = address.trim();
     }
 
-    const birthParts = [body.birthDay, body.birthMonth, body.birthYear];
-    const suppliedBirthParts = birthParts.filter((part) => part !== undefined && part !== '');
-    const hasBirthParts = birthParts.some((part) => part !== undefined);
-    if (suppliedBirthParts.length > 0 && suppliedBirthParts.length < 3) {
-      return respondWithError(res, 400, 'Vui lòng chọn đủ ngày, tháng, năm sinh');
-    }
-
-    if (suppliedBirthParts.length === 3) {
-      const [day, month, year] = birthParts.map(Number);
-      const dob = new Date(Date.UTC(year, month - 1, day));
-      if (
-        dob.getUTCFullYear() !== year ||
-        dob.getUTCMonth() !== month - 1 ||
-        dob.getUTCDate() !== day ||
-        dob > new Date()
-      ) {
-        return respondWithError(res, 400, 'Ngày sinh không hợp lệ');
-      }
-      updateData.dob = dob;
-    } else if (hasBirthParts && suppliedBirthParts.length === 0) {
-      updateData.dob = null;
-    } else if (body.dob !== undefined) {
+    if (body.dob !== undefined) {
       if (!body.dob) {
         updateData.dob = null;
       } else {

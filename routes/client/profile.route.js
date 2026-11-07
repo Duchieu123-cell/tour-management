@@ -19,7 +19,7 @@ router.get('/', profileController.detail);
 router.patch(
   '/', 
   upload.single('avatar'), 
-  profileValidate.updateProfile, 
+  profileValidate.updateProfile,
   profileController.update
 );
 // [GET] /profile

@@ -32,19 +32,7 @@ module.exports.updateProfile = (req, res, next) => {
       .messages({
         'string.pattern.base': 'Số điện thoại không đúng định dạng (VD: 0912345678)'
       }),
-    phoneNumber: Joi.string()
-      .trim()
-      .allow('')
-      .pattern(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/)
-      .messages({
-        'string.pattern.base': 'Số điện thoại không đúng định dạng (VD: 0912345678)'
-      }),
     avatar: Joi.string().allow(''),
-    gender: Joi.string()
-      .valid('male', 'female', 'other', '')
-      .messages({
-        'any.only': 'Giới tính không hợp lệ'
-      }),
     dob: Joi.date()
       .iso()
       .max('now')
@@ -53,11 +41,13 @@ module.exports.updateProfile = (req, res, next) => {
         'date.format': 'Ngày sinh không đúng định dạng',
         'date.max': 'Ngày sinh không được ở tương lai'
       }),
-    birthDay: Joi.number().integer().min(1).max(31).allow(null, ''),
-    birthMonth: Joi.number().integer().min(1).max(12).allow(null, ''),
-    birthYear: Joi.number().integer().min(1900).max(new Date().getFullYear()).allow(null, ''),
-    address: Joi.string().trim().max(255).allow(''),
-    city: Joi.string().trim().max(100).allow('')
+    gender: Joi.string()
+      .valid('male', 'female', 'other', '')
+      .messages({
+        'any.only': 'Giới tính không hợp lệ'
+      }),
+    
+    address: Joi.string().trim().max(255).allow('')
   });
 
   const { error } = schema.validate(req.body);
