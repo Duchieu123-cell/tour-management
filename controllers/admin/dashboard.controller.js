@@ -1,6 +1,6 @@
 const Order = require('../../models/order.model');
 const AccountAdmin = require('../../models/accounts-admin.model');
-
+const Customer = require('../../models/customer.model');
 
 module.exports.dashboard = async (req, res) => {
   // Thông số tổng quan
@@ -13,6 +13,10 @@ module.exports.dashboard = async (req, res) => {
 
   overview.totalAdmin = await AccountAdmin.countDocuments({
     deleted: false 
+  });
+
+  overview.totalUser = await Customer.countDocuments({
+    deleted: false
   });
 
   const orderList = await Order.find({
