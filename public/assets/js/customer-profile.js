@@ -317,6 +317,7 @@ if (customerPasswordForm) {
       return;
     }
 
+    showFormStatus(customerPasswordForm, PROTOTYPE_MESSAGE);
     const submitButton = customerPasswordForm.querySelector('button[type="submit"]');
     const status = customerPasswordForm.querySelector('.customer-profile-status');
     submitButton.disabled = true;
