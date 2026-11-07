@@ -3,6 +3,7 @@ const Customer = require('../../models/customer.model');
 
 module.exports.optionalCustomer = async (req, res, next) => {
   res.locals.customer = null;
+  req.customer = null;
 
   let token = req.cookies.customerToken;
   if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
@@ -27,6 +28,8 @@ module.exports.optionalCustomer = async (req, res, next) => {
   const customer = await Customer.findOne({
     _id: decoded.id,
     email: decoded.email,
+    status: 'active'
+  }).select('_id fullName email phone avatar dob gender address');
     status: 'active',
     deleted: { $ne: true }
   }).select('_id fullName email avatar');
@@ -40,11 +43,16 @@ module.exports.optionalCustomer = async (req, res, next) => {
   }
 
   res.locals.customer = customer;
+  req.customer = customer;
   next();
 };
 
 module.exports.requireCustomer = (req, res, next) => {
   if (!res.locals.customer) {
+    if (req.xhr || req.headers.accept?.includes('application/json') || req.method !== 'GET') {
+      return res.status(401).json({
+        code: 'ERROR',
+        message: 'Vui lòng đăng nhập để thực hiện thao tác này'
     if (req.xhr || req.headers.accept?.includes('application/json') || req.baseUrl === '/profile') {
       return res.status(401).json({
         code: 'ERROR',

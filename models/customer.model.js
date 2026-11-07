@@ -13,6 +13,11 @@ const schema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  phone: {
+    type: String,
+    default: '',
+    trim: true
+  },
   avatar: {
     type: String,
     default: ''
@@ -36,15 +41,15 @@ const schema = new mongoose.Schema({
   dob: {
     type: Date
   },
-  phone: {
-    type: String
-  },
   gender: {
-    type: String
+    type: String,
+    default: ''
   },
   address: {
-    type: String
-  },
+    type: String,
+    default: '',
+    trim: true
+  }
 }, {
   timestamps: true
 });

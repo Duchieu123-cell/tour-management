@@ -1,0 +1,69 @@
+const Joi = require('joi');
+
+const respondWithError = (res, error) => {
+  return res.status(400).json({
+    code: 'ERROR',
+    message: error.details[0].message
+  });
+};
+
+module.exports.updateProfile = (req, res, next) => {
+  const schema = Joi.object({
+    fullName: Joi.string()
+      .trim()
+      .min(3)
+      .max(50)
+      .messages({
+        'string.empty': 'Vui lòng nhập họ tên',
+        'string.min': 'Họ tên ít nhất 3 ký tự',
+        'string.max': 'Họ tên nhiều nhất 50 ký tự'
+      }),
+    email: Joi.string()
+      .trim()
+      .email()
+      .messages({
+        'string.empty': 'Vui lòng nhập email',
+        'string.email': 'Email không đúng định dạng'
+      }),
+    phone: Joi.string()
+      .trim()
+      .allow('')
+      .pattern(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/)
+      .messages({
+        'string.pattern.base': 'Số điện thoại không đúng định dạng (VD: 0912345678)'
+      }),
+    phoneNumber: Joi.string()
+      .trim()
+      .allow('')
+      .pattern(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/)
+      .messages({
+        'string.pattern.base': 'Số điện thoại không đúng định dạng (VD: 0912345678)'
+      }),
+    avatar: Joi.string().allow(''),
+    gender: Joi.string()
+      .valid('male', 'female', 'other', '')
+      .messages({
+        'any.only': 'Giới tính không hợp lệ'
+      }),
+    dob: Joi.date()
+      .iso()
+      .max('now')
+      .allow(null, '')
+      .messages({
+        'date.format': 'Ngày sinh không đúng định dạng',
+        'date.max': 'Ngày sinh không được ở tương lai'
+      }),
+    birthDay: Joi.number().integer().min(1).max(31).allow(null, ''),
+    birthMonth: Joi.number().integer().min(1).max(12).allow(null, ''),
+    birthYear: Joi.number().integer().min(1900).max(new Date().getFullYear()).allow(null, ''),
+    address: Joi.string().trim().max(255).allow(''),
+    city: Joi.string().trim().max(100).allow('')
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return respondWithError(res, error);
+  }
+
+  next();
+};

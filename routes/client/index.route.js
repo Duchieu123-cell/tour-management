@@ -20,6 +20,7 @@ router.use(authMiddleware.optionalCustomer);
 router.use('/account', accountRoutes);
 router.use(authMiddleware.requireCustomer);
 
+router.use('/profile', profileRoutes);
 router.use('/', homeRoutes);
 router.use('/tour', tourRoutes);
 router.use('/cart', cartRoutes);
