@@ -88,3 +88,56 @@ module.exports.loginPost = (req, res, next) => {
 
   next();
 };
+
+module.exports.changePassword = (req, res, next) => {
+  const schema = Joi.object({
+    currentPassword: Joi.string()
+      .required()
+      .messages({
+        'any.required': 'Vui lòng nhập mật khẩu hiện tại',
+        'string.empty': 'Vui lòng nhập mật khẩu hiện tại'
+      }),
+    newPassword: Joi.string()
+      .min(8)
+      .custom((value, helpers) => {
+        if (!/[A-Z]/.test(value)) {
+          return helpers.error('password.uppercase');
+        }
+        if (!/[a-z]/.test(value)) {
+          return helpers.error('password.lowercase');
+        }
+        if (!/\d/.test(value)) {
+          return helpers.error('password.number');
+        }
+        if (!/[@$!%*?&]/.test(value)) {
+          return helpers.error('password.special');
+        }
+        return value;
+      })
+      .required()
+      .messages({
+        'any.required': 'Vui lòng nhập mật khẩu mới',
+        'string.empty': 'Vui lòng nhập mật khẩu mới',
+        'string.min': 'Mật khẩu ít nhất 8 ký tự',
+        'password.uppercase': 'Mật khẩu cần có ít nhất 1 chữ cái in hoa',
+        'password.lowercase': 'Mật khẩu cần có ít nhất 1 chữ cái in thường',
+        'password.number': 'Mật khẩu cần có ít nhất 1 chữ số',
+        'password.special': 'Mật khẩu cần có ít nhất 1 ký tự đặc biệt'
+      }),
+    confirmPassword: Joi.string()
+      .valid(Joi.ref('newPassword'))
+      .required()
+      .messages({
+        'any.required': 'Vui lòng nhập lại mật khẩu mới',
+        'any.only': 'Mật khẩu nhập lại không khớp',
+        'string.empty': 'Vui lòng nhập lại mật khẩu mới'
+      })
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return respondWithError(res, error);
+  }
+
+  next();
+};
