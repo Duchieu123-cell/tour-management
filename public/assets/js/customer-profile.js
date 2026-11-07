@@ -56,7 +56,7 @@ if (customerProfileForm) {
   const birthdayError = customerProfileForm.querySelector('#customer-birthday-error');
   const saveButton = customerProfileForm.querySelector('button[type="submit"]');
   const cancelButton = customerProfileForm.querySelector('[profile-cancel]');
-  const originalAvatar = avatarPreview.getAttribute('src');
+  let originalAvatar = avatarPreview.getAttribute('src');
   let previewUrl = null;
 
   const getSnapshot = () => {
@@ -65,7 +65,11 @@ if (customerProfileForm) {
     return new URLSearchParams(formData).toString();
   };
 
-  const initialSnapshot = getSnapshot();
+  let initialSnapshot = getSnapshot();
+
+  const setProfileStatusError = (isError) => {
+    customerProfileForm.querySelector('.customer-profile-status').classList.toggle('is-error', isError);
+  };
 
   const updateFormActions = () => {
     const isDirty = getSnapshot() !== initialSnapshot || avatarInput.files.length > 0;
@@ -156,6 +160,7 @@ if (customerProfileForm) {
 
   customerProfileForm.addEventListener('input', () => {
     showFormStatus(customerProfileForm, '');
+    setProfileStatusError(false);
     updateFormActions();
     if (fullNameInput.getAttribute('aria-invalid') === 'true') {
       validateFullName();
@@ -172,6 +177,7 @@ if (customerProfileForm) {
     setFieldError(fullNameInput, fullNameError, '');
     setFieldError(birthdayFieldset, birthdayError, '');
     showFormStatus(customerProfileForm, '');
+    setProfileStatusError(false);
     updateFormActions();
   });
 
@@ -186,9 +192,57 @@ if (customerProfileForm) {
       return;
     }
 
-    if (isBirthdayValid) {
-      showFormStatus(customerProfileForm, PROTOTYPE_MESSAGE);
+    if (!isBirthdayValid) {
+      birthdayFieldset.focus();
+      return;
     }
+
+    const formData = new FormData(customerProfileForm);
+    const submitButton = customerProfileForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    fetch('/account/profile', {
+      method: 'PATCH',
+      headers: {
+        Accept: 'application/json'
+      },
+      body: formData
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok || result.code !== 'SUCCESS') {
+          throw new Error(result.message || 'Không thể cập nhật thông tin. Vui lòng thử lại.');
+        }
+
+        const updatedCustomer = result.data;
+        if (updatedCustomer.fullName) {
+          const identityName = document.querySelector('.customer-profile-identity strong');
+          if (identityName) {
+            identityName.textContent = updatedCustomer.fullName;
+          }
+        }
+        if (updatedCustomer.avatar) {
+          document.querySelectorAll('.customer-profile-avatar img').forEach((image) => {
+            image.src = updatedCustomer.avatar;
+            image.hidden = false;
+          });
+          originalAvatar = updatedCustomer.avatar;
+        }
+
+        avatarInput.value = '';
+        initialSnapshot = getSnapshot();
+        showFormStatus(customerProfileForm, result.message);
+        setProfileStatusError(false);
+        updateFormActions();
+      })
+      .catch((error) => {
+        showFormStatus(customerProfileForm, error.message || 'Không thể kết nối. Vui lòng thử lại.');
+        setProfileStatusError(true);
+      })
+      .finally(() => {
+        submitButton.disabled = false;
+        updateFormActions();
+      });
   });
 }
 // End Dữ liệu cá nhân
@@ -221,6 +275,7 @@ if (customerPhoneForm) {
 
   phoneInput.addEventListener('input', () => {
     showFormStatus(customerPhoneForm, '');
+    customerPhoneForm.querySelector('.customer-profile-status').classList.remove('is-error');
     setFieldError(phoneInput, phoneError, '');
   });
 
@@ -233,7 +288,34 @@ if (customerPhoneForm) {
       return;
     }
 
-    showFormStatus(customerPhoneForm, PROTOTYPE_MESSAGE);
+    const saveButton = customerPhoneForm.querySelector('button[type="submit"]');
+    saveButton.disabled = true;
+
+    fetch('/account/profile', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({ phoneNumber: phoneInput.value.trim() })
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok || result.code !== 'SUCCESS') {
+          throw new Error(result.message || 'Không thể cập nhật số điện thoại. Vui lòng thử lại.');
+        }
+
+        showFormStatus(customerPhoneForm, result.message);
+        customerPhoneForm.querySelector('.customer-profile-status').classList.remove('is-error');
+        addButton.innerHTML = '<i class="fa-solid fa-pen"></i> Cập nhật số di động';
+      })
+      .catch((error) => {
+        customerPhoneForm.querySelector('.customer-profile-status').classList.add('is-error');
+        showFormStatus(customerPhoneForm, error.message || 'Không thể kết nối. Vui lòng thử lại.');
+      })
+      .finally(() => {
+        saveButton.disabled = false;
+      });
   });
 }
 // End Số di động

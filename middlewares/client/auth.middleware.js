@@ -1,14 +1,20 @@
 const jwt = require('jsonwebtoken');
 const Customer = require('../../models/customer.model');
 
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: 'strict'
+};
+
 module.exports.optionalCustomer = async (req, res, next) => {
   res.locals.customer = null;
   req.customer = null;
 
-  let token = req.cookies.customerToken;
-  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
+  const authorization = req.headers.authorization;
+  const bearerToken = authorization?.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length)
+    : null;
+  const token = req.cookies?.customerToken || bearerToken;
 
   if (!token) {
     return next();
@@ -18,51 +24,41 @@ module.exports.optionalCustomer = async (req, res, next) => {
   try {
     decoded = jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
-    res.clearCookie('customerToken', {
-      httpOnly: true,
-      sameSite: 'strict'
-    });
+    res.clearCookie('customerToken', cookieOptions);
     return next();
   }
 
   const customer = await Customer.findOne({
     _id: decoded.id,
     email: decoded.email,
-    status: 'active'
-  }).select('_id fullName email phone avatar dob gender address');
     status: 'active',
     deleted: { $ne: true }
-  }).select('_id fullName email avatar');
+  }).select('_id fullName email phone avatar dob gender address');
 
   if (!customer) {
-    res.clearCookie('customerToken', {
-      httpOnly: true,
-      sameSite: 'strict'
-    });
+    res.clearCookie('customerToken', cookieOptions);
     return next();
   }
 
   res.locals.customer = customer;
   req.customer = customer;
-  next();
+  return next();
 };
 
 module.exports.requireCustomer = (req, res, next) => {
   if (!res.locals.customer) {
-    if (req.xhr || req.headers.accept?.includes('application/json') || req.method !== 'GET') {
+    const acceptsJson = req.headers.accept?.includes('application/json');
+    if (req.xhr || acceptsJson || req.method !== 'GET') {
       return res.status(401).json({
         code: 'ERROR',
         message: 'Vui lòng đăng nhập để thực hiện thao tác này'
-    if (req.xhr || req.headers.accept?.includes('application/json') || req.baseUrl === '/profile') {
-      return res.status(401).json({
-        code: 'ERROR',
-        message: 'Vui lòng đăng nhập để tiếp tục'
       });
     }
+
     return res.redirect('/account/login');
   }
 
-  next();
+  return next();
 };
 
 module.exports.requireCustomerApi = (req, res, next) => {
@@ -73,5 +69,5 @@ module.exports.requireCustomerApi = (req, res, next) => {
     });
   }
 
-  next();
+  return next();
 };

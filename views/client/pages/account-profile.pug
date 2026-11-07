@@ -5,6 +5,7 @@ block main
     const nameParts = customer.fullName.trim().split(/\s+/);
     const initials = (nameParts.length > 1 ? nameParts[0][0] + nameParts[nameParts.length - 1][0] : nameParts[0][0]).toUpperCase();
     const currentYear = new Date().getFullYear();
+    const customerDob = customer.dob ? new Date(customer.dob) : null;
 
   mixin customerAvatar(imageId)
     .customer-profile-avatar&attributes(attributes)
@@ -99,24 +100,24 @@ block main
                     label(for="customer-gender") Giới tính
                     select#customer-gender(name="gender")
                       option(value="") Chọn
-                      option(value="male") Nam
-                      option(value="female") Nữ
-                      option(value="other") Khác
+                      option(value="male" selected=customer.gender === 'male') Nam
+                      option(value="female" selected=customer.gender === 'female') Nữ
+                      option(value="other" selected=customer.gender === 'other') Khác
                   fieldset.customer-profile-field.customer-profile-birthday(aria-describedby="customer-birthday-error")
                     legend Ngày sinh
                     .customer-profile-birthday-selects
                       select(name="birthDay" aria-label="Ngày")
                         option(value="") Ngày
                         - for (let day = 1; day <= 31; day++)
-                          option(value=day) #{day}
+                          option(value=day selected=customerDob && customerDob.getUTCDate() === day) #{day}
                       select(name="birthMonth" aria-label="Tháng")
                         option(value="") Tháng
                         - for (let month = 1; month <= 12; month++)
-                          option(value=month) Tháng #{month}
+                          option(value=month selected=customerDob && customerDob.getUTCMonth() + 1 === month) Tháng #{month}
                       select(name="birthYear" aria-label="Năm")
                         option(value="") Năm
                         - for (let year = currentYear; year >= currentYear - 100; year--)
-                          option(value=year) #{year}
+                          option(value=year selected=customerDob && customerDob.getUTCFullYear() === year) #{year}
                     p#customer-birthday-error.customer-profile-error(hidden)
 
                 .customer-profile-field
@@ -124,6 +125,7 @@ block main
                   input#customer-city(
                     type="text"
                     name="city"
+                    value=customer.address
                     placeholder="Thành phố cư trú"
                     autocomplete="address-level1"
                     maxlength="100"
@@ -150,13 +152,17 @@ block main
                   p Dùng để liên hệ khi bạn đặt tour.
                 button#customer-phone-add.customer-profile-button-outline(type="button" aria-expanded="false" aria-controls="customer-phone-form")
                   i.fa-solid.fa-plus
-                  | Thêm số di động
+                  if customer.phone
+                    | Cập nhật số di động
+                  else
+                    | Thêm số di động
               form#customer-phone-form.customer-profile-card-body(novalidate hidden)
                 .customer-profile-field
                   label(for="customer-phone") Số di động
                   input#customer-phone(
                     type="tel"
                     name="phoneNumber"
+                    value=customer.phone
                     placeholder="0912345678"
                     autocomplete="tel"
                     inputmode="numeric"

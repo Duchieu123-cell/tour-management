@@ -37,7 +37,7 @@ const schema = new mongoose.Schema({
   deletedAt: {
     type: Date,
     default: null
-  }
+  },
   dob: {
     type: Date
   },

@@ -7,7 +7,6 @@ router.post('/delete', profileController.deleteAccount);
 router.delete('/', profileController.deleteAccount);
 const multer = require('multer');
 
-const profileController = require('../../controllers/client/profile.controller');
 const profileValidate = require('../../validates/client/profile.validate');
 const cloudinaryHelper = require('../../helpers/cloudinary.helper');
 

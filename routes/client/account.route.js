@@ -3,7 +3,6 @@ const multer = require('multer');
 
 const accountController = require('../../controllers/client/account.controller');
 const accountValidate = require('../../validates/client/account.validate');
-const authMiddleware = require('../../middlewares/client/auth.middleware');
 const profileController = require('../../controllers/client/profile.controller');
 const profileValidate = require('../../validates/client/profile.validate');
 const authMiddleware = require('../../middlewares/client/auth.middleware');
