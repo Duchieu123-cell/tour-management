@@ -60,7 +60,7 @@ module.exports.list = async (req, res) => {
           orderDetail.statusName = "Hoàn thành";
           orderDetail.statusColor = "green";
           break;
-        case 'cacel':
+        case 'cancel':
           orderDetail.statusName = "Hủy";
           orderDetail.statusColor = "red";
           break;
