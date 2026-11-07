@@ -25,6 +25,14 @@ const schema = new mongoose.Schema({
     type: String,
     default: 'active'
   },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: {
+    type: Date,
+    default: null
+  }
   dob: {
     type: Date
   },

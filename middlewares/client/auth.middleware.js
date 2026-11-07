@@ -27,7 +27,8 @@ module.exports.optionalCustomer = async (req, res, next) => {
   const customer = await Customer.findOne({
     _id: decoded.id,
     email: decoded.email,
-    status: 'active'
+    status: 'active',
+    deleted: { $ne: true }
   }).select('_id fullName email avatar');
 
   if (!customer) {
