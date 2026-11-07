@@ -13,6 +13,11 @@ const schema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  phone: {
+    type: String,
+    default: '',
+    trim: true
+  },
   avatar: {
     type: String,
     default: ''
