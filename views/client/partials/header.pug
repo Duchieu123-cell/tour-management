@@ -48,14 +48,15 @@ header.header
       .header-account
         if customer
           .header-account-profile
-            .header-account-avatar
-              img(
-                src=customer.avatar || "/assets/images/icon-user.svg"
-                alt=`Ảnh đại diện của ${customer.fullName}`
-              )
-            .header-account-info
-              span.header-account-greeting Xin chào,
-              span.header-account-name #{customer.fullName}
+            a.header-account-link(href="/account/profile" title="Hồ sơ cá nhân")
+              .header-account-avatar
+                img(
+                  src=customer.avatar || "/assets/images/icon-user.svg"
+                  alt=`Ảnh đại diện của ${customer.fullName}`
+                )
+              .header-account-info
+                span.header-account-greeting Xin chào,
+                span.header-account-name #{customer.fullName}
             form(action="/account/logout" method="post")
               button(type="submit")
                 i.fa-solid.fa-arrow-right-from-bracket

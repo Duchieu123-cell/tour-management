@@ -45,3 +45,14 @@ module.exports.requireCustomer = (req, res, next) => {
 
   next();
 };
+
+module.exports.requireCustomerApi = (req, res, next) => {
+  if (!res.locals.customer) {
+    return res.status(401).json({
+      code: 'ERROR',
+      message: 'Vui lòng đăng nhập để tiếp tục'
+    });
+  }
+
+  next();
+};
