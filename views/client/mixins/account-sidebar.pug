@@ -1,0 +1,39 @@
+mixin customerAvatar(imageId)
+  -
+    const nameParts = customer.fullName.trim().split(/\s+/);
+    const initials = (nameParts.length > 1 ? nameParts[0][0] + nameParts[nameParts.length - 1][0] : nameParts[0][0]).toUpperCase();
+  .customer-profile-avatar&attributes(attributes)
+    span(aria-hidden="true") #{initials}
+    img(
+      id=imageId
+      src=customer.avatar || false
+      alt=`Ảnh đại diện của ${customer.fullName}`
+      hidden=!customer.avatar
+    )
+
+mixin accountSidebar(active)
+  aside.customer-profile-side
+    .customer-profile-summary
+      +customerAvatar()
+      .customer-profile-identity
+        strong #{customer.fullName}
+        span(title=customer.email) #{customer.email}
+    nav.customer-profile-menu(aria-label="Menu tài khoản")
+      a.customer-profile-menu-item(
+        href="/account/orders"
+        class=(active === 'orders' ? 'is-active' : '')
+        aria-current=(active === 'orders' ? 'page' : false)
+      )
+        i.fa-solid.fa-suitcase-rolling
+        | Đơn đặt tour của tôi
+      a.customer-profile-menu-item(
+        href="/account/profile"
+        class=(active === 'profile' ? 'is-active' : '')
+        aria-current=(active === 'profile' ? 'page' : false)
+      )
+        i.fa-solid.fa-gear
+        | Tài khoản
+      form(action="/account/logout" method="post")
+        button.customer-profile-menu-item(type="submit")
+          i.fa-solid.fa-power-off
+          | Đăng xuất
