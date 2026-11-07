@@ -33,15 +33,15 @@ const schema = new mongoose.Schema({
   dob: {
     type: Date
   },
-  phone: {
-    type: String
-  },
   gender: {
-    type: String
+    type: String,
+    default: ''
   },
   address: {
-    type: String
-  },
+    type: String,
+    default: '',
+    trim: true
+  }
 }, {
   timestamps: true
 });

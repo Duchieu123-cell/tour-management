@@ -25,7 +25,7 @@ module.exports.optionalCustomer = async (req, res, next) => {
     _id: decoded.id,
     email: decoded.email,
     status: 'active'
-  }).select('_id fullName email phone avatar');
+  }).select('_id fullName email phone avatar dob gender address');
 
   if (!customer) {
     res.clearCookie('customerToken', {

@@ -20,7 +20,7 @@ module.exports.detail = async (req, res) => {
     const customer = await Customer.findOne({
       _id: customerId,
       status: 'active'
-    }).select('_id fullName email phone avatar createdAt');
+    }).select('_id fullName email phone avatar dob gender address createdAt updatedAt');
 
     if (!customer) {
       return res.status(404).json({
@@ -59,18 +59,41 @@ module.exports.update = async (req, res) => {
       updateData.fullName = req.body.fullName.trim();
     }
 
-    if (req.body.phone !== undefined) {
-      updateData.phone = req.body.phone.trim();
+    // Số điện thoại (chấp nhận phone hoặc phoneNumber từ form)
+    const phoneInput = req.body.phone !== undefined ? req.body.phone : req.body.phoneNumber;
+    if (phoneInput !== undefined) {
+      updateData.phone = phoneInput.trim();
     }
 
-    // Xử lý avatar: ưu tiên file upload qua Cloudinary, hoặc URL truyền trong body
+    // Giới tính
+    if (req.body.gender !== undefined) {
+      updateData.gender = req.body.gender.trim();
+    }
+
+    // Địa chỉ (chấp nhận address hoặc city từ form)
+    const addressInput = req.body.address !== undefined ? req.body.address : req.body.city;
+    if (addressInput !== undefined) {
+      updateData.address = addressInput.trim();
+    }
+
+    // Ngày sinh (chấp nhận dob dạng Date/ISO hoặc các trường riêng birthDay, birthMonth, birthYear)
+    if (req.body.birthDay && req.body.birthMonth && req.body.birthYear) {
+      const day = parseInt(req.body.birthDay, 10);
+      const month = parseInt(req.body.birthMonth, 10);
+      const year = parseInt(req.body.birthYear, 10);
+      updateData.dob = new Date(Date.UTC(year, month - 1, day));
+    } else if (req.body.dob !== undefined) {
+      updateData.dob = req.body.dob ? new Date(req.body.dob) : null;
+    }
+
+    // Avatar (ưu tiên file upload qua Cloudinary, hoặc URL ảnh dạng chuỗi)
     if (req.file) {
       updateData.avatar = req.file.path;
     } else if (req.body.avatar !== undefined) {
       updateData.avatar = req.body.avatar;
     }
 
-    // Nếu có đổi email, kiểm tra trùng lặp với tài khoản khác
+    // Kiểm tra trùng lặp email nếu có thay đổi email
     let emailChanged = false;
     if (req.body.email) {
       const newEmail = req.body.email.trim().toLowerCase();
@@ -96,7 +119,7 @@ module.exports.update = async (req, res) => {
       customerId,
       updateData,
       { new: true }
-    ).select('_id fullName email phone avatar status');
+    ).select('_id fullName email phone avatar dob gender address status createdAt updatedAt');
 
     if (!updatedCustomer) {
       return res.status(404).json({
@@ -105,7 +128,7 @@ module.exports.update = async (req, res) => {
       });
     }
 
-    // Nếu email thay đổi, cập nhật lại JWT token cookie để không bị gián đoạn phiên
+    // Cấp phát lại JWT token cookie nếu email thay đổi
     if (emailChanged) {
       const token = jwt.sign(
         {
@@ -124,8 +147,9 @@ module.exports.update = async (req, res) => {
       });
     }
 
-    // Cập nhật lại res.locals.customer
+    // Cập nhật lại res.locals.customer và req.customer
     res.locals.customer = updatedCustomer;
+    req.customer = updatedCustomer;
 
     res.json({
       code: 'SUCCESS',
