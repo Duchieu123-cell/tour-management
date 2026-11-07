@@ -24,7 +24,19 @@ const schema = new mongoose.Schema({
   status: {
     type: String,
     default: 'active'
-  }
+  },
+  dob: {
+    type: Date
+  },
+  phone: {
+    type: String
+  },
+  gender: {
+    type: String
+  },
+  address: {
+    type: String
+  },
 }, {
   timestamps: true
 });

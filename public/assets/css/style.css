@@ -3599,6 +3599,10 @@ ul{
     font-size: 14px;
 }
 
+.customer-profile-status.is-error{
+    color: #B42318;
+}
+
 .customer-profile-button,
 .customer-profile-button-ghost,
 .customer-profile-button-outline{

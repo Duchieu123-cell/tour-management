@@ -10,6 +10,12 @@ router.get('/register', accountController.register);
 router.post('/register', accountValidate.registerPost, accountController.registerPost);
 
 router.post('/logout', accountController.logoutPost);
+router.post(
+  '/change-password',
+  authMiddleware.requireCustomerApi,
+  accountValidate.changePassword,
+  accountController.changePassword
+);
 
 // /account được mount trước requireCustomer nên route này phải tự chặn
 router.get('/profile', authMiddleware.requireCustomer, accountController.profile);
