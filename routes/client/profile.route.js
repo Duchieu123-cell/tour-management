@@ -1,12 +1,7 @@
 const router = require('express').Router();
-const profileController = require('../../controllers/client/profile.controller');
-
-router.delete('/delete', profileController.deleteAccount);
-router.patch('/delete', profileController.deleteAccount);
-router.post('/delete', profileController.deleteAccount);
-router.delete('/', profileController.deleteAccount);
 const multer = require('multer');
 
+const profileController = require('../../controllers/client/profile.controller');
 const profileValidate = require('../../validates/client/profile.validate');
 const cloudinaryHelper = require('../../helpers/cloudinary.helper');
 
@@ -17,13 +12,16 @@ router.get('/', profileController.detail);
 
 // Cập nhật thông tin profile
 router.patch(
-  '/', 
+  '/',
   upload.single('avatar'),
   profileValidate.updateProfile,
   profileController.update
 );
-// [GET] /profile
-router.get('/', profileController.getProfile);
 
+// Xóa tài khoản (Soft delete)
+router.delete('/delete', profileController.deleteAccount);
+router.patch('/delete', profileController.deleteAccount);
+router.post('/delete', profileController.deleteAccount);
+router.delete('/', profileController.deleteAccount);
 
 module.exports = router;

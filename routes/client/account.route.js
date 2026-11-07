@@ -3,6 +3,8 @@ const multer = require('multer');
 
 const accountController = require('../../controllers/client/account.controller');
 const accountValidate = require('../../validates/client/account.validate');
+const profileController = require('../../controllers/client/profile.controller');
+const profileValidate = require('../../validates/client/profile.validate');
 const authMiddleware = require('../../middlewares/client/auth.middleware');
 const cloudinaryHelper = require('../../helpers/cloudinary.helper');
 
@@ -24,5 +26,12 @@ router.post(
 
 // /account được mount trước requireCustomer nên route này phải tự chặn
 router.get('/profile', authMiddleware.requireCustomer, accountController.profile);
+router.patch(
+  '/profile',
+  authMiddleware.requireCustomerApi,
+  upload.single('avatar'),
+  profileValidate.updateProfile,
+  profileController.update
+);
 
 module.exports = router;
