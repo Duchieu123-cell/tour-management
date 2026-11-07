@@ -18,8 +18,8 @@ router.get('/', profileController.detail);
 // Cập nhật thông tin profile
 router.patch(
   '/', 
-  upload.single('avatar'), 
-  profileValidate.updateProfile, 
+  upload.single('avatar'),
+  profileValidate.updateProfile,
   profileController.update
 );
 // [GET] /profile
