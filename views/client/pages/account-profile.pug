@@ -1,0 +1,220 @@
+extends ../layouts/default.pug
+
+block main
+  -
+    const nameParts = customer.fullName.trim().split(/\s+/);
+    const initials = (nameParts.length > 1 ? nameParts[0][0] + nameParts[nameParts.length - 1][0] : nameParts[0][0]).toUpperCase();
+    const currentYear = new Date().getFullYear();
+
+  mixin customerAvatar(imageId)
+    .customer-profile-avatar&attributes(attributes)
+      span(aria-hidden="true") #{initials}
+      img(
+        id=imageId
+        src=customer.avatar || false
+        alt=`Ảnh đại diện của ${customer.fullName}`
+        hidden=!customer.avatar
+      )
+
+  .customer-profile-page
+    .container
+      .customer-profile-layout
+        aside.customer-profile-side
+          .customer-profile-summary
+            +customerAvatar()
+            .customer-profile-identity
+              strong #{customer.fullName}
+              span(title=customer.email) #{customer.email}
+          nav.customer-profile-menu(aria-label="Menu tài khoản")
+            span.customer-profile-menu-item.is-disabled(aria-disabled="true")
+              i.fa-solid.fa-suitcase-rolling
+              | Đơn đặt tour của tôi
+              small Sắp có
+            a.customer-profile-menu-item.is-active(href="/account/profile" aria-current="page")
+              i.fa-solid.fa-gear
+              | Tài khoản
+            form(action="/account/logout" method="post")
+              button.customer-profile-menu-item(type="submit")
+                i.fa-solid.fa-power-off
+                | Đăng xuất
+
+        .customer-profile-main
+          h1.customer-profile-heading Cài đặt
+
+          .customer-profile-tabs(role="tablist" aria-label="Cài đặt tài khoản")
+            a#customer-profile-tab-info(
+              href="#info"
+              role="tab"
+              aria-controls="customer-profile-panel-info"
+              aria-selected="true"
+              profile-tab="info"
+            ) Thông tin tài khoản
+            a#customer-profile-tab-password(
+              href="#password"
+              role="tab"
+              aria-controls="customer-profile-panel-password"
+              aria-selected="false"
+              profile-tab="password"
+            ) Mật khẩu
+
+          //- Thông tin tài khoản
+          #customer-profile-panel-info.customer-profile-panel(
+            role="tabpanel"
+            aria-labelledby="customer-profile-tab-info"
+          )
+            section.customer-profile-card
+              .customer-profile-card-head
+                h2 Dữ liệu cá nhân
+              form#customer-profile-form.customer-profile-card-body(novalidate)
+                .customer-profile-upload
+                  +customerAvatar("customer-avatar-preview").customer-profile-avatar-large
+                  .customer-profile-upload-action
+                    label.customer-profile-button-outline(for="customer-avatar")
+                      i.fa-solid.fa-camera
+                      | Chọn ảnh mới
+                    input#customer-avatar.customer-profile-file(
+                      type="file"
+                      name="avatar"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-describedby="customer-avatar-hint customer-avatar-error"
+                    )
+                    small#customer-avatar-hint JPG, PNG hoặc WebP, tối đa 2 MB.
+                    p#customer-avatar-error.customer-profile-error(hidden)
+
+                .customer-profile-field
+                  label(for="customer-full-name") Tên đầy đủ
+                  input#customer-full-name(
+                    type="text"
+                    name="fullName"
+                    value=customer.fullName
+                    autocomplete="name"
+                    maxlength="50"
+                    required
+                    aria-describedby="customer-full-name-error"
+                  )
+                  p#customer-full-name-error.customer-profile-error(hidden)
+
+                .customer-profile-personal-grid
+                  .customer-profile-field
+                    label(for="customer-gender") Giới tính
+                    select#customer-gender(name="gender")
+                      option(value="") Chọn
+                      option(value="male") Nam
+                      option(value="female") Nữ
+                      option(value="other") Khác
+                  fieldset.customer-profile-field.customer-profile-birthday(aria-describedby="customer-birthday-error")
+                    legend Ngày sinh
+                    .customer-profile-birthday-selects
+                      select(name="birthDay" aria-label="Ngày")
+                        option(value="") Ngày
+                        - for (let day = 1; day <= 31; day++)
+                          option(value=day) #{day}
+                      select(name="birthMonth" aria-label="Tháng")
+                        option(value="") Tháng
+                        - for (let month = 1; month <= 12; month++)
+                          option(value=month) Tháng #{month}
+                      select(name="birthYear" aria-label="Năm")
+                        option(value="") Năm
+                        - for (let year = currentYear; year >= currentYear - 100; year--)
+                          option(value=year) #{year}
+                    p#customer-birthday-error.customer-profile-error(hidden)
+
+                .customer-profile-field
+                  label(for="customer-city") Thành phố cư trú
+                  input#customer-city(
+                    type="text"
+                    name="city"
+                    placeholder="Thành phố cư trú"
+                    autocomplete="address-level1"
+                    maxlength="100"
+                  )
+
+                .customer-profile-actions
+                  p.customer-profile-status(role="status" hidden)
+                  button.customer-profile-button-ghost(type="button" profile-cancel disabled) Hủy
+                  button.customer-profile-button(type="submit" disabled) Lưu
+
+            section.customer-profile-card
+              .customer-profile-card-head
+                div
+                  h2 Email
+                  p Dùng để đăng nhập nên không đổi tại đây.
+              .customer-profile-card-row
+                strong #{customer.email}
+                span.customer-profile-tag Email đăng nhập
+
+            section.customer-profile-card
+              .customer-profile-card-head
+                div
+                  h2 Số di động
+                  p Dùng để liên hệ khi bạn đặt tour.
+                button#customer-phone-add.customer-profile-button-outline(type="button" aria-expanded="false" aria-controls="customer-phone-form")
+                  i.fa-solid.fa-plus
+                  | Thêm số di động
+              form#customer-phone-form.customer-profile-card-body(novalidate hidden)
+                .customer-profile-field
+                  label(for="customer-phone") Số di động
+                  input#customer-phone(
+                    type="tel"
+                    name="phoneNumber"
+                    placeholder="0912345678"
+                    autocomplete="tel"
+                    inputmode="numeric"
+                    maxlength="10"
+                    aria-describedby="customer-phone-error"
+                  )
+                  p#customer-phone-error.customer-profile-error(hidden)
+                .customer-profile-actions
+                  p.customer-profile-status(role="status" hidden)
+                  button.customer-profile-button-ghost(type="button" phone-cancel) Hủy
+                  button.customer-profile-button(type="submit") Lưu
+
+          //- Mật khẩu
+          #customer-profile-panel-password.customer-profile-panel(
+            role="tabpanel"
+            aria-labelledby="customer-profile-tab-password"
+            hidden
+          )
+            section.customer-profile-card
+              .customer-profile-card-head
+                div
+                  h2 Đổi mật khẩu
+                  p Nhập mật khẩu hiện tại để xác nhận đây là bạn.
+              form#customer-password-form.customer-profile-card-body(novalidate)
+                .customer-profile-password-layout
+                  .customer-profile-password-fields
+                    each field in [{ id: 'current', name: 'currentPassword', label: 'Mật khẩu hiện tại', autocomplete: 'current-password' }, { id: 'new', name: 'newPassword', label: 'Mật khẩu mới', autocomplete: 'new-password' }, { id: 'confirm', name: 'confirmPassword', label: 'Nhập lại mật khẩu mới', autocomplete: 'new-password' }]
+                      .customer-profile-field
+                        label(for=`customer-password-${field.id}`) #{field.label}
+                        .customer-profile-password-input
+                          input(
+                            id=`customer-password-${field.id}`
+                            type="password"
+                            name=field.name
+                            autocomplete=field.autocomplete
+                            required
+                            aria-describedby=`customer-password-${field.id}-error`
+                          )
+                          button(
+                            type="button"
+                            aria-label=`Hiện ${field.label.toLowerCase()}`
+                            aria-pressed="false"
+                            password-toggle
+                          )
+                            i.fa-solid.fa-eye
+                        p.customer-profile-error(id=`customer-password-${field.id}-error` hidden)
+
+                  .customer-profile-rules
+                    strong Mật khẩu mới cần có
+                    ul
+                      li(password-rule="length") Ít nhất 8 ký tự
+                      li(password-rule="uppercase") 1 chữ cái in hoa
+                      li(password-rule="lowercase") 1 chữ cái in thường
+                      li(password-rule="number") 1 chữ số
+                      li(password-rule="special") 1 ký tự đặc biệt (@$!%*?&)
+
+                .customer-profile-actions
+                  p.customer-profile-status(role="status" hidden)
+                  button.customer-profile-button(type="submit") Đổi mật khẩu
+
+  script(src="/assets/js/customer-profile.js")

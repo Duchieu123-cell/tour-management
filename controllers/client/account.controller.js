@@ -106,6 +106,12 @@ module.exports.registerPost = async (req, res) => {
   });
 };
 
+module.exports.profile = (req, res) => {
+  res.render('client/pages/account-profile', {
+    pageTitle: 'Hồ sơ cá nhân'
+  });
+};
+
 module.exports.logoutPost = (req, res) => {
   res.clearCookie('customerToken', cookieOptions);
   res.redirect('/account/login');
