@@ -25,6 +25,17 @@ const schema = new mongoose.Schema({
     type: String,
     default: 'active'
   }
+  ,
+  dob: {
+    type: Date
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other'],
+  },
+  address: {
+    type: String,
+  }
 }, {
   timestamps: true
 });
