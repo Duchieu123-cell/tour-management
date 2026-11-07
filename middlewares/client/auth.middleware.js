@@ -4,7 +4,11 @@ const Customer = require('../../models/customer.model');
 module.exports.optionalCustomer = async (req, res, next) => {
   res.locals.customer = null;
 
-  const token = req.cookies.customerToken;
+  let token = req.cookies.customerToken;
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
   if (!token) {
     return next();
   }
@@ -41,7 +45,24 @@ module.exports.optionalCustomer = async (req, res, next) => {
 
 module.exports.requireCustomer = (req, res, next) => {
   if (!res.locals.customer) {
+    if (req.xhr || req.headers.accept?.includes('application/json') || req.baseUrl === '/profile') {
+      return res.status(401).json({
+        code: 'ERROR',
+        message: 'Vui lòng đăng nhập để tiếp tục'
+      });
+    }
     return res.redirect('/account/login');
+  }
+
+  next();
+};
+
+module.exports.requireCustomerApi = (req, res, next) => {
+  if (!res.locals.customer) {
+    return res.status(401).json({
+      code: 'ERROR',
+      message: 'Vui lòng đăng nhập để tiếp tục'
+    });
   }
 
   next();

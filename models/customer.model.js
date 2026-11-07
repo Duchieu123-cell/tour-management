@@ -33,6 +33,18 @@ const schema = new mongoose.Schema({
     type: Date,
     default: null
   }
+  dob: {
+    type: Date
+  },
+  phone: {
+    type: String
+  },
+  gender: {
+    type: String
+  },
+  address: {
+    type: String
+  },
 }, {
   timestamps: true
 });
