@@ -6,6 +6,16 @@ block main
   .section-4(style="padding-top: 60px;")
     .container
       h2.box-title Kết quả tìm kiếm
+      if aiSearchSummary && aiSearchSummary.length
+        .ai-search-summary
+          .ai-search-summary-title
+            i.fa-solid.fa-wand-magic-sparkles
+            span Đang sắp xếp theo mức độ phù hợp:
+          .ai-search-summary-chips
+            each chip in aiSearchSummary
+              span.ai-search-summary-chip
+                strong #{chip.label}:
+                |  #{chip.value}
       if tourList.length
         .inner-wrap
           each item in tourList
