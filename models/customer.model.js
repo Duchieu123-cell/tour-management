@@ -24,6 +24,14 @@ const schema = new mongoose.Schema({
   status: {
     type: String,
     default: 'active'
+  },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

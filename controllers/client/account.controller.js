@@ -20,7 +20,10 @@ module.exports.login = (req, res) => {
 
 module.exports.loginPost = async (req, res) => {
   const email = req.body.email.trim().toLowerCase();
-  const customer = await Customer.findOne({ email });
+  const customer = await Customer.findOne({
+    email,
+    deleted: { $ne: true }
+  });
 
   if (!customer) {
     return res.status(401).json({
