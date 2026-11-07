@@ -287,6 +287,7 @@ if (customerPasswordForm) {
 
   customerPasswordForm.addEventListener('input', () => {
     showFormStatus(customerPasswordForm, '');
+    customerPasswordForm.querySelector('.customer-profile-status').classList.remove('is-error');
   });
 
   customerPasswordForm.querySelectorAll('[password-toggle]').forEach((button) => {
@@ -317,6 +318,40 @@ if (customerPasswordForm) {
     }
 
     showFormStatus(customerPasswordForm, PROTOTYPE_MESSAGE);
+    const submitButton = customerPasswordForm.querySelector('button[type="submit"]');
+    const status = customerPasswordForm.querySelector('.customer-profile-status');
+    submitButton.disabled = true;
+
+    fetch('/account/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({
+        currentPassword: currentInput.value,
+        newPassword: newInput.value,
+        confirmPassword: confirmInput.value
+      })
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok || result.code !== 'SUCCESS') {
+          throw new Error(result.message || 'Không thể đổi mật khẩu. Vui lòng thử lại.');
+        }
+
+        customerPasswordForm.reset();
+        updatePasswordRules();
+        status.classList.remove('is-error');
+        showFormStatus(customerPasswordForm, result.message);
+      })
+      .catch((error) => {
+        status.classList.add('is-error');
+        showFormStatus(customerPasswordForm, error.message || 'Không thể kết nối. Vui lòng thử lại.');
+      })
+      .finally(() => {
+        submitButton.disabled = false;
+      });
   });
 }
 // End Đổi mật khẩu

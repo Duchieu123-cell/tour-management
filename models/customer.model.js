@@ -13,6 +13,11 @@ const schema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  phone: {
+    type: String,
+    default: '',
+    trim: true
+  },
   avatar: {
     type: String,
     default: ''
@@ -24,6 +29,26 @@ const schema = new mongoose.Schema({
   status: {
     type: String,
     default: 'active'
+  },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: {
+    type: Date,
+    default: null
+  }
+  dob: {
+    type: Date
+  },
+  gender: {
+    type: String,
+    default: ''
+  },
+  address: {
+    type: String,
+    default: '',
+    trim: true
   }
 }, {
   timestamps: true

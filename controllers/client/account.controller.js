@@ -20,7 +20,10 @@ module.exports.login = (req, res) => {
 
 module.exports.loginPost = async (req, res) => {
   const email = req.body.email.trim().toLowerCase();
-  const customer = await Customer.findOne({ email });
+  const customer = await Customer.findOne({
+    email,
+    deleted: { $ne: true }
+  });
 
   if (!customer) {
     return res.status(401).json({
@@ -115,4 +118,38 @@ module.exports.profile = (req, res) => {
 module.exports.logoutPost = (req, res) => {
   res.clearCookie('customerToken', cookieOptions);
   res.redirect('/account/login');
+};
+
+module.exports.changePassword = async (req, res) => {
+  const customer = await Customer.findById(res.locals.customer._id);
+
+  if (!customer) {
+    return res.status(404).json({
+      code: 'ERROR',
+      message: 'Không tìm thấy tài khoản'
+    });
+  }
+
+  const isCurrentPasswordValid = await bcrypt.compare(req.body.currentPassword, customer.password);
+  if (!isCurrentPasswordValid) {
+    return res.status(401).json({
+      code: 'ERROR',
+      message: 'Mật khẩu hiện tại không đúng'
+    });
+  }
+
+  if (req.body.currentPassword === req.body.newPassword) {
+    return res.status(400).json({
+      code: 'ERROR',
+      message: 'Mật khẩu mới phải khác mật khẩu hiện tại'
+    });
+  }
+
+  customer.password = await bcrypt.hash(req.body.newPassword, 10);
+  await customer.save();
+
+  res.json({
+    code: 'SUCCESS',
+    message: 'Đổi mật khẩu thành công'
+  });
 };
