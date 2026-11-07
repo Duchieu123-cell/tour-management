@@ -28,5 +28,6 @@ router.use('/contact', contactRoutes);
 router.use('/category', categoryRoutes);
 router.use('/search', searchRoutes);
 router.use('/order', orderRoutes);
+router.use('/profile', profileRoutes);
 
 module.exports = router;

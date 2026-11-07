@@ -14,6 +14,26 @@ module.exports.detail = async (req, res) => {
       return res.status(401).json({
         code: 'ERROR',
         message: 'Vui lòng đăng nhập để thực hiện thao tác này'
+module.exports.deleteAccount = async (req, res) => {
+  try {
+    const currentCustomer = res.locals.customer;
+    if (!currentCustomer) {
+      return res.status(401).json({
+        code: 'ERROR',
+        message: 'Vui lòng đăng nhập để thực hiện thao tác này'
+const moment = require('moment');
+const Customer = require('../../models/customer.model');
+const Order = require('../../models/order.model');
+
+// [GET] /profile
+module.exports.getProfile = async (req, res) => {
+  try {
+    const customerId = res.locals.customer?.id || res.locals.customer?._id;
+
+    if (!customerId) {
+      return res.status(401).json({
+        code: 'ERROR',
+        message: 'Vui lòng đăng nhập để tiếp tục'
       });
     }
 
@@ -155,6 +175,69 @@ module.exports.update = async (req, res) => {
       code: 'SUCCESS',
       message: 'Cập nhật thông tin cá nhân thành công',
       data: updatedCustomer
+      _id: currentCustomer._id,
+      status: 'active',
+      deleted: { $ne: true }
+    });
+
+    if (!customer) {
+      res.clearCookie('customerToken', cookieOptions);
+      return res.status(404).json({
+        code: 'ERROR',
+        message: 'Tài khoản không tồn tại hoặc đã bị xóa'
+      });
+    }
+
+    if (typeof req.body?.password === 'string' && req.body.password.length > 0) {
+      const isPasswordValid = await bcrypt.compare(req.body.password, customer.password);
+      if (!isPasswordValid) {
+        return res.status(400).json({
+          code: 'ERROR',
+          message: 'Mật khẩu xác nhận không đúng'
+        });
+      }
+    }
+
+    await Customer.updateOne(
+      {
+        _id: customer._id,
+        deleted: { $ne: true }
+      },
+      {
+        status: 'inactive',
+        deleted: true,
+        deletedAt: new Date()
+      }
+    );
+
+    res.clearCookie('customerToken', cookieOptions);
+
+    return res.json({
+      code: 'SUCCESS',
+      message: 'Xóa tài khoản thành công'
+    });
+  } catch (error) {
+    return res.status(500).json({
+      code: 'ERROR',
+      message: 'Không thể xóa tài khoản lúc này'
+    });
+  }
+};
+      _id: customerId,
+      status: 'active'
+    }).select('-password');
+
+    if (!customer) {
+      return res.status(404).json({
+        code: 'ERROR',
+        message: 'Tài khoản không tồn tại hoặc đã bị khóa'
+      });
+    }
+
+    res.json({
+      code: 'SUCCESS',
+      message: 'Lấy thông tin profile thành công',
+      profile: customer
     });
   } catch (error) {
     res.status(500).json({
@@ -163,3 +246,10 @@ module.exports.update = async (req, res) => {
     });
   }
 };
+      message: 'Lỗi máy chủ khi lấy thông tin profile',
+      error: error.message
+    });
+  }
+};
+
+
