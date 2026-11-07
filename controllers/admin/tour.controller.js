@@ -88,14 +88,14 @@ module.exports.list = async (req, res) => {
       const accountCreated = await AccountAdmin.findOne({
         _id: item.createdBy
       });
-      item.createdByFullName = accountCreated.fullName;
+      item.createdByFullName = accountCreated ? accountCreated.fullName : "";
     }
 
     if(item.updatedBy){
       const accountUpdated = await AccountAdmin.findOne({
         _id: item.updatedBy
       });
-      item.updatedByFullName = accountUpdated.fullName;
+      item.updatedByFullName = accountUpdated ? accountUpdated.fullName : "";
     }
 
     item.createdAtFormatted = moment(item.createdAt).format('HH:mm - DD/MM/YYYY');
@@ -342,7 +342,7 @@ module.exports.trash = async (req, res) => {
       const accountDeleted = await AccountAdmin.findOne({
         _id: item.deletedBy
       });
-      item.deletedByFullName = accountDeleted.fullName;
+      item.deletedByFullName = accountDeleted ? accountDeleted.fullName : "";
     }
 
     item.deletedAtFormatted = moment(item.deletedAt).format('HH:mm - DD/MM/YYYY');
