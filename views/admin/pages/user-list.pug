@@ -39,6 +39,8 @@ block main
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
         input(type="text" placeholder="Tìm kiếm theo tên, email, sđt..." search)
+      .inner-button-create
+        button(type="button" button-create-user) + Tạo mới
   //- End Section 5
 
   //- Section 6: Bảng người dùng
@@ -78,9 +80,17 @@ block main
                 td
                   .inner-buttons
                     button(
+                      class="inner-edit" 
+                      type="button"
+                      button-edit-user 
+                      data-id=item._id
+                      title="Chỉnh sửa thông tin"
+                    ) <i class="fa-regular fa-pen-to-square"></i>
+                    button(
                       class="inner-delete" 
                       button-delete 
                       data-api=`/${pathAdmin}/user/delete/${item._id}`
+                      title="Xóa người dùng"
                     ) <i class="fa-regular fa-trash-can"></i>
           else
             tr
@@ -95,3 +105,8 @@ block main
         - for (let i = 1; i <= pagination.totalPages; i++)
           option(value=i) Trang #{i}
   //- End Section 7
+
+  //- Include Modals
+  include ../partials/user-modals.pug
+
+  script(src="/admin/assets/js/user.js")
