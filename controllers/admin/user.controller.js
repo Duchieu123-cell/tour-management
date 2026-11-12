@@ -314,19 +314,3 @@ module.exports.undoPatch = async (req, res) => {
     res.json({ code: 'ERROR', message: error.message });
   }
 };
-
-// [DELETE] /admin/user/destroy/:id (Hard delete)
-module.exports.destroyDelete = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    await Customer.deleteOne({ _id: id });
-
-    res.json({
-      code: 'SUCCESS',
-      message: 'Đã xóa vĩnh viễn người dùng'
-    });
-  } catch (error) {
-    res.json({ code: 'ERROR', message: error.message });
-  }
-};

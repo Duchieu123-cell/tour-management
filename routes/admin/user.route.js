@@ -30,7 +30,4 @@ router.patch('/delete/:id', userController.deletePatch);
 // [PATCH] Khôi phục người dùng đã xóa mềm
 router.patch('/undo/:id', userController.undoPatch);
 
-// [DELETE] Xóa vĩnh viễn người dùng
-router.delete('/destroy/:id', userController.destroyDelete);
-
 module.exports = router;
