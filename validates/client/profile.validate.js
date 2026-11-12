@@ -32,7 +32,6 @@ module.exports.updateProfile = (req, res, next) => {
       .messages({
         'string.pattern.base': 'Số điện thoại không đúng định dạng (VD: 0912345678)'
       }),
-    // avatar: Joi.string().allow(''),
     dob: Joi.date()
       .iso()
       .max('now')
@@ -46,8 +45,10 @@ module.exports.updateProfile = (req, res, next) => {
       .messages({
         'any.only': 'Giới tính không hợp lệ'
       }),
-    
-    address: Joi.string().trim().max(255).allow('')
+    address: Joi.string()
+      .trim()
+      .max(255)
+      .allow('')
   });
 
   const { error } = schema.validate(req.body);
