@@ -632,21 +632,32 @@ if(aiSearchForm){
 		}
 	});
 
+	const setAiStatus = (state, message) => {
+		aiTourResults.classList.remove("is-loading", "is-success", "is-warning", "is-error");
+		if(state){
+			aiTourResults.classList.add(`is-${state}`);
+		}
+		aiTourResults.hidden = false;
+		aiTourMessage.textContent = message;
+	};
+
 	aiSearchForm.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const request = aiTourRequest.value.trim();
 		if(!request){
 			aiTourRequest.focus();
-			aiTourResults.hidden = false;
-			aiTourMessage.textContent = "Hãy mô tả điểm đến, thời lượng hoặc ngân sách bạn mong muốn.";
+			aiTourSuggestions.replaceChildren();
+			setAiStatus("warning", "Hãy mô tả điểm đến, thời lượng hoặc ngân sách bạn mong muốn.");
 			return;
 		}
 
 		aiSearchButton.disabled = true;
 		aiSearchButton.classList.add("is-loading");
-		aiTourResults.hidden = false;
-		aiTourMessage.textContent = "AI đang phân tích yêu cầu...";
+		setAiStatus("loading", "AI đang phân tích yêu cầu của bạn...");
 		aiTourSuggestions.replaceChildren();
+
+		const controller = new AbortController();
+		const timeoutId = window.setTimeout(() => controller.abort(), 15000);
 
 		try{
 			const response = await fetch("/search/ai", {
@@ -654,23 +665,37 @@ if(aiSearchForm){
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ request })
+				body: JSON.stringify({ request }),
+				signal: controller.signal
 			});
 
 			if(response.redirected && new URL(response.url).pathname === "/account/login"){
 				window.location.href = response.url;
 				return;
 			}
-			if(!response.headers.get("content-type")?.includes("application/json")){
-				throw new Error("Phiên đăng nhập có thể đã hết hạn. Vui lòng đăng nhập lại.");
+
+			let data = null;
+			try{
+				data = await response.json();
+			}
+			catch{
+				if(response.status === 401){
+					throw new Error("Phiên đăng nhập có thể đã hết hạn. Vui lòng đăng nhập lại.");
+				}
+				if(response.status === 429){
+					throw new Error("Gemini đang giới hạn lượt gọi hoặc đã hết quota. Vui lòng thử lại sau.");
+				}
+				if(response.status === 504){
+					throw new Error("AI phản hồi quá thời gian chờ. Vui lòng thử lại.");
+				}
+				throw new Error("Không thể phân tích yêu cầu lúc này. Vui lòng thử lại sau.");
 			}
 
-			const data = await response.json();
 			if(!response.ok || data.code === "ERROR"){
-				throw new Error(data.message || "Không thể phân tích yêu cầu.");
+				throw new Error(data?.message || "Không thể phân tích yêu cầu lúc này. Vui lòng thử lại sau.");
 			}
 
-			aiTourMessage.textContent = data.message;
+			setAiStatus(data.code === "SUCCESS" ? "success" : "warning", data.message);
 			(data.suggestions || []).forEach((suggestion) => {
 				const button = document.createElement("button");
 				button.type = "button";
@@ -691,9 +716,13 @@ if(aiSearchForm){
 			}
 		}
 		catch(error){
-			aiTourMessage.textContent = error.message || "Không thể tìm tour lúc này. Vui lòng thử lại.";
+			const message = error.name === "AbortError"
+				? "AI phản hồi quá thời gian chờ. Vui lòng thử lại."
+				: (error.message || "Không thể tìm tour lúc này. Vui lòng thử lại.");
+			setAiStatus("error", message);
 		}
 		finally{
+			window.clearTimeout(timeoutId);
 			aiSearchButton.disabled = false;
 			aiSearchButton.classList.remove("is-loading");
 		}

@@ -63,7 +63,9 @@ block main
               button.ai-quick-chip(type="button" ai-quick-prompt="Tìm tour Đà Lạt 2 ngày 1 đêm, giá dưới 5 triệu.") Đà Lạt 2N1Đ (&lt; 5tr)
               button.ai-quick-chip(type="button" ai-quick-prompt="Tôi muốn tìm tour biển giá khoảng 8 triệu.") Tour biển (~8tr)
           .ai-tour-results(ai-tour-results hidden aria-live="polite")
-            p.ai-tour-results-message(ai-tour-message)
+            .ai-tour-status
+              span.ai-tour-spinner(aria-hidden="true")
+              p.ai-tour-results-message(ai-tour-message)
             .ai-tour-suggestions(ai-tour-suggestions)
     // End AI Search Hero
 

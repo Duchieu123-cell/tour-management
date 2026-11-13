@@ -60,7 +60,9 @@ block main
               i.fa-solid.fa-wand-magic-sparkles
               span Tìm tour ngay
         section.ai-tour-results(ai-tour-results hidden aria-live="polite")
-          p.ai-tour-results-message(ai-tour-message)
+          .ai-tour-status
+            span.ai-tour-spinner(aria-hidden="true")
+            p.ai-tour-results-message(ai-tour-message)
           .ai-tour-suggestions(ai-tour-suggestions)
   // End Section 1
 

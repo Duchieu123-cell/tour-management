@@ -255,7 +255,7 @@ module.exports.analyzeTourRequest = async (request) => {
       'Content-Type': 'application/json'
     },
     httpsAgent: keepAliveAgent,
-    timeout: 8000
+    timeout: 12000
   };
 
   let response;

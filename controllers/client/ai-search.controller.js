@@ -64,7 +64,7 @@ module.exports.searchPost = async (req, res) => {
         message: error.response?.data?.error?.message || error.message
       });
 
-      if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+      if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.code === 'ERR_CANCELED') {
         return res.status(504).json({
           code: 'ERROR',
           message: 'AI phản hồi quá thời gian chờ. Vui lòng thử lại.'
