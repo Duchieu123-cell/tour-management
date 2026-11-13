@@ -1336,6 +1336,62 @@ if (filterEndDate) {
 }
 // End Filter End Date
 
+// Filter Category
+const filterCategory = document.querySelector("[filter-category]");
+if (filterCategory) {
+  const url = new URL(window.location.href);
+
+  // Lắng nghe thay đổi lựa chọn
+  filterCategory.addEventListener("change", () => {
+    const category = filterCategory.value;
+
+    if(category){
+      url.searchParams.set("category", category);
+    }
+    else {
+      url.searchParams.delete("category");
+    }
+
+    url.searchParams.delete("page");
+    window.location.href = url.href;
+  });
+
+  // Hiển thị lựa chọn mặc định
+  const currentCategory = url.searchParams.get("category");
+  if (currentCategory) {
+    filterCategory.value = currentCategory;
+  }
+}
+// End Filter Category
+
+// Filter Price
+const filterPrice = document.querySelector("[filter-price]");
+if (filterPrice) {
+  const url = new URL(window.location.href);
+
+  // Lắng nghe thay đổi lựa chọn
+  filterPrice.addEventListener("change", () => {
+    const price = filterPrice.value;
+
+    if(price){
+      url.searchParams.set("price", price);
+    }
+    else {
+      url.searchParams.delete("price");
+    }
+
+    url.searchParams.delete("page");
+    window.location.href = url.href;
+  });
+
+  // Hiển thị lựa chọn mặc định
+  const currentPrice = url.searchParams.get("price");
+  if (currentPrice) {
+    filterPrice.value = currentPrice;
+  }
+}
+// End Filter Price
+
 // Filter reset
 const filterReset = document.querySelector("[filter-reset]");
 if (filterReset) {

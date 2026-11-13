@@ -1,5 +1,517 @@
+const moment = require('moment');
+const bcrypt = require('bcryptjs');
+const Customer = require('../../models/customer.model');
+
+const hasPermission = (req, perm) => {
+  if (!req.role || !Array.isArray(req.role.permissions)) return true;
+  // Allow if role explicitly has the permission or if user-* permissions haven't been assigned to the role yet
+  const hasAnyUserPerm = req.role.permissions.some((p) => p.startsWith('user-'));
+  if (!hasAnyUserPerm && req.role.permissions.includes('tour-view')) return true;
+  return req.role.permissions.includes(perm);
+};
+
+// [GET] /admin/user/list
 module.exports.list = async (req, res) => {
-  res.render('admin/pages/user-list', {
-    pageTitle: 'Quản lý người dùng'
-  });
-}
+  try {
+    const find = {
+      deleted: false
+    };
+
+    // Lọc theo trạng thái
+    if (req.query.status) {
+      find.status = req.query.status;
+    }
+
+    // Lọc theo khoảng ngày tạo
+    const dateFilter = {};
+    if (req.query.startDate) {
+      dateFilter.$gte = moment(req.query.startDate).startOf('day').toDate();
+    }
+    if (req.query.endDate) {
+      dateFilter.$lte = moment(req.query.endDate).endOf('day').toDate();
+    }
+    if (Object.keys(dateFilter).length > 0) {
+      find.createdAt = dateFilter;
+    }
+
+    // Tìm kiếm theo Họ tên, Email, Số điện thoại
+    if (req.query.keyword) {
+      const escaped = req.query.keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const keywordRegex = new RegExp(escaped, 'i');
+      find.$or = [
+        { fullName: keywordRegex },
+        { email: keywordRegex },
+        { phone: keywordRegex }
+      ];
+    }
+
+    // Phân trang
+    const limitItems = parseInt(req.query.limit) || 10;
+    let page = 1;
+    if (req.query.page) {
+      const currentPage = parseInt(req.query.page);
+      page = currentPage > 0 ? currentPage : 1;
+    }
+
+    const totalRecords = await Customer.countDocuments(find);
+    const totalPages = Math.ceil(totalRecords / limitItems) || 1;
+    const skip = (page - 1) * limitItems;
+
+    const pagination = {
+      totalRecords: totalRecords,
+      totalPages: totalPages,
+      skip: skip,
+      limitItems: limitItems,
+      page: page
+    };
+
+    // Sắp xếp
+    let sort = { createdAt: 'desc' };
+    let sortKey = 'createdAt';
+    let sortValue = 'desc';
+
+    if (req.query.sortKey && req.query.sortValue) {
+      sortKey = req.query.sortKey;
+      sortValue = req.query.sortValue;
+      sort = { [sortKey]: sortValue };
+    }
+
+    const userList = await Customer
+      .find(find)
+      .select('-password')
+      .sort(sort)
+      .limit(limitItems)
+      .skip(skip);
+
+    // Format ngày hiển thị
+    const formattedUserList = userList.map(user => {
+      const u = user.toObject();
+      u.createdAtFormatted = moment(u.createdAt).format('HH:mm - DD/MM/YYYY');
+      if (u.dob) {
+        u.dobFormatted = moment(u.dob).format('DD/MM/YYYY');
+      }
+      return u;
+    });
+
+    // Nếu client yêu cầu JSON API (hoặc gắn param ?format=json)
+    if (req.query.format === 'json' || req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.json({
+        code: 'SUCCESS',
+        pagination: pagination,
+        sortKey: sortKey,
+        sortValue: sortValue,
+        data: formattedUserList
+      });
+    }
+
+    // Render Pug View
+    res.render('admin/pages/user-list', {
+      pageTitle: 'Quản lý người dùng',
+      userList: formattedUserList,
+      pagination: pagination,
+      sortKey: sortKey,
+      sortValue: sortValue
+    });
+  } catch (error) {
+    console.error(error);
+    if (req.query.format === 'json' || req.xhr) {
+      return res.json({ code: 'ERROR', message: error.message });
+    }
+    res.redirect(`/${global.pathAdmin}/dashboard`);
+  }
+};
+
+// [GET] /admin/user/detail/:id
+module.exports.detail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await Customer.findOne({ _id: id, deleted: false }).select('-password');
+
+    if (!user) {
+      return res.json({ code: 'ERROR', message: 'Người dùng không tồn tại' });
+    }
+
+    res.json({
+      code: 'SUCCESS',
+      data: user
+    });
+  } catch (error) {
+    res.json({ code: 'ERROR', message: error.message });
+  }
+};
+
+// [POST] /admin/user/create
+module.exports.createPost = async (req, res) => {
+  try {
+    if (!hasPermission(req, 'user-create')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền thêm người dùng' });
+    }
+
+    const { email, password } = req.body;
+
+    const existEmail = await Customer.findOne({
+      email: email.toLowerCase().trim(),
+      deleted: false
+    });
+
+    if (existEmail) {
+      return res.json({
+        code: 'ERROR',
+        message: 'Email này đã tồn tại trong hệ thống'
+      });
+    }
+
+    // Mã hóa mật khẩu
+    const hashedPassword = await bcrypt.hash(password, 10);
+    req.body.password = hashedPassword;
+    req.body.email = email.toLowerCase().trim();
+
+    if (req.file) {
+      req.body.avatar = req.file.path;
+    }
+
+    const newUser = new Customer(req.body);
+    await newUser.save();
+
+    const userData = newUser.toObject();
+    delete userData.password;
+
+    req.flash('success', 'Tạo tài khoản người dùng thành công');
+
+    res.json({
+      code: 'SUCCESS',
+      message: 'Tạo tài khoản người dùng thành công',
+      data: userData
+    });
+  } catch (error) {
+    res.json({
+      code: 'ERROR',
+      message: error.message
+    });
+  }
+};
+
+// [PATCH] /admin/user/edit/:id
+module.exports.editPatch = async (req, res) => {
+  try {
+    if (!hasPermission(req, 'user-edit')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền chỉnh sửa người dùng' });
+    }
+
+    const { id } = req.params;
+
+    const existUser = await Customer.findOne({ _id: id, deleted: false });
+    if (!existUser) {
+      return res.json({ code: 'ERROR', message: 'Người dùng không tồn tại' });
+    }
+
+    // Kiểm tra trùng email với user khác
+    if (req.body.email) {
+      const email = req.body.email.toLowerCase().trim();
+      const duplicateEmail = await Customer.findOne({
+        _id: { $ne: id },
+        email: email,
+        deleted: false
+      });
+      if (duplicateEmail) {
+        return res.json({ code: 'ERROR', message: 'Email đã được sử dụng bởi người dùng khác' });
+      }
+      req.body.email = email;
+    }
+
+    // Nếu đổi mật khẩu
+    if (req.body.password && req.body.password.trim() !== '') {
+      req.body.password = await bcrypt.hash(req.body.password, 10);
+    } else {
+      delete req.body.password;
+    }
+
+    // Nếu upload avatar mới
+    if (req.file) {
+      req.body.avatar = req.file.path;
+    }
+
+    await Customer.updateOne({ _id: id, deleted: false }, req.body);
+
+    req.flash('success', 'Cập nhật thông tin người dùng thành công');
+
+    res.json({
+      code: 'SUCCESS',
+      message: 'Cập nhật thông tin người dùng thành công'
+    });
+  } catch (error) {
+    res.json({
+      code: 'ERROR',
+      message: error.message
+    });
+  }
+};
+
+// [PATCH] /admin/user/change-status/:status/:id
+module.exports.changeStatusPatch = async (req, res) => {
+  try {
+    if (!hasPermission(req, 'user-edit')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền đổi trạng thái người dùng' });
+    }
+
+    const { id, status } = req.params;
+
+    if (!['active', 'inactive'].includes(status)) {
+      return res.json({ code: 'ERROR', message: 'Trạng thái không hợp lệ' });
+    }
+
+    await Customer.updateOne({ _id: id }, { status: status });
+
+    req.flash('success', 'Cập nhật trạng thái thành công');
+
+    res.json({
+      code: 'SUCCESS',
+      message: 'Cập nhật trạng thái thành công'
+    });
+  } catch (error) {
+    res.json({ code: 'ERROR', message: error.message });
+  }
+};
+
+// [PATCH] /admin/user/change-multi
+module.exports.changeMultiPatch = async (req, res) => {
+  try {
+    const { option, ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.json({ code: 'ERROR', message: 'Vui lòng chọn ít nhất 1 người dùng' });
+    }
+
+    if (option === 'active' || option === 'inactive') {
+      if (!hasPermission(req, 'user-edit')) {
+        return res.json({ code: 'ERROR', message: 'Bạn không có quyền đổi trạng thái người dùng' });
+      }
+      await Customer.updateMany({ _id: { $in: ids } }, { status: option });
+      req.flash('success', 'Đổi trạng thái thành công');
+      return res.json({ code: 'SUCCESS', message: 'Đổi trạng thái thành công' });
+    }
+
+    if (option === 'delete') {
+      if (!hasPermission(req, 'user-delete')) {
+        return res.json({ code: 'ERROR', message: 'Bạn không có quyền xóa người dùng' });
+      }
+      await Customer.updateMany(
+        { _id: { $in: ids } },
+        { deleted: true, deletedAt: new Date() }
+      );
+      req.flash('success', 'Xóa thành công');
+      return res.json({ code: 'SUCCESS', message: 'Xóa thành công' });
+    }
+
+    res.json({ code: 'ERROR', message: 'Hành động không hợp lệ' });
+  } catch (error) {
+    res.json({ code: 'ERROR', message: error.message });
+  }
+};
+
+// [PATCH] /admin/user/delete/:id (Soft delete)
+module.exports.deletePatch = async (req, res) => {
+  try {
+    if (!hasPermission(req, 'user-delete')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền xóa người dùng' });
+    }
+
+    const { id } = req.params;
+
+    await Customer.updateOne(
+      { _id: id },
+      { deleted: true, deletedAt: new Date() }
+    );
+
+    req.flash('success', 'Xóa người dùng thành công');
+
+    res.json({
+      code: 'SUCCESS',
+      message: 'Xóa người dùng thành công'
+    });
+  } catch (error) {
+    res.json({ code: 'ERROR', message: error.message });
+  }
+};
+
+// [PATCH] /admin/user/undo/:id (Restore)
+module.exports.undoPatch = async (req, res) => {
+  try {
+    if (!hasPermission(req, 'user-trash')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền khôi phục người dùng' });
+    }
+
+    const { id } = req.params;
+
+    await Customer.updateOne(
+      { _id: id },
+      { deleted: false, deletedAt: null }
+    );
+
+    req.flash('success', 'Khôi phục người dùng thành công');
+
+    res.json({
+      code: 'SUCCESS',
+      message: 'Khôi phục người dùng thành công'
+    });
+  } catch (error) {
+    res.json({ code: 'ERROR', message: error.message });
+  }
+};
+
+// [PATCH/DELETE] /admin/user/destroy/:id (Hard delete)
+module.exports.destroyDelete = async (req, res) => {
+  try {
+    if (!hasPermission(req, 'user-trash')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền xóa vĩnh viễn người dùng' });
+    }
+
+    const { id } = req.params;
+
+    await Customer.deleteOne({ _id: id });
+
+    req.flash('success', 'Xóa vĩnh viễn người dùng thành công');
+
+    res.json({
+      code: 'SUCCESS',
+      message: 'Đã xóa vĩnh viễn người dùng'
+    });
+  } catch (error) {
+    res.json({ code: 'ERROR', message: error.message });
+  }
+};
+
+// [GET] /admin/user/trash
+module.exports.trash = async (req, res) => {
+  try {
+    const find = {
+      deleted: true
+    };
+
+    // Tìm kiếm theo Họ tên, Email, Số điện thoại
+    if (req.query.keyword) {
+      const escaped = req.query.keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const keywordRegex = new RegExp(escaped, 'i');
+      find.$or = [
+        { fullName: keywordRegex },
+        { email: keywordRegex },
+        { phone: keywordRegex }
+      ];
+    }
+
+    // Phân trang
+    const limitItems = parseInt(req.query.limit) || 10;
+    let page = 1;
+    if (req.query.page) {
+      const currentPage = parseInt(req.query.page);
+      page = currentPage > 0 ? currentPage : 1;
+    }
+
+    const totalRecords = await Customer.countDocuments(find);
+    const totalPages = Math.ceil(totalRecords / limitItems) || 1;
+    const skip = (page - 1) * limitItems;
+
+    const pagination = {
+      totalRecords: totalRecords,
+      totalPages: totalPages,
+      skip: skip,
+      limitItems: limitItems,
+      page: page
+    };
+
+    // Sắp xếp
+    let sort = { deletedAt: 'desc' };
+    let sortKey = 'deletedAt';
+    let sortValue = 'desc';
+
+    if (req.query.sortKey && req.query.sortValue) {
+      sortKey = req.query.sortKey;
+      sortValue = req.query.sortValue;
+      sort = { [sortKey]: sortValue };
+    }
+
+    const userList = await Customer
+      .find(find)
+      .select('-password')
+      .sort(sort)
+      .limit(limitItems)
+      .skip(skip);
+
+    const formattedUserList = userList.map(user => {
+      const u = user.toObject();
+      u.deletedAtFormatted = u.deletedAt ? moment(u.deletedAt).format('HH:mm - DD/MM/YYYY') : '';
+      u.createdAtFormatted = moment(u.createdAt).format('HH:mm - DD/MM/YYYY');
+      return u;
+    });
+
+    if (req.query.format === 'json' || req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.json({
+        code: 'SUCCESS',
+        pagination: pagination,
+        sortKey: sortKey,
+        sortValue: sortValue,
+        data: formattedUserList
+      });
+    }
+
+    res.render('admin/pages/user-trash', {
+      pageTitle: 'Thùng rác người dùng',
+      userList: formattedUserList,
+      pagination: pagination,
+      sortKey: sortKey,
+      sortValue: sortValue
+    });
+  } catch (error) {
+    console.error(error);
+    if (req.query.format === 'json' || req.xhr) {
+      return res.json({ code: 'ERROR', message: error.message });
+    }
+    res.redirect(`/${global.pathAdmin}/user/list`);
+  }
+};
+
+// [PATCH] /admin/user/trash/change-multi
+module.exports.trashChangeMultiPatch = async (req, res) => {
+  try {
+    if (!hasPermission(req, 'user-trash')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền thao tác thùng rác người dùng' });
+    }
+
+    const { option, ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.json({ code: 'ERROR', message: 'Vui lòng chọn ít nhất 1 người dùng' });
+    }
+
+    switch (option) {
+      case "undo":
+        await Customer.updateMany({
+          _id: { $in: ids },
+          deleted: true
+        }, {
+          deleted: false,
+          deletedAt: null
+        });
+        req.flash('success', 'Khôi phục người dùng thành công');
+        break;
+      case "delete-permanent":
+        await Customer.deleteMany({
+          _id: { $in: ids }
+        });
+        req.flash('success', 'Xóa vĩnh viễn thành công');
+        break;
+      default:
+        return res.json({ code: 'ERROR', message: 'Hành động không hợp lệ' });
+    }
+
+    res.json({
+      code: "SUCCESS",
+      message: "Cập nhật thành công"
+    });
+  } catch (error) {
+    res.json({
+      code: "ERROR",
+      message: error.message
+    });
+  }
+};

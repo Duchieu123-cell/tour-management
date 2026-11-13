@@ -98,7 +98,7 @@ module.exports.edit = async (req, res) => {
         const city = await City.findOne({
           _id: item.locationFrom
         });
-        item.locationFromName = city.name;
+        item.locationFromName = city ? city.name : "";
       }
     }
 
@@ -107,7 +107,7 @@ module.exports.edit = async (req, res) => {
       orderDetail: orderDetail
     });
   } catch (error) {
-    res.redirect(`/${pathAdmin}/orders/list`);
+    res.redirect(`/${pathAdmin}/order/list`);
   }
 }
 

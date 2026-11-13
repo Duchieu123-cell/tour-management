@@ -38,6 +38,53 @@ module.exports.list = async (req, res) => {
   }
   // Hết lọc theo Ngày tạo
 
+  // Lọc theo danh mục
+  if(req.query.category){
+    const allCategoryChildren = [];
+    const getCategoryChildren = async (parentId) => {
+      const children = await Category.find({
+        parent: parentId,
+        deleted: false
+      });
+      for(const child of children){
+        allCategoryChildren.push(child._id);
+        await getCategoryChildren(child._id);
+      }
+    };
+    await getCategoryChildren(req.query.category);
+    find.category = { $in: [req.query.category, ...allCategoryChildren] };
+  }
+  // Hết lọc theo danh mục
+
+  // Lọc theo mức giá
+  if(req.query.price){
+    const [minPrice, maxPrice] = req.query.price.split("-").map(Number);
+    if(!isNaN(minPrice) && !isNaN(maxPrice)){
+      const priceQuery = {
+        $or: [
+          {
+            newPriceAdult: { $gt: 0, $gte: minPrice, $lte: maxPrice }
+          },
+          {
+            $or: [
+              { newPriceAdult: { $exists: false } },
+              { newPriceAdult: 0 },
+              { newPriceAdult: null }
+            ],
+            priceAdult: { $gte: minPrice, $lte: maxPrice }
+          }
+        ]
+      };
+      if (find.$or) {
+        find.$and = find.$and || [];
+        find.$and.push(priceQuery);
+      } else {
+        find.$or = priceQuery.$or;
+      }
+    }
+  }
+  // Hết lọc theo mức giá
+
   // Tìm kiếm
   if(req.query.keyword){
     const keyword = slugify(req.query.keyword, {
@@ -49,7 +96,7 @@ module.exports.list = async (req, res) => {
   // Hết lọc tìm kiếm
 
   //Phân trang
-  const limitItems = 3;
+  const limitItems = 10;
   
   let page = 1;
   if(req.query.page){
@@ -108,10 +155,18 @@ module.exports.list = async (req, res) => {
     .select("_id fullName");
   //Hết danh sách tài khoản quản trị
 
+  // Danh sách phân cấp danh mục
+  const categoryList = await Category.find({
+    deleted: false
+  });
+  const categoryTree = CategoryHelper.buildCategoryTree(categoryList, "");
+  // Hết danh sách phân cấp danh mục
+
   res.render('admin/pages/tour-list', {
     pageTitle: 'Quản lý tour',
     tourList: tourList,
     adminAccountList: adminAccountList,
+    categoryList: categoryTree,
     pagination: pagination,
   });
 }
@@ -265,19 +320,26 @@ module.exports.editPatch = async (req, res) => {
 
 module.exports.deletePatch = async (req, res) => {
   try {
-    const id = req.params.id;
-    await Tour.updateOne({
-      _id: id,
-      deleted: false
-    }, {
-      deleted: true,
-      deletedAt: new Date(),
-      deletedBy: req.account.id
-    });
-    req.flash('success', 'Xóa tour thành công');
-    res.json({
-      code: "SUCCESS"
-    });
+    if(req.role && req.role.permissions.includes("tour-delete")){
+      const id = req.params.id;
+      await Tour.updateOne({
+        _id: id,
+        deleted: false
+      }, {
+        deleted: true,
+        deletedAt: new Date(),
+        deletedBy: req.account ? req.account._id : null
+      });
+      req.flash('success', 'Xóa tour thành công');
+      res.json({
+        code: "SUCCESS"
+      });
+    } else {
+      res.json({
+        code: "ERROR",
+        message: "Bạn không có quyền xóa tour"
+      });
+    }
   } catch (error) {
     res.json({
       code: "ERROR",
@@ -330,12 +392,41 @@ module.exports.trash = async (req, res) => {
     deleted: true
   };
 
+  if(req.query.keyword){
+    const keyword = slugify(req.query.keyword, {
+      lower: true,
+    });
+    const keywordRegex = new RegExp(keyword);
+    find.slug = keywordRegex;
+  }
+
+  const limitItems = 10;
+  let page = 1;
+  if(req.query.page){
+    const currentPage = parseInt(req.query.page);
+    if(currentPage > 0){
+      page = currentPage;
+    }
+  }
+
+  const totalRecords = await Tour.countDocuments(find);
+  const totalPages = Math.ceil(totalRecords / limitItems) || 1;
+  const skip = (page - 1) * limitItems;
+
+  const pagination = {
+    totalRecords: totalRecords,
+    totalPages: totalPages,
+    skip: skip,
+    limitItems: limitItems
+  };
 
   const tourList = await Tour
     .find(find)
     .sort({ 
       position: "desc"
     })
+    .limit(limitItems)
+    .skip(skip);
 
   for (const item of tourList) {
     if(item.deletedBy){
@@ -351,37 +442,43 @@ module.exports.trash = async (req, res) => {
   res.render('admin/pages/tour-trash', {
     pageTitle: 'Thùng rác tour',
     tourList: tourList,
+    pagination: pagination,
   });
 }
 
 module.exports.changeMultiPatch = async (req, res) => {
   try {
     const { option, ids } = req.body;
+    const permissions = req.role ? req.role.permissions : [];
 
-    switch (option){
-      case "active":
-      case "inactive":
-        await Tour.updateMany({
-          _id: { $in: ids }
-        }, {
-          status: option
-        });
-        req.flash('success', 'Đổi trạng thái thành công');
-        break;
-      case "delete":
-        await Tour.updateMany({
-          _id: { $in: ids }
-        }, {
-          deleted: true,
-          deletedAt: Date.now(),
-          deletedBy: req.account._id
-        });
-        req.flash('success', 'Xóa thành công');
+    if(permissions.includes("tour-edit") && (option === "active" || option === "inactive")) {
+      await Tour.updateMany({
+        _id: { $in: ids }
+      }, {
+        status: option
+      });
+      req.flash('success', 'Đổi trạng thái thành công');
+      return res.json({
+        code: "SUCCESS"
+      });
+    } else if(permissions.includes("tour-delete") && option === "delete") {
+      await Tour.updateMany({
+        _id: { $in: ids }
+      }, {
+        deleted: true,
+        deletedAt: Date.now(),
+        deletedBy: req.account ? req.account._id : null
+      });
+      req.flash('success', 'Xóa thành công');
+      return res.json({
+        code: "SUCCESS"
+      });
+    } else {
+      return res.json({
+        code: "ERROR",
+        message: "Bạn không có quyền thực hiện thao tác này"
+      });
     }
-
-    res.json({
-      code: "SUCCESS"
-    });
   } catch (error) {
     res.json({
       code: "ERROR",

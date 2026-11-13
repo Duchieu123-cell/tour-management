@@ -185,43 +185,67 @@ ul{
     color:#FFFFFF;
 }
 
-.header .inner-cart a{
-    display: inline-flex;
+.header .inner-menu-mobile{
+    display: none;
+}
+
+.header .header-actions{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.header .inner-cart{
+    display: flex;
     align-items: center;
 }
 
-.header .inner-cart img{
-    height: 26px;
+.header .header-cart-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid #E8E8F0;
+    border-radius: 999px;
+    background-color: #FAFAFE;
+    color: var(--color-black);
+    font-size: 13px;
+    font-weight: 600;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.header .header-cart-btn:hover{
+    border-color: #D2C4F2;
+    background-color: #F4F0FC;
+    color: var(--color-blue);
+    box-shadow: 0 3px 10px rgba(69, 2, 199, 0.08);
+}
+
+.header .header-cart-btn img{
+    height: 20px;
     width: auto;
+    display: block;
 }
 
-.header .inner-cart span{
+.header .header-cart-label{
+    white-space: nowrap;
+}
+
+.header .header-cart-badge{
     background-color: #FF3904;
-    display: inline-block;
-    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 999px;
     color: #FFFFFF;
-    font-weight: 400;
-    font-size: 12px;
-    padding: 1px 5px;
-    margin-left: 5px;
-    position: relative;
-}
-
-.header .inner-cart span::before{
-    content: "";
-    display: inline-block;
-    width: 0; 
-    height: 0; 
-    border-top: 1.9px solid transparent;
-    border-bottom: 1.9px solid transparent; 
-    border-right:3.8px solid #FF3904;
-    position: absolute;
-    top: 6.2px;
-    left: -3.4px;
-}
-
-.header .inner-menu-mobile{
-    display: none;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 0 6px;
+    line-height: 1;
 }
 
 .header .header-account{
@@ -230,24 +254,38 @@ ul{
     white-space: nowrap;
 }
 
-.header .header-account-profile{
-    display: flex;
+.header .header-account-dropdown{
+    position: relative;
+}
+
+.header .header-account-trigger{
+    display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 5px 8px 5px 5px;
+    min-height: 44px;
+    padding: 4px 12px 4px 5px;
     border: 1px solid #E8E8F0;
     border-radius: 999px;
     background-color: #FFFFFF;
     box-shadow: 0 3px 12px #25282B0D;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.header .header-account-trigger:hover,
+.header .header-account-dropdown.is-open .header-account-trigger{
+    border-color: #D2C4F2;
+    background-color: #FCFAFF;
+    box-shadow: 0 4px 14px rgba(69, 2, 199, 0.1);
 }
 
 .header .header-account-avatar{
     display: flex;
-    flex: 0 0 42px;
+    flex: 0 0 34px;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
+    width: 34px;
+    height: 34px;
     overflow: hidden;
     border: 2px solid #E9E3F8;
     border-radius: 50%;
@@ -261,67 +299,132 @@ ul{
 }
 
 .header .header-account-avatar img[src$="icon-user.svg"]{
-    width: 19px;
-    height: 21px;
+    width: 16px;
+    height: 18px;
 }
 
 .header .header-account-info{
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    max-width: 130px;
+    align-items: flex-start;
+    gap: 1px;
+    max-width: 135px;
     overflow: hidden;
+    text-align: left;
 }
 
 .header .header-account-greeting{
     color: #777582;
     font-size: 11px;
-    line-height: 1.2;
+    line-height: 1.15;
 }
 
 .header .header-account-name{
+    max-width: 100%;
     overflow: hidden;
     color: var(--color-black);
     font-size: 13px;
     font-weight: 700;
+    line-height: 1.25;
     text-overflow: ellipsis;
 }
 
-.header .header-account-link{
-    display: flex;
-    align-items: center;
-    gap: inherit;
-    min-width: 0;
-    border-radius: 999px;
+.header .header-account-caret{
+    font-size: 11px;
+    color: #777582;
+    margin-left: 2px;
+    transition: transform 0.2s ease, color 0.2s ease;
 }
 
-.header .header-account-link:hover .header-account-name{
+.header .header-account-dropdown:hover .header-account-caret,
+.header .header-account-dropdown.is-open .header-account-caret{
+    transform: rotate(180deg);
     color: var(--color-blue);
 }
 
-.header .header-account-profile form{
+.header .header-account-menu{
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 215px;
+    padding: 8px;
+    background-color: #FFFFFF;
+    border: 1px solid #ECE8F6;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(25, 15, 55, 0.14);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+.header .header-account-dropdown::after{
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 10px;
+}
+
+.header .header-account-dropdown:hover .header-account-menu,
+.header .header-account-dropdown.is-open .header-account-menu{
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.header .header-account-item{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--color-black);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.header .header-account-item i{
+    width: 16px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-blue);
+}
+
+.header .header-account-item:hover{
+    background-color: #F4F0FC;
+    color: var(--color-blue);
+}
+
+.header .header-account-divider{
+    height: 1px;
+    margin: 6px 4px;
+    background-color: #EFEBF8;
+}
+
+.header .header-account-menu form{
     margin: 0;
 }
 
-.header .header-account-profile button{
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-height: 34px;
-    padding: 0 10px;
-    border: 0;
-    border-radius: 999px;
-    background-color: #F4F0FC;
-    color: var(--color-blue);
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 600;
-    transition: background-color 0.2s, color 0.2s;
+.header .header-account-item.is-logout{
+    color: #D92D20;
 }
 
-.header .header-account-profile button:hover{
-    background-color: var(--color-blue);
-    color: #FFFFFF;
+.header .header-account-item.is-logout i{
+    color: #D92D20;
+}
+
+.header .header-account-item.is-logout:hover{
+    background-color: #FEF3F2;
+    color: #B42318;
 }
 
 .header .header-account-login,
@@ -329,8 +432,8 @@ ul{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
-    padding: 0 14px;
+    min-height: 42px;
+    padding: 0 15px;
     border-radius: 999px;
     font-size: 13px;
     font-weight: 600;
@@ -360,9 +463,16 @@ ul{
 
 @media (max-width: 1199.98px){
     .header .inner-menu > ul{
-        gap: 5px 24px;
+        gap: 5px 22px;
     }
 
+    .header .header-cart-label{
+        display: none;
+    }
+
+    .header .header-cart-btn{
+        padding: 0 12px;
+    }
 }
 
 @media (max-width: 991.98px){
@@ -370,19 +480,13 @@ ul{
         display: none;
     }
 
-    .header .header-account-profile{
-        gap: 7px;
+    .header .header-account-trigger{
+        padding: 4px 10px 4px 4px;
+        gap: 6px;
     }
 
-    .header .header-account-profile button{
-        width: 36px;
-        justify-content: center;
-        padding: 0;
-        font-size: 0;
-    }
-
-    .header .header-account-profile button i{
-        font-size: 14px;
+    .header .header-actions{
+        gap: 8px;
     }
 }
 

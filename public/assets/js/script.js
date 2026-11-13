@@ -26,6 +26,29 @@ if(buttonMenuMobile){
 }
 // End Menu Mobile
 
+// Header Account Dropdown
+const headerAccountDropdown = document.querySelector("[header-account-dropdown]");
+if(headerAccountDropdown){
+	const trigger = headerAccountDropdown.querySelector("[header-account-trigger]");
+	if(trigger){
+		trigger.addEventListener("click", (event) => {
+			event.stopPropagation();
+			const isOpen = headerAccountDropdown.classList.toggle("is-open");
+			trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+		});
+	}
+
+	document.addEventListener("click", (event) => {
+		if(!headerAccountDropdown.contains(event.target)){
+			headerAccountDropdown.classList.remove("is-open");
+			if(trigger){
+				trigger.setAttribute("aria-expanded", "false");
+			}
+		}
+	});
+}
+// End Header Account Dropdown
+
 
 // Box Address Section 1
 const boxAddressSection1 = document.querySelector(".section-1 .inner-form .inner-address");
