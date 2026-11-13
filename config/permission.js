@@ -39,4 +39,24 @@ module.exports.permissionList = [
     label: 'Thùng rác tour',
     value: 'tour-trash'
   },
-]
+  {
+    label: 'Xem người dùng',
+    value: 'user-view'
+  },
+  {
+    label: 'Tạo người dùng',
+    value: 'user-create'
+  },
+  {
+    label: 'Sửa người dùng',
+    value: 'user-edit'
+  },
+  {
+    label: 'Xóa người dùng',
+    value: 'user-delete'
+  },
+  {
+    label: 'Thùng rác người dùng',
+    value: 'user-trash'
+  }
+];

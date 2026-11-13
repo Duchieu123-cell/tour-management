@@ -1,4 +1,5 @@
 extends ../layouts/layout-default.pug
+include ../mixins/pagination.pug
 
 block main
   h1.box-title Quản lý đơn hàng 
@@ -9,26 +10,36 @@ block main
       .inner-item.inner-label
         <i class="fa-solid fa-filter"></i> Bộ lọc
       .inner-item
-        select
-          option(value="") Trạng thái
-          option(value="") Hoạt động 
-          option(value="") Tạm dừng
+        span.inner-field-label Trạng thái đơn
+        select(filter-status)
+          option(value="") Tất cả trạng thái
+          option(value="initial") Khởi tạo
+          option(value="done") Hoàn thành
+          option(value="cancel") Hủy
       .inner-item.inner-date
-        input(type="date")
-        span -
-        input(type="date")
+        span.inner-field-label Ngày đặt
+        .inner-date-inputs
+          span.inner-date-label Từ
+          input(type="date" filter-start-date aria-label="Từ ngày")
+          span.inner-date-sep -
+          span.inner-date-label Đến
+          input(type="date" filter-end-date aria-label="Đến ngày")
       .inner-item
+        span.inner-field-label Phương thức thanh toán
         select
-          option(value="") Phương thức thanh toán
-          option(value="") Ví Momo
-          option(value="") VNPay
-          option(value="") ZaloPay
+          option(value="") Tất cả PTTT
+          option(value="money") Tiền mặt
+          option(value="momo") Ví MoMo
+          option(value="vnpay") VNPay
+          option(value="zalopay") ZaloPay
+          option(value="bank") Chuyển khoản
       .inner-item
+        span.inner-field-label Trạng thái thanh toán
         select
-          option(value="") Trạng thái thanh toán
-          option(value="") Đã thanh toán
-          option(value="") Chưa thanh toán
-      .inner-item.inner-reset
+          option(value="") Tất cả thanh toán
+          option(value="paid") Đã thanh toán
+          option(value="unpaid") Chưa thanh toán
+      .inner-item.inner-reset(filter-reset)
         <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
   //- End Section 4
 
@@ -50,14 +61,14 @@ block main
             th Thông tin khách
             th Danh sách tour
             th Thanh toán
-            th Trạng thái
+            th(class="inner-center") Trạng thái
             th.inner-text-right Ngày đặt
-            th.inner-text-right Hành động 
+            th.inner-center Hành động 
         tbody
           each orderDetail in orderList
             tr
               td
-                .inner-code #{orderDetail.code}
+                .inner-code.inner-nowrap #{orderDetail.code}
               td
                 .inner-info
                   div Họ tên: #{orderDetail.fullName}
@@ -78,18 +89,18 @@ block main
                         if(item.quantityBaby > 0)
                           .inner-quantity Em bé: #{item.quantityBaby} x #{item.newPriceBaby.toLocaleString("vi-VN")}đ
               td 
-                div Tổng tiền: #{orderDetail.subTotal.toLocaleString("vi-VN")}đ
-                div Giảm 0đ
-                div Mã giảm: 0
-                div Thanh toán #{orderDetail.total.toLocaleString("vi-VN")}đ
-                div PTTT: #{orderDetail.paymentMethodName}
-                div TTTT: #{orderDetail.paymentStatusName}
-              td
+                div.inner-nowrap Tổng tiền: #{orderDetail.subTotal.toLocaleString("vi-VN")}đ
+                div.inner-nowrap Giảm 0đ
+                div.inner-nowrap Mã giảm: 0
+                div.inner-nowrap Thanh toán #{orderDetail.total.toLocaleString("vi-VN")}đ
+                div.inner-nowrap PTTT: #{orderDetail.paymentMethodName}
+                div.inner-nowrap TTTT: #{orderDetail.paymentStatusName}
+              td.inner-center
                 div(class=`badge badge-${orderDetail.statusColor}`) #{orderDetail.statusName}
-              td.inner-text-right 
+              td.inner-text-right.inner-nowrap
                 div #{orderDetail.createdAtFormatTime}
                 div #{orderDetail.createdAtFormatDate}
-              td.inner-text-right
+              td.inner-center
                 .inner-buttons
                   a(href=`/${pathAdmin}/order/edit/${orderDetail.id}` class="inner-edit") <i class="fa-regular fa-pen-to-square"></i> 
                   button(
@@ -100,10 +111,5 @@ block main
   //- End Section 6
 
   //- Section 7
-  .section-7  
-    span.inner-label Hiển thị 1 - 9 của 78
-    select(class="inner-pagination")
-      option Trang 1
-      option Trang 2
-      option Trang 3
+  +pagination(pagination, orderList ? orderList.length : 0)
   //- End Section 7

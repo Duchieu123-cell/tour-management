@@ -1,0 +1,125 @@
+//- Modal Tạo mới người dùng
+#modal-user-create.custom-modal
+  .custom-modal-overlay(modal-close)
+  .custom-modal-dialog
+    .custom-modal-header
+      h3.custom-modal-title
+        <i class="fa-solid fa-user-plus"></i> Thêm người dùng mới
+      button.custom-modal-close(type="button" modal-close)
+        <i class="fa-solid fa-xmark"></i>
+    .custom-modal-body
+      form#user-create-form.modal-form(enctype="multipart/form-data")
+        .inner-group
+          label(for="create-fullName") Họ và tên <span class="text-danger">*</span>
+          input#create-fullName(type="text" name="fullName" placeholder="Nhập họ và tên" required)
+        
+        .inner-group
+          label(for="create-email") Email <span class="text-danger">*</span>
+          input#create-email(type="email" name="email" placeholder="example@gmail.com" required)
+
+        .inner-group
+          label(for="create-password") Mật khẩu <span class="text-danger">*</span>
+          input#create-password(type="password" name="password" placeholder="Tối thiểu 8 ký tự, gồm chữ hoa, thường, số, ký tự đặc biệt" required)
+
+        .inner-group
+          label(for="create-phone") Số điện thoại
+          input#create-phone(type="text" name="phone" placeholder="0912345678")
+
+        .inner-group
+          label(for="create-gender") Giới tính
+          select#create-gender(name="gender")
+            option(value="") -- Chọn giới tính --
+            option(value="male") Nam
+            option(value="female") Nữ
+            option(value="other") Khác
+
+        .inner-group
+          label(for="create-dob") Ngày sinh
+          input#create-dob(type="date" name="dob")
+
+        .inner-group
+          label(for="create-status") Trạng thái
+          select#create-status(name="status")
+            option(value="active" selected) Hoạt động
+            option(value="inactive") Tạm dừng
+
+        .inner-group
+          label(for="create-address") Địa chỉ
+          input#create-address(type="text" name="address" placeholder="Số nhà, đường, quận/huyện, tỉnh/thành")
+
+        .inner-group.inner-two-col
+          label Ảnh đại diện
+          .avatar-upload-wrap
+            img#avatar-preview-create.avatar-preview-circle(src="/admin/assets/images/batman.png" alt="Avatar Preview")
+            .avatar-file-input
+              input#create-avatar(type="file" name="avatar" accept="image/*")
+              span.inner-hint Định dạng: JPG, PNG, WEBP (tối đa 5MB)
+
+        .custom-modal-footer
+          button.btn-modal-cancel(type="button" modal-close) Hủy bỏ
+          button.btn-modal-submit(type="submit")
+            <i class="fa-solid fa-plus"></i> Tạo người dùng
+
+//- Modal Chỉnh sửa người dùng
+#modal-user-edit.custom-modal
+  .custom-modal-overlay(modal-close)
+  .custom-modal-dialog
+    .custom-modal-header
+      h3.custom-modal-title
+        <i class="fa-solid fa-user-pen"></i> Chỉnh sửa thông tin người dùng
+      button.custom-modal-close(type="button" modal-close)
+        <i class="fa-solid fa-xmark"></i>
+    .custom-modal-body
+      form#user-edit-form.modal-form(enctype="multipart/form-data")
+        input#edit-id(type="hidden" name="id")
+
+        .inner-group
+          label(for="edit-fullName") Họ và tên <span class="text-danger">*</span>
+          input#edit-fullName(type="text" name="fullName" placeholder="Nhập họ và tên" required)
+        
+        .inner-group
+          label(for="edit-email") Email <span class="text-danger">*</span>
+          input#edit-email(type="email" name="email" placeholder="example@gmail.com" required)
+
+        .inner-group
+          label(for="edit-password") Mật khẩu mới
+          input#edit-password(type="password" name="password" placeholder="Để trống nếu không đổi mật khẩu")
+
+        .inner-group
+          label(for="edit-phone") Số điện thoại
+          input#edit-phone(type="text" name="phone" placeholder="0912345678")
+
+        .inner-group
+          label(for="edit-gender") Giới tính
+          select#edit-gender(name="gender")
+            option(value="") -- Chọn giới tính --
+            option(value="male") Nam
+            option(value="female") Nữ
+            option(value="other") Khác
+
+        .inner-group
+          label(for="edit-dob") Ngày sinh
+          input#edit-dob(type="date" name="dob")
+
+        .inner-group
+          label(for="edit-status") Trạng thái
+          select#edit-status(name="status")
+            option(value="active") Hoạt động
+            option(value="inactive") Tạm dừng
+
+        .inner-group
+          label(for="edit-address") Địa chỉ
+          input#edit-address(type="text" name="address" placeholder="Số nhà, đường, quận/huyện, tỉnh/thành")
+
+        .inner-group.inner-two-col
+          label Ảnh đại diện
+          .avatar-upload-wrap
+            img#avatar-preview-edit.avatar-preview-circle(src="/admin/assets/images/batman.png" alt="Avatar Preview")
+            .avatar-file-input
+              input#edit-avatar(type="file" name="avatar" accept="image/*")
+              span.inner-hint Chọn ảnh mới nếu muốn thay đổi ảnh hiện tại
+
+        .custom-modal-footer
+          button.btn-modal-cancel(type="button" modal-close) Hủy bỏ
+          button.btn-modal-submit(type="submit")
+            <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi

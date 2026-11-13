@@ -19,7 +19,7 @@
 header.header
   .container
     .inner-wrap
-      button.inner-menu-mobile
+      button.inner-menu-mobile(type="button" aria-label="Mở menu")
         i.fa-solid.fa-bars
       .inner-logo
         a(href="/")
@@ -34,41 +34,48 @@ header.header
           each item in categoryTree 
             li
               a(href=`/category/${item.slug}`) #{item.name}
-              if(item.children)
+              if(item.children && item.children.length > 0)
                 i.fa-solid.fa-caret-down
                 ul
                   each itemChild in item.children
                     li
                       a(href=`/category/${itemChild.slug}`) #{itemChild.name}
-          //- li
-          //-   a(href="#") Tin tức
-          //- li
-          //-   a(href="#") Liên hệ
         .inner-overlay
-      .header-account
-        if customer
-          .header-account-profile
-            a.header-account-link(href="/account/profile" title="Hồ sơ cá nhân")
-              .header-account-avatar
-                img(
-                  src=customer.avatar || "/assets/images/icon-user.svg"
-                  alt=`Ảnh đại diện của ${customer.fullName}`
-                )
-              .header-account-info
-                span.header-account-greeting Xin chào,
-                span.header-account-name #{customer.fullName}
-            form(action="/account/logout" method="post")
-              button(type="submit")
-                i.fa-solid.fa-arrow-right-from-bracket
-                | Đăng xuất
-        else
-          a.header-account-login(href="/account/login") Đăng nhập
-          a.header-account-register(href="/account/register") Đăng ký
-      .inner-cart
-        a(href="/cart")
-          img(
-            alt="Cart" 
-            src="/assets/images/icon-cart.svg"
-            )
-          span(mini-cart) 0
+      .header-actions
+        .inner-cart
+          a.header-cart-btn(href="/cart" title="Giỏ hàng đặt tour")
+            img(
+              alt="Cart" 
+              src="/assets/images/icon-cart.svg"
+              )
+            span.header-cart-label Giỏ hàng
+            span.header-cart-badge(mini-cart) 0
+        .header-account
+          if customer
+            .header-account-dropdown(header-account-dropdown)
+              button.header-account-trigger(type="button" header-account-trigger aria-expanded="false")
+                .header-account-avatar
+                  img(
+                    src=customer.avatar || "/assets/images/icon-user.svg"
+                    alt=`Ảnh đại diện của ${customer.fullName}`
+                  )
+                .header-account-info
+                  span.header-account-greeting Xin chào,
+                  span.header-account-name #{customer.fullName}
+                i.fa-solid.fa-chevron-down.header-account-caret
+              .header-account-menu(header-account-menu)
+                a.header-account-item(href="/account/profile")
+                  i.fa-regular.fa-id-badge
+                  span Hồ sơ cá nhân
+                a.header-account-item(href="/account/orders")
+                  i.fa-solid.fa-suitcase-rolling
+                  span Đơn đặt tour của tôi
+                .header-account-divider
+                form(action="/account/logout" method="post")
+                  button.header-account-item.is-logout(type="submit")
+                    i.fa-solid.fa-arrow-right-from-bracket
+                    span Đăng xuất
+          else
+            a.header-account-login(href="/account/login") Đăng nhập
+            a.header-account-register(href="/account/register") Đăng ký
 // End Header

@@ -1244,6 +1244,7 @@ if (filterStatus) {
       url.searchParams.delete("status");
     }
 
+    url.searchParams.delete("page");
     window.location.href = url.href;
   });
 
@@ -1271,6 +1272,7 @@ if (filterCreatedBy) {
       url.searchParams.delete("createdBy");
     }
 
+    url.searchParams.delete("page");
     window.location.href = url.href;
   });
 
@@ -1298,6 +1300,7 @@ if (filterStartDate) {
       url.searchParams.delete("startDate");
     }
 
+    url.searchParams.delete("page");
     window.location.href = url.href;
   });
 
@@ -1325,6 +1328,7 @@ if (filterEndDate) {
       url.searchParams.delete("endDate");
     }
 
+    url.searchParams.delete("page");
     window.location.href = url.href;
   });
 
@@ -1335,6 +1339,62 @@ if (filterEndDate) {
   }
 }
 // End Filter End Date
+
+// Filter Category
+const filterCategory = document.querySelector("[filter-category]");
+if (filterCategory) {
+  const url = new URL(window.location.href);
+
+  // Lắng nghe thay đổi lựa chọn
+  filterCategory.addEventListener("change", () => {
+    const category = filterCategory.value;
+
+    if(category){
+      url.searchParams.set("category", category);
+    }
+    else {
+      url.searchParams.delete("category");
+    }
+
+    url.searchParams.delete("page");
+    window.location.href = url.href;
+  });
+
+  // Hiển thị lựa chọn mặc định
+  const currentCategory = url.searchParams.get("category");
+  if (currentCategory) {
+    filterCategory.value = currentCategory;
+  }
+}
+// End Filter Category
+
+// Filter Price
+const filterPrice = document.querySelector("[filter-price]");
+if (filterPrice) {
+  const url = new URL(window.location.href);
+
+  // Lắng nghe thay đổi lựa chọn
+  filterPrice.addEventListener("change", () => {
+    const price = filterPrice.value;
+
+    if(price){
+      url.searchParams.set("price", price);
+    }
+    else {
+      url.searchParams.delete("price");
+    }
+
+    url.searchParams.delete("page");
+    window.location.href = url.href;
+  });
+
+  // Hiển thị lựa chọn mặc định
+  const currentPrice = url.searchParams.get("price");
+  if (currentPrice) {
+    filterPrice.value = currentPrice;
+  }
+}
+// End Filter Price
 
 // Filter reset
 const filterReset = document.querySelector("[filter-reset]");
@@ -1364,41 +1424,68 @@ const changeMulti = document.querySelector("[change-multi]");
 if(changeMulti){
   const select = changeMulti.querySelector("select");
   const button = changeMulti.querySelector("button");
+  const selectedCountEl = changeMulti.querySelector("[bulk-selected-count]");
+  const checkItems = document.querySelectorAll("[check-item]");
+
+  const updateBulkActionState = () => {
+    const checkedCount = document.querySelectorAll("[check-item]:checked").length;
+    changeMulti.classList.toggle("is-active", checkedCount > 0);
+    if (selectedCountEl) {
+      selectedCountEl.textContent = checkedCount > 0
+        ? `Đã chọn ${checkedCount} mục`
+        : "Chọn ô tích bên dưới để áp dụng";
+    }
+    if (button) {
+      button.disabled = checkedCount === 0;
+    }
+  };
+
+  checkItems.forEach((item) => {
+    item.addEventListener("change", updateBulkActionState);
+  });
+  updateBulkActionState();
 
   button.addEventListener("click", () => {
     const option = select.value;
     const listCheckItem = document.querySelectorAll("[check-item]:checked");
-    if(option && listCheckItem.length > 0){
-      const ids = [];
-
-      listCheckItem.forEach((item) => {
-        const id = item.getAttribute("check-item");
-        ids.push(id);
-      })
-
-      const dataFinal = {
-        option: option,
-        ids: ids
-      };
-
-      const dataApi = changeMulti.getAttribute("data-api");
-
-      fetch(dataApi, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataFinal)
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.code === "SUCCESS") {
-            window.location.reload();
-          } else {
-            alert(data.message);
-          }
-        });
+    if (listCheckItem.length === 0) {
+      return;
     }
+    if (!option) {
+      alert("Vui lòng chọn hành động cần áp dụng!");
+      select.focus();
+      return;
+    }
+
+    const ids = [];
+
+    listCheckItem.forEach((item) => {
+      const id = item.getAttribute("check-item");
+      ids.push(id);
+    });
+
+    const dataFinal = {
+      option: option,
+      ids: ids
+    };
+
+    const dataApi = changeMulti.getAttribute("data-api");
+
+    fetch(dataApi, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dataFinal)
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "SUCCESS") {
+          window.location.reload();
+        } else {
+          alert(data.message);
+        }
+      });
   });
 }
 // End Change Multi
@@ -1420,6 +1507,7 @@ if(inputSearch){
         url.searchParams.delete("keyword");
       }
 
+      url.searchParams.delete("page");
       window.location.href = url.href;
       }
   })
@@ -1434,25 +1522,79 @@ if(inputSearch){
 
 // Pagination
 const pagination = document.querySelector("[pagination]");
-if(pagination){
+if (pagination) {
   const url = new URL(window.location.href);
 
-  // Lắng nghe sự kiện change
-  pagination.addEventListener("change", () => {
-    const value = pagination.value;
-    if(value){
-      url.searchParams.set("page", value);
-    }
-    else {
+  const goToPage = (targetPage) => {
+    if (targetPage && targetPage > 1) {
+      url.searchParams.set("page", targetPage);
+    } else {
       url.searchParams.delete("page");
     }
     window.location.href = url.href;
-  })
+  };
 
-  // Hiển thị lựa chọn mặc định
-  const valueCurrent = url.searchParams.get("page");
-  if (valueCurrent) {
-    pagination.value = valueCurrent;
+  if (pagination.tagName === "SELECT") {
+    pagination.addEventListener("change", () => {
+      goToPage(parseInt(pagination.value, 10));
+    });
+
+    const valueCurrent = url.searchParams.get("page");
+    if (valueCurrent) {
+      pagination.value = valueCurrent;
+    }
+  } else {
+    const totalPages = Math.max(1, parseInt(pagination.getAttribute("data-total-pages"), 10) || 1);
+    const paramPage = parseInt(url.searchParams.get("page"), 10);
+    const attrPage = parseInt(pagination.getAttribute("data-current-page"), 10) || 1;
+    const currentPage = Math.min(totalPages, Math.max(1, Number.isNaN(paramPage) ? attrPage : paramPage));
+
+    const prevBtn = pagination.querySelector("[pagination-prev]");
+    const nextBtn = pagination.querySelector("[pagination-next]");
+    const pageInput = pagination.querySelector("[pagination-input]");
+
+    if (prevBtn) {
+      prevBtn.disabled = currentPage <= 1;
+      prevBtn.addEventListener("click", () => {
+        if (currentPage > 1) {
+          goToPage(currentPage - 1);
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.disabled = currentPage >= totalPages;
+      nextBtn.addEventListener("click", () => {
+        if (currentPage < totalPages) {
+          goToPage(currentPage + 1);
+        }
+      });
+    }
+
+    if (pageInput) {
+      pageInput.value = currentPage;
+      const submitInputPage = () => {
+        const parsed = parseInt(pageInput.value, 10);
+        if (Number.isNaN(parsed)) {
+          pageInput.value = currentPage;
+          return;
+        }
+        const clamped = Math.min(totalPages, Math.max(1, parsed));
+        pageInput.value = clamped;
+        if (clamped !== currentPage) {
+          goToPage(clamped);
+        }
+      };
+
+      pageInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          submitInputPage();
+        }
+      });
+
+      pageInput.addEventListener("change", submitInputPage);
+    }
   }
 }
 // End Pagination

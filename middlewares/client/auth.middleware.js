@@ -33,7 +33,7 @@ module.exports.optionalCustomer = async (req, res, next) => {
     email: decoded.email,
     status: 'active',
     deleted: { $ne: true }
-  }).select('_id fullName email phone avatar dob gender address');
+  }).select('_id fullName email phone avatar dob gender address').lean();
 
   if (!customer) {
     res.clearCookie('customerToken', cookieOptions);

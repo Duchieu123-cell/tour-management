@@ -1,4 +1,6 @@
 extends ../layouts/layout-default.pug
+include ../mixins/pagination.pug
+include ../mixins/bulk-action.pug
 
 block main
   if(account.permissions.includes('category-view'))
@@ -10,19 +12,25 @@ block main
         .inner-item.inner-label
           <i class="fa-solid fa-filter"></i> Bộ lọc
         .inner-item
+          span.inner-field-label Trạng thái
           select(filter-status)
-            option(value="") Trạng thái
+            option(value="") Tất cả trạng thái
             option(value="active") Hoạt động 
             option(value="inactive") Tạm dừng
         .inner-item
+          span.inner-field-label Người tạo
           select(filter-created-by)
-            option(value="") Người tạo
+            option(value="") Tất cả người tạo
             each admin in adminAccountList
               option(value=admin._id) #{admin.fullName}
         .inner-item.inner-date
-          input(type="date" filter-start-date)
-          span -
-          input(type="date" filter-end-date)
+          span.inner-field-label Ngày tạo
+          .inner-date-inputs
+            span.inner-date-label Từ
+            input(type="date" filter-start-date aria-label="Từ ngày")
+            span.inner-date-sep -
+            span.inner-date-label Đến
+            input(type="date" filter-end-date aria-label="Đến ngày")
         .inner-item.inner-reset(filter-reset)
           <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
     //- End Section 4
@@ -30,20 +38,6 @@ block main
     //- Section 5
     .section-5 
       .inner-wrap
-        .inner-change-status(
-          change-multi 
-          data-api=`/${pathAdmin}/category/change-multi`
-        )
-          .inner-item
-            select
-              option(value="") --Hành động--
-              if(account.permissions.includes('category-edit'))
-                option(value="active") Hoạt động
-                option(value="inactive") Tạm dừng
-              if(account.permissions.includes('category-delete'))
-                option(value="delete") Xóa
-          .inner-item
-            button Áp dụng
         .inner-search
           <i class="fa-solid fa-magnifying-glass"></i>
           input(type="text" placeholder="Tìm kiếm" search)  
@@ -52,6 +46,18 @@ block main
             a(href=`/${pathAdmin}/category/create`)  + Tạo mới  
     //- End Section 5
 
+    -
+      const bulkActions = [];
+      if (account.permissions.includes('category-edit')) {
+        bulkActions.push({ value: "active", label: "Hoạt động" });
+        bulkActions.push({ value: "inactive", label: "Tạm dừng" });
+      }
+      if (account.permissions.includes('category-delete')) {
+        bulkActions.push({ value: "delete", label: "Xóa" });
+      }
+    if(bulkActions.length > 0)
+      +bulkAction(`/${pathAdmin}/category/change-multi`, bulkActions)
+
     //- Section 6
     .section-6 
       .table-2 
@@ -59,21 +65,20 @@ block main
           thead
             tr
               th(class="inner-center")
-                input(type="checkbox" class="inner-check" check-all)
               th Tên danh mục
-              th Ảnh đại diện
+              th(class="inner-center") Ảnh đại diện
               th(class="inner-center") Vị trí 
               th(class="inner-center") Trạng thái
               th Tạo bởi
               th Cập nhật bởi
-              th Hành động 
+              th.inner-center Hành động 
           tbody
             each item in categoryList
               tr
                 td(class="inner-center")
                   input(type="checkbox" class="inner-check" check-item=item.id)
-                td #{item.name}
-                td 
+                td.inner-col-title #{item.name}
+                td.inner-center
                   img(src=item.avatar, class="inner-avatar")
                 td(class="inner-center") #{item.position}
                 td(class="inner-center")
@@ -84,12 +89,12 @@ block main
                   else if(item.status == "deleted")
                     .badge.badge-orange Xóa
                 td 
-                  div #{item.createdByFullName}
-                  div.inner-time #{item.createdAtFormatted} 
+                  div.inner-nowrap #{item.createdByFullName}
+                  div.inner-time.inner-nowrap #{item.createdAtFormatted} 
                 td 
-                  div #{item.updatedByFullName}
-                  div.inner-time #{item.updatedAtFormatted}
-                td
+                  div.inner-nowrap #{item.updatedByFullName}
+                  div.inner-time.inner-nowrap #{item.updatedAtFormatted}
+                td.inner-center
                   .inner-buttons
                     if(account.permissions.includes('category-edit'))
                       a(
@@ -105,9 +110,5 @@ block main
     //- End Section 6
 
     //- Section 7
-    .section-7  
-      span.inner-label Hiển thị #{pagination.skip + 1} - #{pagination.skip + categoryList.length} của #{pagination.totalRecords}
-      select(class="inner-pagination" pagination)
-        - for (let i = 1; i <= pagination.totalPages; i++)
-          option(value=i) Trang #{i}
+    +pagination(pagination, categoryList.length)
     //- End Section 7

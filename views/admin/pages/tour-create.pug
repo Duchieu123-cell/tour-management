@@ -8,111 +8,140 @@ block main
     //- Section 8
     .section-8#tour-create-form
       form
+        .form-section-head.inner-two-col
+          i.fa-solid.fa-circle-info
+          span Thông tin cơ bản
+
         .inner-group
           label(for="name" class="inner-label") Tên tour
-          input(type="text" id="name" name="name")
+          input(type="text" id="name" name="name" placeholder="Ví dụ: Tour Nha Trang - VinWonders 3N2Đ")
         .inner-group
           label(for="category" class="inner-label") Danh mục
           select(id="category" name="category")
-            option(value="") --Chọn danh mục--
+            option(value="") Chọn danh mục
             +option(categoryList)
+
+        .inner-three-col.inner-two-col
+          .inner-group
+            label(for="time" class="inner-label") Thời gian
+            input(type="text" id="time" name="time" placeholder="Ví dụ: 3 ngày 2 đêm")
+          .inner-group
+            label(for="vehicle" class="inner-label") Phương tiện
+            input(type="text" id="vehicle" name="vehicle" placeholder="Ví dụ: Máy bay / Xe khách")
+          .inner-group
+            label(for="departure" class="inner-label") Ngày khởi hành
+            input(type="date" id="departure" name="departure")
+
         .inner-group
-          label(for="position" class="inner-label") Vị trí
-          input(type="number" id="position" name="position")
+          label(for="position" class="inner-label") Vị trí hiển thị
+          input(type="number" id="position" name="position" placeholder="Tự động nếu để trống")
         .inner-group
           label(for="status" class="inner-label") Trạng thái
           select(id="status" name="status")
             option(value="active") Hoạt động
             option(value="inactive") Dừng hoạt động
+
+        .form-section-head.inner-two-col
+          i.fa-regular.fa-images
+          span Hình ảnh tour
+
+        .inner-media-row.inner-two-col
+          .inner-group.inner-media-avatar
+            label(for="avatar" class="inner-label") Ảnh đại diện
+            .inner-upload-image
+              input(type="file" id="avatar" name="avatar" accept="image/*" filepond-image)
+          .inner-group.inner-media-gallery
+            label(for="images" class="inner-label") Danh sách ảnh (có thể kéo thả để sắp xếp)
+            .inner-upload-image-multi
+              input(
+                type="file"
+                multiple
+                id="images"
+                name="images"
+                accept="image/*"
+                data-allow-reorder="true"
+                filepond-image-multi
+              )
+
+        .form-section-head.inner-two-col
+          i.fa-solid.fa-tags
+          span Giá tour & Số chỗ còn lại
+
+        .inner-three-col.inner-two-col
+          .inner-group.inner-price-card
+            label(class="inner-label") Giá gốc (VND)
+            .inner-input-list
+              .inner-input-item
+                label Người lớn
+                input(type="number" name="priceAdult" min="0" placeholder="0")
+              .inner-input-item
+                label Trẻ em
+                input(type="number" name="priceChildren" min="0" placeholder="0")
+              .inner-input-item
+                label Em bé
+                input(type="number" name="priceBaby" min="0" placeholder="0")
+          .inner-group.inner-price-card
+            label(class="inner-label") Giá khuyến mãi (VND)
+            .inner-input-list
+              .inner-input-item
+                label Người lớn
+                input(type="number" name="newPriceAdult" min="0" placeholder="0")
+              .inner-input-item
+                label Trẻ em
+                input(type="number" name="newPriceChildren" min="0" placeholder="0")
+              .inner-input-item
+                label Em bé
+                input(type="number" name="newPriceBaby" min="0" placeholder="0")
+          .inner-group.inner-price-card
+            label(class="inner-label") Số chỗ còn lại
+            .inner-input-list
+              .inner-input-item
+                label Người lớn
+                input(type="number" name="stockAdult" min="0" placeholder="0")
+              .inner-input-item
+                label Trẻ em
+                input(type="number" name="stockChildren" min="0" placeholder="0")
+              .inner-input-item
+                label Em bé
+                input(type="number" name="stockBaby" min="0" placeholder="0")
+
+        .form-section-head.inner-two-col
+          i.fa-solid.fa-map-location-dot
+          span Địa điểm & Nội dung chi tiết
+
         .inner-group.inner-two-col
-          label(for="avatar" class="inner-label") Ảnh đại diện
-          .inner-upload-image
-            input(type="file" id="avatar" name="avatar" accept="image/*" filepond-image)
-        .inner-group.inner-two-col
-          label(for="images" class="inner-label") Danh sách ảnh
-          div(class="inner-upload-image-multi")
-            input(
-              type="file" 
-              multiple 
-              id="images" 
-              name="images" 
-              accept="image/*" 
-              data-allow-reorder="true"
-              filepond-image-multi
-            )
-        .inner-group 
-          label(class="inner-label") Giá cũ
-          .inner-input-list
-            .inner-input-item
-              label Người lớn
-              input(type="number" name="priceAdult") 
-            .inner-input-item
-              label Trẻ em
-              input(type="number" name="priceChildren")
-            .inner-input-item
-              label Em bé
-              input(type="number" name="priceBaby")
-        .inner-group 
-          label(class="inner-label") Giá mới
-          .inner-input-list
-            .inner-input-item
-              label Người lớn
-              input(type="number" name="newPriceAdult")
-            .inner-input-item
-              label Trẻ em
-              input(type="number" name="newPriceChildren") 
-            .inner-input-item
-              label Em bé
-              input(type="number" name="newPriceBaby") 
-        .inner-group 
-          label(class="inner-label") Còn lại
-          .inner-input-list
-            .inner-input-item
-              label Người lớn
-              input(type="number" name="stockAdult") 
-            .inner-input-item
-              label Trẻ em
-              input(type="number" name="stockChildren") 
-            .inner-input-item
-              label Em bé
-              input(type="number" name="stockBaby") 
-        .inner-group
-          label(class="inner-label") Những địa điểm có tour
-          .inner-checkbox-list
+          label(class="inner-label") Những điểm khởi hành có tour
+          .inner-checkbox-list.inner-checkbox-list--grid
             each item in provinceCityList
-              .inner-checkbox-item
-                input(type="checkbox" name="locations" value=item.id) 
-                label #{item.name}
-        .inner-group
-          label(for="time" class="inner-label") Thời gian
-          input(type="text" id="time" name="time")
-        .inner-group
-          label(for="vehicle" class="inner-label") Phương tiện
-          input(type="text" id="vehicle" name="vehicle")
-        .inner-group
-          label(for="departure" class="inner-label") Ngày khởi hành
-          input(type="date" id="departure" name="departure")
+              label.inner-checkbox-item
+                input(type="checkbox" name="locations" value=item.id)
+                span #{item.name}
+
         .inner-group.inner-two-col
-          label(for="information" class="inner-label") Thông tin tour
+          label(for="information" class="inner-label") Thông tin chi tiết tour
           textarea(id="information" name="information" textarea-mce)
+
         .inner-group.inner-two-col
           label(class="inner-label") Lịch trình tour
           .inner-schedule
-            .inner-schedule-list   
+            .inner-schedule-list
               .inner-schedule-item
-                .inner-schedule-head 
+                .inner-schedule-head
                   span.inner-schedule-button.inner-move
-                    <i class="fa-solid fa-arrows-up-down-left-right"></i>
-                  input(type="text")
+                    i.fa-solid.fa-arrows-up-down-left-right
+                  input(type="text" placeholder="Nhập tiêu đề ngày (ví dụ: Ngày 1 | Hà Nội - Nha Trang)")
                   span.inner-schedule-button.inner-remove
-                    <i class="fa-regular fa-trash-can"></i>
+                    i.fa-regular.fa-trash-can
                   span.inner-schedule-button.inner-more
-                    <i class="fa-solid fa-chevron-down"></i>
+                    i.fa-solid.fa-chevron-down
                 .inner-schedule-body
                   textarea(textarea-mce)
             .inner-schedule-create + Thêm lịch trình
-        .inner-button.inner-two-col
-          button Tạo mới
-      .inner-back
-        a(href=`/${pathAdmin}/tour/list`) Quay lại danh sách
+
+        .inner-form-actions.inner-two-col
+          a.inner-back-btn(href=`/${pathAdmin}/tour/list`)
+            i.fa-solid.fa-arrow-left
+            span Quay lại danh sách
+          .inner-button
+            button(type="submit") Tạo mới
     //- End Section 8
