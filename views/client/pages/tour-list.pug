@@ -128,7 +128,8 @@ block main
                 select(name="locationFrom")
                   option(value="") Tất cả điểm đi
                   each item in cityList
-                    option(value=item.id) #{item.name}
+                    // `cityList` comes from a lean query, so it has `_id` but no Mongoose `id` virtual.
+                    option(value=item._id) #{item.name}
               .inner-group
                 lable.inner-lable(for="") Điểm đến
                 select(name="locationTo")

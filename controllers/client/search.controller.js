@@ -1,6 +1,6 @@
 const moment = require('moment');
-const slugify = require('slugify');
 const Tour = require('../../models/tour.model');
+const { slugifyVietnamese } = require('../../helpers/slug.helper');
 
 const normalizeDuration = (value) => String(value || '')
   .normalize('NFD')
@@ -120,9 +120,7 @@ const buildHardDestinationQuery = (query) => {
   };
 
   if (typeof query.locationTo === 'string' && query.locationTo.trim()) {
-    const keyword = slugify(query.locationTo, {
-      lower: true
-    });
+    const keyword = slugifyVietnamese(query.locationTo);
     if (keyword) {
       find.slug = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     }
@@ -344,9 +342,7 @@ const buildTourQuery = (query) => {
   }
 
   if(typeof query.locationTo === 'string' && query.locationTo.trim()){
-    const keyword = slugify(query.locationTo, {
-      lower: true
-    });
+    const keyword = slugifyVietnamese(query.locationTo);
     if(keyword){
       find.slug = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     }
