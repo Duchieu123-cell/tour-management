@@ -17,6 +17,10 @@ mixin product-item(item)
         i.fa-solid.fa-bolt
         | Giảm -#{computedDiscount}%
     .inner-content
+      if item.aiMatchBadge
+        .inner-ai-badge(class=item.aiMatchTone)
+          i.fa-solid.fa-wand-magic-sparkles
+          span #{item.aiMatchBadge}
       h3.inner-title
         a(href=`/tour/detail/${item.slug}`) #{item.name}
       .inner-prices

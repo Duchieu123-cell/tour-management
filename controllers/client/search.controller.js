@@ -131,7 +131,42 @@ const buildHardDestinationQuery = (query) => {
   return find;
 };
 
-const rankToursByPriority = (tours, query) => {
+const resolveAiMatchMeta = (scoredItem, criteriaFlags) => {
+  const { hasDurationCriterion, hasPriceCriterion, hasDestination } = criteriaFlags;
+
+  if (hasDurationCriterion && hasPriceCriterion) {
+    if (scoredItem.isDurationMatch && scoredItem.isPriceMatch) {
+      return { badge: 'Phù hợp nhất', tone: 'is-exact' };
+    }
+    if (scoredItem.isDurationMatch) {
+      return { badge: 'Khớp thời lượng', tone: 'is-partial' };
+    }
+    if (scoredItem.isPriceMatch) {
+      return { badge: 'Khớp ngân sách', tone: 'is-partial' };
+    }
+    return { badge: 'Gợi ý gần nhất', tone: 'is-near' };
+  }
+
+  if (hasDurationCriterion) {
+    return scoredItem.isDurationMatch
+      ? { badge: 'Khớp thời lượng', tone: 'is-exact' }
+      : { badge: 'Gợi ý gần nhất', tone: 'is-near' };
+  }
+
+  if (hasPriceCriterion) {
+    return scoredItem.isPriceMatch
+      ? { badge: 'Khớp ngân sách', tone: 'is-exact' }
+      : { badge: 'Gợi ý gần nhất', tone: 'is-near' };
+  }
+
+  if (hasDestination) {
+    return { badge: 'Đúng điểm đến', tone: 'is-exact' };
+  }
+
+  return { badge: 'Gợi ý bởi AI', tone: 'is-exact' };
+};
+
+const scoreAndRankTours = (tours, query) => {
   const hasDurationCriterion = typeof query.time === 'string' && Boolean(query.time.trim());
   const targetDuration = hasDurationCriterion ? parseDuration(query.time) : null;
   const targetTimeRegex = hasDurationCriterion ? durationRegex(query.time) : null;
@@ -236,7 +271,20 @@ const rankToursByPriority = (tours, query) => {
     return (b.tour.position || 0) - (a.tour.position || 0);
   });
 
-  return filteredScored.map((item) => item.tour);
+  const criteriaFlags = {
+    hasDurationCriterion,
+    hasPriceCriterion: Boolean(priceBounds),
+    hasDestination
+  };
+
+  return filteredScored.map((item) => ({
+    ...item,
+    matchMeta: resolveAiMatchMeta(item, criteriaFlags)
+  }));
+};
+
+const rankToursByPriority = (tours, query) => {
+  return scoreAndRankTours(tours, query).map((item) => item.tour);
 };
 
 const buildAiSearchSummary = (query) => {
@@ -360,16 +408,22 @@ const buildTourQuery = (query) => {
 };
 
 module.exports.list = async (req, res) => {
+  const isAiSearch = isAiPriorityQuery(req.query);
   let tourList = [];
 
-  if (isAiPriorityQuery(req.query)) {
+  if (isAiSearch) {
     const hardFind = buildHardDestinationQuery(req.query);
     const candidateTours = await Tour
       .find(hardFind)
       .sort({
         position: "desc"
       });
-    tourList = rankToursByPriority(candidateTours, req.query);
+    const rankedEntries = scoreAndRankTours(candidateTours, req.query);
+    tourList = rankedEntries.map((entry) => {
+      entry.tour.aiMatchBadge = entry.matchMeta.badge;
+      entry.tour.aiMatchTone = entry.matchMeta.tone;
+      return entry.tour;
+    });
   } else {
     const find = buildTourQuery(req.query);
     tourList = await Tour
@@ -389,11 +443,16 @@ module.exports.list = async (req, res) => {
   }
 
   const aiSearchSummary = buildAiSearchSummary(req.query);
+  const aiPrompt = isAiSearch && typeof req.query.prompt === 'string'
+    ? req.query.prompt.trim().slice(0, 500)
+    : '';
 
   res.render('client/pages/search', {
-    pageTitle: 'Kết quả tìm kiếm',
+    pageTitle: isAiSearch ? 'Gợi ý tour từ AI' : 'Kết quả tìm kiếm',
     tourList: tourList,
-    aiSearchSummary: aiSearchSummary
+    aiSearchSummary: aiSearchSummary,
+    isAiSearch: isAiSearch,
+    aiPrompt: aiPrompt
   });
 };
 

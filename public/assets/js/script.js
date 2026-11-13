@@ -612,7 +612,7 @@ if(aiSearchForm){
 	const aiTourResults = document.querySelector("[ai-tour-results]");
 	const aiTourMessage = aiTourResults.querySelector("[ai-tour-message]");
 	const aiTourSuggestions = aiTourResults.querySelector("[ai-tour-suggestions]");
-	const quickPromptButtons = aiSearchForm.querySelectorAll("[ai-quick-prompt]");
+	const quickPromptButtons = document.querySelectorAll("[ai-quick-prompt]");
 
 	quickPromptButtons.forEach((chip) => {
 		chip.addEventListener("click", () => {
@@ -620,6 +620,7 @@ if(aiSearchForm){
 			if(promptText){
 				aiTourRequest.value = promptText;
 				aiTourRequest.focus();
+				aiTourRequest.scrollIntoView({ behavior: "smooth", block: "center" });
 			}
 		});
 	});

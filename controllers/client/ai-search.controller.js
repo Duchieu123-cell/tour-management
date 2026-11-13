@@ -25,8 +25,14 @@ module.exports.searchPost = async (req, res) => {
       });
     }
 
+    const promptText = typeof req.body.request === 'string'
+      ? req.body.request.trim().slice(0, 500)
+      : '';
     const searchParams = new URLSearchParams();
     searchParams.set('ai', '1');
+    if (promptText) {
+      searchParams.set('prompt', promptText);
+    }
     if (criteria.name) {
       searchParams.set('locationTo', criteria.name);
     }

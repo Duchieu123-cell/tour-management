@@ -1,25 +1,113 @@
 extends ../layouts/default.pug
-include ../mixins/product-item.pug 
+include ../mixins/product-item.pug
 
-block main 
+block main
+  if isAiSearch
+    // AI Search Hero
+    .ai-results-hero
+      .container
+        .ai-results-top
+          .ai-results-heading
+            .ai-results-eyebrow
+              i.fa-solid.fa-wand-magic-sparkles
+              span Gợi ý bởi Trợ lý AI
+            h1.ai-results-title Kết quả gợi ý cho yêu cầu của bạn
+            p.ai-results-subtitle AI đã phân tích ngôn ngữ tự nhiên, ưu tiên xếp hạng theo điểm đến, thời lượng và ngân sách gần nhất với mong muốn của bạn.
+          .ai-results-count-card
+            .ai-results-count-number #{tourList.length}
+            .ai-results-count-label #{tourList.length > 0 ? 'tour phù hợp' : 'tour khớp tiêu chí'}
+
+        if aiPrompt || (aiSearchSummary && aiSearchSummary.length)
+          .ai-understanding-card
+            if aiPrompt
+              .ai-prompt-echo
+                .ai-prompt-echo-label
+                  i.fa-regular.fa-comment-dots
+                  span Bạn đã hỏi:
+                p.ai-prompt-echo-text “#{aiPrompt}”
+            if aiSearchSummary && aiSearchSummary.length
+              .ai-search-summary.ai-search-summary--hero
+                .ai-search-summary-title
+                  i.fa-solid.fa-sliders
+                  span AI đã trích xuất tiêu chí:
+                .ai-search-summary-chips
+                  each chip in aiSearchSummary
+                    span.ai-search-summary-chip
+                      strong #{chip.label}:
+                      |  #{chip.value}
+
+        .ai-refine-box
+          form#ai-search-form.ai-refine-form
+            .ai-refine-header
+              label(for="ai-tour-request")
+                i.fa-solid.fa-wand-magic-sparkles
+                span Điều chỉnh hoặc hỏi AI theo cách khác
+              span.ai-refine-hint
+                | Nhấn 
+                kbd Enter
+                |  để tìm lại ngay • 
+                kbd Shift + Enter
+                |  xuống dòng
+            .ai-refine-input-row
+              textarea#ai-tour-request(
+                name="request"
+                rows="2"
+                placeholder="Ví dụ: Tìm tour Nha Trang 3 ngày 2 đêm giá khoảng 5 - 10 triệu..."
+              )= aiPrompt || ''
+              button.ai-search-button.ai-refine-submit(type="submit")
+                i.fa-solid.fa-wand-magic-sparkles
+                span Tìm lại với AI
+            .ai-quick-prompts
+              span.ai-quick-label Gợi ý thử lại:
+              button.ai-quick-chip(type="button" ai-quick-prompt="Tôi muốn tour du lịch đi Nha Trang, 3 ngày 2 đêm, giá 5 - 10 triệu.") Nha Trang 3N2Đ (5–10tr)
+              button.ai-quick-chip(type="button" ai-quick-prompt="Tìm tour Đà Lạt 2 ngày 1 đêm, giá dưới 5 triệu.") Đà Lạt 2N1Đ (&lt; 5tr)
+              button.ai-quick-chip(type="button" ai-quick-prompt="Tôi muốn tìm tour biển giá khoảng 8 triệu.") Tour biển (~8tr)
+          .ai-tour-results(ai-tour-results hidden aria-live="polite")
+            p.ai-tour-results-message(ai-tour-message)
+            .ai-tour-suggestions(ai-tour-suggestions)
+    // End AI Search Hero
+
   // Section 4
-  .section-4(style="padding-top: 60px;")
+  .section-4.search-results-section(class=isAiSearch ? 'is-ai-results' : 'is-standard-search')
     .container
-      h2.box-title Kết quả tìm kiếm
-      if aiSearchSummary && aiSearchSummary.length
-        .ai-search-summary
-          .ai-search-summary-title
-            i.fa-solid.fa-wand-magic-sparkles
-            span Đang sắp xếp theo mức độ phù hợp:
-          .ai-search-summary-chips
-            each chip in aiSearchSummary
-              span.ai-search-summary-chip
-                strong #{chip.label}:
-                |  #{chip.value}
+      if isAiSearch
+        .search-results-bar
+          .search-results-bar-left
+            h2.search-results-heading Hành trình AI đề xuất cho bạn
+            p.search-results-note Sắp xếp ưu tiên từ khớp hoàn toàn đến gợi ý gần nhất
+          .search-results-bar-right
+            a.search-results-link(href="/")
+              i.fa-solid.fa-arrow-left
+              span Về trang chủ
+      else
+        .search-standard-header
+          .search-standard-title-wrap
+            h1.box-title Kết quả tìm kiếm
+            span.search-standard-count #{tourList.length} tour tìm thấy
+          a.search-results-link(href="/")
+            i.fa-solid.fa-arrow-left
+            span Quay lại trang chủ
+
       if tourList.length
-        .inner-wrap
+        .inner-wrap(class=isAiSearch ? 'ai-results-grid' : '')
           each item in tourList
             +product-item(item)
       else
-        p.search-empty Không tìm thấy tour phù hợp với các tiêu chí này. Hãy thử thay đổi điểm đến, thời lượng hoặc ngân sách.
+        .search-empty-card
+          .search-empty-icon
+            i.fa-solid(class=isAiSearch ? 'fa-wand-magic-sparkles' : 'fa-compass')
+          h3.search-empty-title #{isAiSearch ? 'Chưa tìm thấy tour khớp hoàn toàn với yêu cầu này' : 'Không tìm thấy tour phù hợp'}
+          p.search-empty-desc #{isAiSearch ? 'Bạn có thể nới lỏng ngân sách, đổi số ngày hoặc chọn một gợi ý mẫu bên dưới để AI tìm lại ngay.' : 'Hãy thử thay đổi điểm đến, thời lượng hoặc quay lại danh sách tour nổi bật.'}
+          if isAiSearch
+            .search-empty-prompts
+              button.ai-quick-chip(type="button" ai-quick-prompt="Tôi muốn tour du lịch đi Nha Trang, 3 ngày 2 đêm, giá 5 - 10 triệu.") Thử: Nha Trang 3N2Đ
+              button.ai-quick-chip(type="button" ai-quick-prompt="Tìm tour Đà Lạt 2 ngày 1 đêm, giá dưới 5 triệu.") Thử: Đà Lạt 2N1Đ
+              button.ai-quick-chip(type="button" ai-quick-prompt="Tôi muốn tìm tour biển giá khoảng 8 triệu.") Thử: Tour biển 8 triệu
+          .search-empty-actions
+            a.search-empty-btn.is-primary(href="/category/tour-trong-nuoc")
+              i.fa-solid.fa-map-location-dot
+              span Xem tất cả tour trong nước
+            a.search-empty-btn.is-secondary(href="/")
+              i.fa-solid.fa-house
+              span Về trang chủ
   // End Section 4
