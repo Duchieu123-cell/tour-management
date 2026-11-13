@@ -61,7 +61,7 @@ block main
             th Thông tin khách
             th Danh sách tour
             th Thanh toán
-            th Trạng thái
+            th(class="inner-center") Trạng thái
             th.inner-text-right Ngày đặt
             th.inner-center Hành động 
         tbody
@@ -95,7 +95,7 @@ block main
                 div.inner-nowrap Thanh toán #{orderDetail.total.toLocaleString("vi-VN")}đ
                 div.inner-nowrap PTTT: #{orderDetail.paymentMethodName}
                 div.inner-nowrap TTTT: #{orderDetail.paymentStatusName}
-              td
+              td.inner-center
                 div(class=`badge badge-${orderDetail.statusColor}`) #{orderDetail.statusName}
               td.inner-text-right.inner-nowrap
                 div #{orderDetail.createdAtFormatTime}

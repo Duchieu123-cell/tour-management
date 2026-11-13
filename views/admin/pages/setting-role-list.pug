@@ -25,8 +25,8 @@ block main
         tbody
           each item in roleList
             tr
-              td #{item.name}
-              td #{item.description}
+              td.inner-col-name #{item.name}
+              td.inner-col-title #{item.description}
               td(class="inner-center")
                 .inner-buttons
                   a(

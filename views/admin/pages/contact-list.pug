@@ -41,8 +41,8 @@ block main
         tbody
           each item in contactList
             tr
-              td #{item.email}
-              td #{item.createdAtFormatted}
+              td.inner-col-email #{item.email}
+              td.inner-nowrap #{item.createdAtFormatted}
               td(class="inner-center")
                 .inner-buttons
                   button(

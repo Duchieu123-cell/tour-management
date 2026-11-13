@@ -28,7 +28,7 @@ block main
           tr
             th(class="inner-center")
             th Họ tên
-            th Ảnh đại diện
+            th(class="inner-center") Ảnh đại diện
             th Email 
             th(class="inner-center") Số điện thoại
             th Địa chỉ
@@ -54,12 +54,12 @@ block main
               tr
                 td(class="inner-center")
                   input(type="checkbox" class="inner-check" check-item=item._id)
-                td #{item.fullName}
-                td 
+                td.inner-col-name #{item.fullName}
+                td.inner-center
                   img(src=(item.avatar || "/admin/assets/images/batman.png"), class="inner-avatar")
-                td #{item.email}
-                td(class="inner-center") #{item.phone || "---"}
-                td #{item.address || "---"}
+                td.inner-col-email #{item.email}
+                td(class="inner-center inner-nowrap") #{item.phone || "---"}
+                td.inner-col-address #{item.address || "---"}
                 td(class="inner-center inner-nowrap") #{item.deletedAtFormatted}
                 td.inner-center
                   .inner-buttons

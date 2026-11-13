@@ -52,7 +52,7 @@ block main
         thead
           tr
             th Họ tên
-            th Ảnh đại diện
+            th(class="inner-center") Ảnh đại diện
             th Email 
             th(class="inner-center") Số điện thoại
             th Nhóm quyền 
@@ -62,13 +62,13 @@ block main
         tbody
           each admin in accountAdminList
             tr
-              td #{admin.fullName}
-              td 
+              td.inner-col-name #{admin.fullName}
+              td.inner-center
                 img(src=admin.avatar, class="inner-avatar") 
-              td #{admin.email}
+              td.inner-col-email #{admin.email}
               td(class="inner-center inner-nowrap") #{admin.phoneNumber}
-              td #{admin.roleName}
-              td #{admin.positionCompany}
+              td.inner-nowrap #{admin.roleName}
+              td.inner-nowrap #{admin.positionCompany}
               td(class="inner-center")
                 if admin.status == 'inactive'
                   .badge.badge-red Dừng hoạt động
