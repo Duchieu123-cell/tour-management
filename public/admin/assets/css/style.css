@@ -346,7 +346,42 @@ ul {
   left: 0;
   z-index: 9999;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 8px 12px;
+  transition: width 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sider .sider-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  padding: 0 15px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background-color: var(--color-page);
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sider .sider-toggle:hover {
+  background-color: var(--color-blue-wash);
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+.sider .sider-toggle i {
+  font-size: 14px;
+  width: 18px;
+  flex-shrink: 0;
+  text-align: center;
+  transition: transform 0.2s ease;
 }
 
 .sider .inner-menu {
@@ -363,7 +398,7 @@ ul {
   align-items: center;
   gap: 12px;
   min-height: 40px;
-  padding: 0 12px;
+  padding: 0 15px;
   font-weight: 600;
   font-size: 14px;
   color: var(--color-muted);
@@ -384,7 +419,14 @@ ul {
 .sider .inner-menu li a i {
   font-size: 15px;
   width: 18px;
+  flex-shrink: 0;
   text-align: center;
+}
+
+.sider .inner-label {
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.15s ease;
 }
 
 .sider hr {
@@ -405,8 +447,43 @@ ul {
   display: none;
 }
 
+@media (min-width: 992px) {
+  body.sider-collapsed .sider {
+    width: 72px;
+  }
+
+  body.sider-collapsed .sider .sider-toggle i {
+    transform: rotate(180deg);
+  }
+
+  body.sider-collapsed .sider .inner-label {
+    opacity: 0;
+    width: 0;
+    pointer-events: none;
+  }
+
+  body.sider-collapsed .sider:hover {
+    width: 240px;
+    box-shadow: 6px 0 24px rgba(15, 23, 42, 0.12);
+  }
+
+  body.sider-collapsed .sider:hover .inner-label {
+    opacity: 1;
+    width: auto;
+    pointer-events: auto;
+  }
+
+  body.sider-collapsed .main {
+    left: 72px;
+    width: calc(100% - 72px);
+  }
+}
+
 @media (max-width: 991.98px) {
   .sider {
+    display: none;
+  }
+  .sider .sider-toggle {
     display: none;
   }
   .sider.active {
@@ -440,6 +517,7 @@ ul {
   width: calc(100% - 240px);
   min-height: calc(100vh - 64px);
   padding: 28px;
+  transition: left 0.2s ease, width 0.2s ease;
 }
 
 @media (max-width: 991.98px) {

@@ -160,3 +160,7 @@ All five areas identified from the Team Lead's feedback and our codebase/databas
 
 ### 24. Admin Tour Edit Form Layout Alignment
 - **Consistent 4-section layout (`views/admin/pages/tour-edit.pug`)**: Applied the same section headers (`.form-section-head`), 3-column metadata & pricing/stock grids (`.inner-three-col`, `.inner-price-card`), side-by-side media row (`.inner-media-row`), multi-column departure checkbox grid (`.inner-checkbox-list--grid`), clean default category option, placeholders, and aligned footer action bar (`.inner-form-actions`) from `tour-create.pug` while preserving all existing `tourDetail.*` values and bindings.
+
+### 25. Collapsible Admin Side Panel with Hover-to-Extend
+- **Icon rail & hover overlay (`views/admin/partials/sider.pug`, `public/admin/assets/css/style.css`)**: Wrapped sidebar menu labels in `.inner-label`, added a `.sider-toggle` button (`Thu gọn` / `Mở rộng`), and added desktop `body.sider-collapsed` styles shrinking `.sider` from `240px` to `72px` while expanding `.main` to `calc(100% - 72px)` (`+168px` horizontal space for tables). When collapsed, icons stay centered and hovering `.sider` temporarily extends it back to `240px` as an elevated overlay without shifting `.main`.
+- **Persistent state (`views/admin/layouts/layout-default.pug`, `public/admin/assets/js/script.js`)**: Restored `body.sider-collapsed` from `localStorage` (`adminSiderCollapsed`) before paint to prevent layout flash and wired `.sider-toggle` click handling with `aria-expanded` / `aria-label` updates.

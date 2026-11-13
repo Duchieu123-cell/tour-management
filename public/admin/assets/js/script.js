@@ -1135,7 +1135,6 @@ if (profileChangePasswordForm) {
 const sider = document.querySelector(".sider");
 if (sider) {
   const currentPathName = window.location.pathname;
-  console.log(currentPathName);
   const splitCurrentPathName = currentPathName.split("/");
   const menuList = sider.querySelectorAll("a");
   menuList.forEach((item) => {
@@ -1149,6 +1148,28 @@ if (sider) {
       item.classList.add("active");
     }
   });
+
+  const siderToggle = sider.querySelector(".sider-toggle");
+  if (siderToggle) {
+    const toggleLabel = siderToggle.querySelector(".inner-label");
+    const syncToggleState = (collapsed) => {
+      siderToggle.setAttribute("aria-expanded", String(!collapsed));
+      siderToggle.setAttribute("aria-label", collapsed ? "Mở rộng thanh bên" : "Thu gọn thanh bên");
+      if (toggleLabel) {
+        toggleLabel.textContent = collapsed ? "Mở rộng" : "Thu gọn";
+      }
+    };
+
+    syncToggleState(document.body.classList.contains("sider-collapsed"));
+
+    siderToggle.addEventListener("click", () => {
+      const isCollapsed = document.body.classList.toggle("sider-collapsed");
+      syncToggleState(isCollapsed);
+      try {
+        localStorage.setItem("adminSiderCollapsed", isCollapsed ? "1" : "0");
+      } catch (e) {}
+    });
+  }
 }
 //End Sider
 
