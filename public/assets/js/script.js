@@ -26,6 +26,19 @@ if(buttonMenuMobile){
 }
 // End Menu Mobile
 
+// Header Active Nav Link
+const headerNavLinks = document.querySelectorAll(".header .inner-menu a");
+if(headerNavLinks.length){
+	const currentPath = window.location.pathname;
+	headerNavLinks.forEach((link) => {
+		const linkPath = link.getAttribute("href");
+		const isExactHome = linkPath === "/" && currentPath === "/";
+		const isCategoryMatch = linkPath !== "/" && (currentPath === linkPath || currentPath.startsWith(`${linkPath}/`));
+		link.classList.toggle("active", isExactHome || isCategoryMatch);
+	});
+}
+// End Header Active Nav Link
+
 // Header Account Dropdown
 const headerAccountDropdown = document.querySelector("[header-account-dropdown]");
 if(headerAccountDropdown){

@@ -65,27 +65,30 @@ ul{
 
 /* Top Header */
 .top-header{
-    background-color: var(--color-blue);
-    padding: 10px 0;
+    background: linear-gradient(90deg, #36019D 0%, #4502C7 100%);
+    padding: 5px 0;
 }
 
 .top-header .inner-wrap{
     display: flex;
     justify-content: flex-end;
-    gap: 5px 40px;
+    align-items: center;
+    gap: 4px 24px;
 }
 
 .top-header .inner-item{
-    color: #FFFBEB;
+    color: rgba(255, 255, 255, 0.9);
     font-weight: 400;
-    font-size: 14px;
+    font-size: 12px;
+    line-height: 1.4;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .top-header .inner-item i{
-    font-size: 20px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 @media (max-width: 767.98px){
@@ -97,19 +100,27 @@ ul{
 
 /* Header */
 .header{
-    background-color: #FFFFFF;
-    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 990;
+    background-color: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #E2E8F0;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    padding: 10px 0;
 }
 
 .header .inner-wrap{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
 }
 
 .header .inner-logo{
-    height: 50px;
+    height: 46px;
     width: auto;
+    flex-shrink: 0;
 }
 
 .header .inner-logo a{
@@ -121,49 +132,85 @@ ul{
 .header .inner-logo img{
     display: block;
     width: auto;
-    max-width: 180px;
+    max-width: 170px;
     height: auto;
-    max-height: 50px;
+    max-height: 46px;
     object-fit: contain;
 }
 
 .header .inner-menu > ul{
     display: flex;
+    align-items: center;
     list-style: none;
-    gap: 5px 40px;
+    gap: 4px 6px;
 }
 
 .header .inner-menu > ul > li{
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .header .inner-menu > ul > li > i{
-    margin-left: 5px;
+    margin-left: -6px;
+    margin-right: 6px;
+    font-size: 11px;
+    color: #64748B;
+    transition: transform 0.2s ease, color 0.15s ease;
+    pointer-events: none;
+}
+
+.header .inner-menu > ul > li:hover > i{
+    transform: rotate(180deg);
+    color: var(--color-blue);
 }
 
 .header .inner-menu > ul > li > a{
-    font-weight: 500;
-    font-size: 16px;
-    color: var(--color-black);
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #334155;
     text-transform: capitalize;
+    white-space: nowrap;
+    transition: color 0.15s ease, background-color 0.15s ease;
 }
 
-.header .inner-menu > ul > li > a.active, 
-.header .inner-menu > ul > li > a:hover{
+.header .inner-menu > ul > li:has(> i) > a{
+    padding-right: 12px;
+}
+
+.header .inner-menu > ul > li > a.active,
+.header .inner-menu > ul > li > a:hover,
+.header .inner-menu > ul > li:hover > a{
     color: var(--color-blue);
+    background-color: #F5F3FF;
 }
 
 .header .inner-menu > ul > li > ul{
     position: absolute;
     list-style: none;
-    top: 100%;
+    top: calc(100% + 6px);
     left: 0;
-    padding: 8px 0;
+    padding: 8px;
     background-color: #FFFFFF;
-    border-radius: 0 0 10px 10px;
-    width: 280px;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+    width: 248px;
     z-index: 999;
     display: none;
+}
+
+.header .inner-menu > ul > li > ul::before{
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -10px;
+    height: 10px;
 }
 
 .header .inner-menu > ul > li:hover > ul{
@@ -171,18 +218,20 @@ ul{
 }
 
 .header .inner-menu > ul > li > ul > li > a{
-    font-weight: 400px;
-    font-size: 16px;
-    color: var(--color-blue);
+    font-weight: 500;
+    font-size: 14px;
+    color: #334155;
     display: block;
-    padding: 8px 22px;
+    padding: 9px 14px;
+    border-radius: 8px;
     text-transform: capitalize;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .header .inner-menu > ul > li > ul > li > a.active,
 .header .inner-menu > ul > li > ul > li > a:hover{
-    background-color: var(--color-blue);
-    color:#FFFFFF;
+    background-color: #F5F3FF;
+    color: var(--color-blue);
 }
 
 .header .inner-menu-mobile{
@@ -511,6 +560,7 @@ ul{
         height: 100%;
         background-color: #FFF;
         flex-direction: column;
+        align-items: stretch;
         gap: 0;
         position: relative;
         z-index: 1;
@@ -525,11 +575,14 @@ ul{
 
     .header .inner-menu > ul > li > a {
         flex: 1;
-        padding: 10px;
+        padding: 12px 16px;
+        border-radius: 0;
     }
 
     .header .inner-menu > ul > li > i {
         width: 40px;
+        margin: 0;
+        pointer-events: auto;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -547,7 +600,11 @@ ul{
     .header .inner-menu > ul > li.active > ul {
         display: block;
         position: static;
-        padding: 0;
+        width: 100%;
+        padding: 4px 8px 8px;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
     }
 
     .header .inner-menu .inner-overlay {
