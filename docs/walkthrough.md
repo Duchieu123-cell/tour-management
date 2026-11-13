@@ -87,3 +87,8 @@ All five areas identified from the Team Lead's feedback and our codebase/databas
   - [setting.controller.js](controllers/admin/setting.controller.js): Batched `Role` lookups in `accountAdminList` using `$in` and `.lean()` (`903 ms` $\rightarrow$ `322 ms`).
   - [auth.middleware.js](middlewares/admin/auth.middleware.js): Added `.select(...).lean()` and null-safe `roleDetail` handling in `verifyToken`.
 - **Removed render-blocking scripts**: Added `defer` to TinyMCE and vendor CDN scripts in [layout-default.pug](views/admin/layouts/layout-default.pug), and guarded `initTinyMce()` in [tinymce-config.js](public/admin/assets/js/tinymce-config.js) so TinyMCE only initializes on pages containing `[textarea-mce]`.
+
+### 9. Admin Bulk-Action Toolbar & Checkbox Cleanup
+- **Dedicated bulk-action bar**: Created [bulk-action.pug](views/admin/mixins/bulk-action.pug) and styled `.section-bulk-action` in [style.css](public/admin/assets/css/style.css) right above the table with a `Thao tác hàng loạt:` label, live selection counter (`Đã chọn N mục`), `-- Chọn hành động --` default option, and a primary `Áp dụng` button that highlights in `--color-blue-wash` when rows are checked.
+- **Live state & validation**: Updated `[change-multi]` in [script.js](public/admin/assets/js/script.js) to disable `Áp dụng` when zero items are checked, update `[bulk-selected-count]` live on checkbox changes, and prompt when clicked without selecting an action.
+- **Removed `check-all` & dead placeholders**: Removed `check-all` checkboxes across `tour-list`, `tour-trash`, `category-list`, `user-list`, and `user-trash`, and removed unwired static `.inner-change-status` bars and non-functional checkboxes from `contact-list`, `setting-account-admin-list`, and `setting-role-list`.

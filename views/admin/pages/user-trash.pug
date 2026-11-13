@@ -1,5 +1,6 @@
 extends ../layouts/layout-default.pug
 include ../mixins/pagination.pug
+include ../mixins/bulk-action.pug
 
 block main
   h1.box-title Thùng rác người dùng
@@ -7,23 +8,17 @@ block main
   //- Section 5
   .section-5 
     .inner-wrap
-      .inner-change-status(
-        change-multi 
-        data-api=`/${pathAdmin}/user/trash/change-multi`
-      )
-        .inner-item
-          select
-            option(value="") --Hành động--
-            option(value="undo") Khôi phục
-            option(value="delete-permanent") Xóa vĩnh viễn
-        .inner-item
-          button Áp dụng
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
         input(type="text" placeholder="Tìm kiếm theo tên, email, sđt..." search)  
       .inner-button-create
         a(href=`/${pathAdmin}/user/list` style="background-color: #6C757D;") <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
   //- End Section 5
+
+  +bulkAction(`/${pathAdmin}/user/trash/change-multi`, [
+    { value: "undo", label: "Khôi phục" },
+    { value: "delete-permanent", label: "Xóa vĩnh viễn" }
+  ])
 
   //- Section 6
   .section-6 
@@ -32,7 +27,6 @@ block main
         thead
           tr
             th(class="inner-center")
-              input(type="checkbox" class="inner-check" check-all)
             th Họ tên
             th Ảnh đại diện
             th Email 

@@ -38,15 +38,6 @@ block main
   //- Section 5
   .section-5 
     .inner-wrap
-      .inner-change-status
-        .inner-item
-          select
-            option(value="") --Hành động--
-            option(value="") Hoạt động
-            option(value="") Dừng hoạt động
-            option(value="") Xóa
-        .inner-item
-          button Áp dụng
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
         input(type="text" placeholder="Tìm kiếm")  
@@ -60,8 +51,6 @@ block main
       table
         thead
           tr
-            th(class="inner-center")
-              input(type="checkbox" class="inner-check")
             th Họ tên
             th Ảnh đại diện
             th Email 
@@ -73,8 +62,6 @@ block main
         tbody
           each admin in accountAdminList
             tr
-              td(class="inner-center")
-                input(type="checkbox" class="inner-check")
               td #{admin.fullName}
               td 
                 img(src=admin.avatar, class="inner-avatar") 

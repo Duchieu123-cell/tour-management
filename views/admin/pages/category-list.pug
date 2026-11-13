@@ -1,5 +1,6 @@
 extends ../layouts/layout-default.pug
 include ../mixins/pagination.pug
+include ../mixins/bulk-action.pug
 
 block main
   if(account.permissions.includes('category-view'))
@@ -37,20 +38,6 @@ block main
     //- Section 5
     .section-5 
       .inner-wrap
-        .inner-change-status(
-          change-multi 
-          data-api=`/${pathAdmin}/category/change-multi`
-        )
-          .inner-item
-            select
-              option(value="") --Hành động--
-              if(account.permissions.includes('category-edit'))
-                option(value="active") Hoạt động
-                option(value="inactive") Tạm dừng
-              if(account.permissions.includes('category-delete'))
-                option(value="delete") Xóa
-          .inner-item
-            button Áp dụng
         .inner-search
           <i class="fa-solid fa-magnifying-glass"></i>
           input(type="text" placeholder="Tìm kiếm" search)  
@@ -59,6 +46,18 @@ block main
             a(href=`/${pathAdmin}/category/create`)  + Tạo mới  
     //- End Section 5
 
+    -
+      const bulkActions = [];
+      if (account.permissions.includes('category-edit')) {
+        bulkActions.push({ value: "active", label: "Hoạt động" });
+        bulkActions.push({ value: "inactive", label: "Tạm dừng" });
+      }
+      if (account.permissions.includes('category-delete')) {
+        bulkActions.push({ value: "delete", label: "Xóa" });
+      }
+    if(bulkActions.length > 0)
+      +bulkAction(`/${pathAdmin}/category/change-multi`, bulkActions)
+
     //- Section 6
     .section-6 
       .table-2 
@@ -66,7 +65,6 @@ block main
           thead
             tr
               th(class="inner-center")
-                input(type="checkbox" class="inner-check" check-all)
               th Tên danh mục
               th Ảnh đại diện
               th(class="inner-center") Vị trí 

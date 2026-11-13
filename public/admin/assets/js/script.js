@@ -1424,41 +1424,68 @@ const changeMulti = document.querySelector("[change-multi]");
 if(changeMulti){
   const select = changeMulti.querySelector("select");
   const button = changeMulti.querySelector("button");
+  const selectedCountEl = changeMulti.querySelector("[bulk-selected-count]");
+  const checkItems = document.querySelectorAll("[check-item]");
+
+  const updateBulkActionState = () => {
+    const checkedCount = document.querySelectorAll("[check-item]:checked").length;
+    changeMulti.classList.toggle("is-active", checkedCount > 0);
+    if (selectedCountEl) {
+      selectedCountEl.textContent = checkedCount > 0
+        ? `Đã chọn ${checkedCount} mục`
+        : "Chọn ô tích bên dưới để áp dụng";
+    }
+    if (button) {
+      button.disabled = checkedCount === 0;
+    }
+  };
+
+  checkItems.forEach((item) => {
+    item.addEventListener("change", updateBulkActionState);
+  });
+  updateBulkActionState();
 
   button.addEventListener("click", () => {
     const option = select.value;
     const listCheckItem = document.querySelectorAll("[check-item]:checked");
-    if(option && listCheckItem.length > 0){
-      const ids = [];
-
-      listCheckItem.forEach((item) => {
-        const id = item.getAttribute("check-item");
-        ids.push(id);
-      })
-
-      const dataFinal = {
-        option: option,
-        ids: ids
-      };
-
-      const dataApi = changeMulti.getAttribute("data-api");
-
-      fetch(dataApi, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataFinal)
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.code === "SUCCESS") {
-            window.location.reload();
-          } else {
-            alert(data.message);
-          }
-        });
+    if (listCheckItem.length === 0) {
+      return;
     }
+    if (!option) {
+      alert("Vui lòng chọn hành động cần áp dụng!");
+      select.focus();
+      return;
+    }
+
+    const ids = [];
+
+    listCheckItem.forEach((item) => {
+      const id = item.getAttribute("check-item");
+      ids.push(id);
+    });
+
+    const dataFinal = {
+      option: option,
+      ids: ids
+    };
+
+    const dataApi = changeMulti.getAttribute("data-api");
+
+    fetch(dataApi, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dataFinal)
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.code === "SUCCESS") {
+          window.location.reload();
+        } else {
+          alert(data.message);
+        }
+      });
   });
 }
 // End Change Multi

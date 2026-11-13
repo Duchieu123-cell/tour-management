@@ -1,5 +1,6 @@
 extends ../layouts/layout-default.pug
 include ../mixins/pagination.pug
+include ../mixins/bulk-action.pug
 
 block main
   h1.box-title Quản lý người dùng
@@ -30,18 +31,6 @@ block main
   //- Section 5: Thao tác & Tìm kiếm
   .section-5 
     .inner-wrap
-      .inner-change-status(
-        change-multi 
-        data-api=`/${pathAdmin}/user/change-multi`
-      )
-        .inner-item
-          select
-            option(value="") --Hành động--
-            option(value="active") Hoạt động
-            option(value="inactive") Dừng hoạt động
-            option(value="delete") Xóa
-        .inner-item
-          button Áp dụng
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
         input(type="text" placeholder="Tìm kiếm theo tên, email, sđt..." search)
@@ -51,6 +40,12 @@ block main
         a(href=`/${pathAdmin}/user/trash`) Thùng rác
   //- End Section 5
 
+  +bulkAction(`/${pathAdmin}/user/change-multi`, [
+    { value: "active", label: "Hoạt động" },
+    { value: "inactive", label: "Dừng hoạt động" },
+    { value: "delete", label: "Xóa" }
+  ])
+
   //- Section 6: Bảng người dùng
   .section-6 
     .table-2 
@@ -58,7 +53,6 @@ block main
         thead
           tr
             th(class="inner-center")
-              input(type="checkbox" class="inner-check" check-all)
             th Họ tên
             th Ảnh đại diện
             th Email 
