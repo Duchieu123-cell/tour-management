@@ -14,13 +14,13 @@ block main
         .inner-item
           span.inner-field-label Trạng thái
           select(filter-status)
-            option(value="") -- Tất cả trạng thái --
+            option(value="") Tất cả trạng thái
             option(value="active") Hoạt động 
             option(value="inactive") Tạm dừng
         .inner-item
           span.inner-field-label Người tạo
           select(filter-created-by)
-            option(value="") -- Tất cả người tạo --
+            option(value="") Tất cả người tạo
             each admin in adminAccountList
               option(value=admin._id) #{admin.fullName}
         .inner-item.inner-date

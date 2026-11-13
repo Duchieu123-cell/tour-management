@@ -15,13 +15,13 @@ block main
         .inner-item
           span.inner-field-label Trạng thái
           select(filter-status)
-            option(value="") -- Tất cả trạng thái --
+            option(value="") Tất cả trạng thái
             option(value="active") Hoạt động 
             option(value="inactive") Tạm dừng
         .inner-item
           span.inner-field-label Người tạo
           select(filter-created-by)
-            option(value="") -- Tất cả người tạo --
+            option(value="") Tất cả người tạo
             each admin in adminAccountList
               option(value=admin._id) #{admin.fullName}
         .inner-item.inner-date
@@ -35,12 +35,12 @@ block main
         .inner-item
           span.inner-field-label Danh mục
           select(filter-category)
-            option(value="") -- Tất cả danh mục --
+            option(value="") Tất cả danh mục
             +option(categoryList)
         .inner-item
           span.inner-field-label Mức giá
           select(filter-price)
-            option(value="") -- Tất cả mức giá --
+            option(value="") Tất cả mức giá
             option(value="0-2000000") Dưới 2tr
             option(value="2000000-4000000") 2tr đến 4tr
             option(value="4000000-8000000") 4tr đến 8tr

@@ -6,7 +6,7 @@ mixin bulkAction(apiUrl, actions)
       span.inner-bulk-count(bulk-selected-count) Chọn ô tích bên dưới để áp dụng
     .inner-bulk-controls
       select(aria-label="Chọn thao tác hàng loạt")
-        option(value="") -- Chọn hành động --
+        option(value="") Chọn hành động
         each action in actions
           option(value=action.value) #{action.label}
       button.inner-bulk-apply(type="button" disabled) Áp dụng
