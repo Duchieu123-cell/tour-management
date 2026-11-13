@@ -2,6 +2,7 @@ const moment = require('moment');
 const Category = require('../../models/category.model');
 const Tour = require('../../models/tour.model');
 const City = require('../../models/province-city.model');
+const PaginationHelper = require('../../helpers/pagination.helper');
 
 module.exports.list = async (req, res) => {
   const slug = req.params.slug;
@@ -11,6 +12,10 @@ module.exports.list = async (req, res) => {
     deleted: false,
     status: 'active'
   });
+
+  if (!category) {
+    return res.redirect('/');
+  }
 
   // Breadcrumb
   const breadcrumb = {
@@ -66,27 +71,36 @@ module.exports.list = async (req, res) => {
     await getCategoryChildren(category._id);
   }
 
-  const tourListSection9 = await Tour
-    .find({
-      category: { $in: [category._id, ...allCategoryChildren] },
-      deleted: false,
-      status: 'active'
-    })
-    .sort({
-      position: "desc"
-    })
+  const find = {
+    category: { $in: [category._id, ...allCategoryChildren] },
+    deleted: false,
+    status: 'active'
+  };
+
+  const totalRecords = await Tour.countDocuments(find);
+  const pagination = PaginationHelper.buildPagination(req.query.page, totalRecords, 9);
+
+  const [tourListSection9, cityList] = await Promise.all([
+    Tour
+      .find(find)
+      .sort({
+        position: "desc"
+      })
+      .limit(pagination.limitItems)
+      .skip(pagination.skip),
+    City.find({})
+  ]);
 
   for (const item of tourListSection9) {
     item.departureDateFormatted = moment(item.departureDate).format('DD/MM/YYYY');
   }
 
-  const cityList = await City.find({});
-
   res.render('client/pages/tour-list', { 
-    pageTitle: "Danh sách tour",
+    pageTitle: category.name || "Danh sách tour",
     breadcrumb: breadcrumb,
     category: category,
     tourListSection9: tourListSection9,
-    cityList: cityList
+    cityList: cityList,
+    pagination: pagination
   });
 }

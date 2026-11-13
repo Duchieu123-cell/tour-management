@@ -108,3 +108,7 @@ All five areas identified from the Team Lead's feedback and our codebase/databas
   - **Châu Phi** (`/category/chau-phi`): `0` $\rightarrow$ **4 active tours**
   - **Tour Châu Âu** (`/category/tour-chau-au`): `1` $\rightarrow$ **4 active tours**
 - **Verified**: Confirmed `controllers/client/category.controller.js` (`list`) returns `4` tours in `tourListSection9` for each of those slugs, bringing active tour totals to **52** under `Tour trong nước` and **18** under `Tour nước ngoài`.
+
+### 13. Client Category Filter & Dynamic Pagination
+- **Polished filter sidebar & default labels**: Updated `.box-filter` in [style.css](public/assets/css/style.css) with clean `#E2E8F0` border, `14px` radius, soft elevation, bottom header divider, `40px` `#F8FAFC` inputs with focus rings, and removed `--` markers from default options in [tour-list.pug](views/client/pages/tour-list.pug) (`Tất cả điểm đi`, `Tất cả điểm đến`, `Tất cả khoảng giá`).
+- **Dynamic pagination & Prev/Next labels**: Wired `PaginationHelper.buildPagination` (9 tours/page) into [category.controller.js](controllers/client/category.controller.js), replaced hardcoded `1 2 3 4` buttons in [tour-list.pug](views/client/pages/tour-list.pug) with dynamic `1..totalPages` rendering, added `Trang trước` / `Trang sau` text with greyed-out `:disabled` styling in [style.css](public/assets/css/style.css), and wired `[client-pagination]` URL navigation in [script.js](public/assets/js/script.js).

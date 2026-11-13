@@ -955,3 +955,24 @@ if(pageCart){
 	drawCart();
 }
 // End Page Cart
+
+// Client Pagination
+const clientPagination = document.querySelector("[client-pagination]");
+if(clientPagination){
+	const buttons = clientPagination.querySelectorAll("[data-page]");
+	buttons.forEach((button) => {
+		button.addEventListener("click", () => {
+			if(button.disabled || button.classList.contains("active")) return;
+			const targetPage = parseInt(button.getAttribute("data-page"), 10);
+			if(Number.isNaN(targetPage) || targetPage < 1) return;
+			const url = new URL(window.location.href);
+			if(targetPage > 1){
+				url.searchParams.set("page", targetPage);
+			} else {
+				url.searchParams.delete("page");
+			}
+			window.location.href = url.href;
+		});
+	});
+}
+// End Client Pagination
