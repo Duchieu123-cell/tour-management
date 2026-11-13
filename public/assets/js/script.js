@@ -812,7 +812,7 @@ if(miniCart){
 
 // Page Cart
 const drawCart = () => {
-	const cart = localStorage.getItem("cart");
+	const cart = localStorage.getItem("cart") || "[]";
 	fetch('/cart/detail', {
 		method: 'POST',
 		headers: {
@@ -823,9 +823,37 @@ const drawCart = () => {
 		.then(res => res.json())
 		.then(data => {
 			if(data.code == "SUCCESS"){
+				const cartCountLabel = pageCart.querySelector("[cart-count-label]");
+				if(cartCountLabel){
+					cartCountLabel.textContent = `${data.cart.length} tour`;
+				}
+
+				const cartList = pageCart.querySelector("[cart-list]");
+				if(data.cart.length === 0){
+					cartList.innerHTML = `
+						<div class="cart-empty-state">
+							<div class="cart-empty-icon">
+								<i class="fa-solid fa-cart-shopping"></i>
+							</div>
+							<h3 class="cart-empty-title">Giỏ hàng của bạn đang trống</h3>
+							<p class="cart-empty-desc">Hãy khám phá các hành trình hấp dẫn và thêm tour yêu thích vào giỏ hàng để đặt chỗ nhanh chóng.</p>
+							<a class="cart-empty-btn" href="/category/tour-trong-nuoc">
+								<i class="fa-solid fa-compass"></i>
+								<span>Khám phá tour ngay</span>
+							</a>
+						</div>
+					`;
+					miniCart.innerHTML = 0;
+					localStorage.setItem("cart", JSON.stringify([]));
+					pageCart.querySelector("[cart-sub-total]").innerHTML = "0";
+					pageCart.querySelector("[cart-discount]").innerHTML = "0";
+					pageCart.querySelector("[cart-total]").innerHTML = "0";
+					return;
+				}
+
 				// Hiển thị item
 				const htmlCart = data.cart.map(item => `
-				<div class="inner-tour-item">
+				<div class="inner-tour-item ${item.checked ? "is-checked" : ""}">
 					<div class="inner-action">
 						<button class="inner-delete" button-delete tour-id="${item.tourId}">
 							<i class="fa-solid fa-xmark"></i>
@@ -914,7 +942,6 @@ const drawCart = () => {
 				</div>	
 				`)
 
-				const cartList = pageCart.querySelector("[cart-list]");
 				cartList.innerHTML = htmlCart.join("");
 
 				// Hết hiển thị item
