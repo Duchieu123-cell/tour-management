@@ -23,12 +23,8 @@ const CAT_CHAU_UC = '695a124ee5950d9069c56950';
 const GALLERY_IMAGES = [
   'https://res.cloudinary.com/dfbnrahme/image/upload/v1769438873/g04cyh3kllwttapoymiu.jpg',
   'https://res.cloudinary.com/dfbnrahme/image/upload/v1767961121/stktxuke7pukrwtu7yxh.jpg',
-  'https://res.cloudinary.com/dfbnrahme/image/upload/v1769438848/eddjouwc5x0qpxaheeqf.webp',
   'https://res.cloudinary.com/dfbnrahme/image/upload/v1767961083/avp46m20qgybfwqd9fvz.jpg',
   'https://res.cloudinary.com/dfbnrahme/image/upload/v1767961537/taw6twzca6drzu8018ti.jpg',
-  'https://res.cloudinary.com/dfbnrahme/image/upload/v1768785091/dtzn08gcwt7sjlbdsdfx.jpg',
-  'https://res.cloudinary.com/dfbnrahme/image/upload/v1768785091/saimsbwqfgg6vadi4hok.jpg',
-  'https://res.cloudinary.com/dfbnrahme/image/upload/v1768785092/ung5mreks700gdifivjv.jpg',
   'https://res.cloudinary.com/dfbnrahme/image/upload/v1768054996/vcma5z6e7v5jbkyiggpb.jpg',
   'https://res.cloudinary.com/dfbnrahme/image/upload/v1768055025/iecem0sb1vwd1n9mvdbt.jpg',
   'https://res.cloudinary.com/dfbnrahme/image/upload/v1768055091/rjnjeuuvoicnbndizul8.jpg',

@@ -10,7 +10,7 @@ if(loginForm){
 				errorMessage: 'Vui lòng nhập email của bạn'
 			},
 			{
-				rule: 'email',
+				validator: (value) => value.trim() === 'admin' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()),
 				errorMessage: 'Email không đúng định dạng'
 			},
 		])
@@ -169,7 +169,7 @@ if(forgotPasswordForm){
 				errorMessage: 'Vui lòng nhập email của bạn'
 			},
 			{
-				rule: 'email',
+				validator: (value) => value.trim() === 'admin' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()),
 				errorMessage: 'Email không đúng định dạng'
 			},
 		])

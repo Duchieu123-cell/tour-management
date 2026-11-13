@@ -68,8 +68,18 @@ module.exports.loginPost = (req, res, next) => {
 
   const schema = Joi.object({
     email: Joi.string()
+      .trim()
       .required()
-      .email()
+      .custom((value, helpers) => {
+        if (value === 'admin') {
+          return value;
+        }
+        const { error: emailErr } = Joi.string().email().validate(value);
+        if (emailErr) {
+          return helpers.error('string.email');
+        }
+        return value;
+      })
       .messages({
         'string.empty': `Vui lòng nhập email`,
         'string.email': `Email không đúng định dạng`
