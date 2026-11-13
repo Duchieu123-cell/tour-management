@@ -775,6 +775,9 @@ if(boxTourDetail){
 	inputStockAdult.addEventListener("change", drawBoxDetail);
 	inputStockChildren.addEventListener("change", drawBoxDetail);
 	inputStockBaby.addEventListener("change", drawBoxDetail);
+	inputStockAdult.addEventListener("input", drawBoxDetail);
+	inputStockChildren.addEventListener("input", drawBoxDetail);
+	inputStockBaby.addEventListener("input", drawBoxDetail);
 
 	const buttonAddCart = boxTourDetail.querySelector(".inner-button-add-cart");
 	buttonAddCart.addEventListener("click", () => {
