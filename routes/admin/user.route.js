@@ -9,6 +9,9 @@ const upload = multer({ storage: cloudinaryHelper.storage });
 // [GET] Danh sách người dùng
 router.get('/list', userController.list);
 
+// [GET] Thùng rác người dùng
+router.get('/trash', userController.trash);
+
 // [GET] Chi tiết người dùng theo ID
 router.get('/detail/:id', userController.detail);
 
@@ -24,10 +27,16 @@ router.patch('/change-status/:status/:id', userController.changeStatusPatch);
 // [PATCH] Thay đổi trạng thái / xóa nhiều người dùng
 router.patch('/change-multi', userController.changeMultiPatch);
 
+// [PATCH] Thao tác nhiều trong thùng rác (Khôi phục / Xóa vĩnh viễn)
+router.patch('/trash/change-multi', userController.trashChangeMultiPatch);
+
 // [PATCH] Xóa mềm người dùng
 router.patch('/delete/:id', userController.deletePatch);
 
 // [PATCH] Khôi phục người dùng đã xóa mềm
 router.patch('/undo/:id', userController.undoPatch);
+
+// [DELETE] Xóa vĩnh viễn người dùng
+router.delete('/destroy/:id', userController.destroyDelete);
 
 module.exports = router;

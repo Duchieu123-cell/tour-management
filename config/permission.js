@@ -54,5 +54,9 @@ module.exports.permissionList = [
   {
     label: 'Xóa người dùng',
     value: 'user-delete'
+  },
+  {
+    label: 'Thùng rác người dùng',
+    value: 'user-trash'
   }
 ];

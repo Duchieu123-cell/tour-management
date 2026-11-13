@@ -217,4 +217,36 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // ==========================================
+  // Xử lý Đổi trạng thái nhanh người dùng
+  // ==========================================
+  const listButtonChangeStatus = document.querySelectorAll("[button-change-status]");
+  if (listButtonChangeStatus.length > 0) {
+    listButtonChangeStatus.forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.getAttribute("data-id");
+        const statusChange = button.getAttribute("data-status");
+        if (!id || !statusChange) return;
+
+        const dataApi = `/${pathAdmin}/user/change-status/${statusChange}/${id}`;
+
+        fetch(dataApi, {
+          method: "PATCH"
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.code === "SUCCESS") {
+              window.location.reload();
+            } else {
+              alert(data.message || "Cập nhật trạng thái thất bại!");
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            alert("Có lỗi xảy ra khi cập nhật trạng thái!");
+          });
+      });
+    });
+  }
 });

@@ -1842,3 +1842,20 @@ ul {
   }
 }
 /* End Custom Modal UI */
+
+
+/* Button Badge Quick Status */
+button.badge {
+  border: none;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+button.badge:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+/* End Button Badge Quick Status */

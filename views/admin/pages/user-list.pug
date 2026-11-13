@@ -41,6 +41,8 @@ block main
         input(type="text" placeholder="Tìm kiếm theo tên, email, sđt..." search)
       .inner-button-create
         button(type="button" button-create-user) + Tạo mới
+      .inner-button-trash
+        a(href=`/${pathAdmin}/user/trash`) Thùng rác
   //- End Section 5
 
   //- Section 6: Bảng người dùng
@@ -73,9 +75,23 @@ block main
                 td #{item.address || "---"}
                 td(class="inner-center")
                   if(item.status == "active")
-                    .badge.badge-green Hoạt động
+                    button(
+                      type="button"
+                      class="badge badge-green"
+                      button-change-status
+                      data-id=item._id
+                      data-status="inactive"
+                      title="Nhấp để chuyển sang Tạm dừng"
+                    ) Hoạt động
                   else
-                    .badge.badge-red Tạm dừng
+                    button(
+                      type="button"
+                      class="badge badge-red"
+                      button-change-status
+                      data-id=item._id
+                      data-status="active"
+                      title="Nhấp để chuyển sang Hoạt động"
+                    ) Tạm dừng
                 td(class="inner-center") #{item.createdAtFormatted}
                 td
                   .inner-buttons

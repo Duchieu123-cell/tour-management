@@ -314,3 +314,137 @@ module.exports.undoPatch = async (req, res) => {
     res.json({ code: 'ERROR', message: error.message });
   }
 };
+
+
+// [DELETE] /admin/user/destroy/:id (Hard delete)
+module.exports.destroyDelete = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Customer.deleteOne({ _id: id });
+
+    req.flash('success', 'Xóa vĩnh viễn người dùng thành công');
+
+    res.json({
+      code: 'SUCCESS',
+      message: 'Đã xóa vĩnh viễn người dùng'
+    });
+  } catch (error) {
+    res.json({ code: 'ERROR', message: error.message });
+  }
+};
+
+// [GET] /admin/user/trash
+module.exports.trash = async (req, res) => {
+  try {
+    const find = {
+      deleted: true
+    };
+
+    // Tìm kiếm theo Họ tên, Email, Số điện thoại
+    if (req.query.keyword) {
+      const keywordRegex = new RegExp(req.query.keyword.trim(), 'i');
+      find.$or = [
+        { fullName: keywordRegex },
+        { email: keywordRegex },
+        { phone: keywordRegex }
+      ];
+    }
+
+    // Phân trang
+    const limitItems = parseInt(req.query.limit) || 10;
+    let page = 1;
+    if (req.query.page) {
+      const currentPage = parseInt(req.query.page);
+      page = currentPage > 0 ? currentPage : 1;
+    }
+
+    const totalRecords = await Customer.countDocuments(find);
+    const totalPages = Math.ceil(totalRecords / limitItems) || 1;
+    const skip = (page - 1) * limitItems;
+
+    const pagination = {
+      totalRecords: totalRecords,
+      totalPages: totalPages,
+      skip: skip,
+      limitItems: limitItems,
+      page: page
+    };
+
+    const userList = await Customer
+      .find(find)
+      .select('-password')
+      .sort({ deletedAt: 'desc' })
+      .limit(limitItems)
+      .skip(skip);
+
+    const formattedUserList = userList.map(user => {
+      const u = user.toObject();
+      u.deletedAtFormatted = u.deletedAt ? moment(u.deletedAt).format('HH:mm - DD/MM/YYYY') : '';
+      u.createdAtFormatted = moment(u.createdAt).format('HH:mm - DD/MM/YYYY');
+      return u;
+    });
+
+    if (req.query.format === 'json' || req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.json({
+        code: 'SUCCESS',
+        pagination: pagination,
+        data: formattedUserList
+      });
+    }
+
+    res.render('admin/pages/user-trash', {
+      pageTitle: 'Thùng rác người dùng',
+      userList: formattedUserList,
+      pagination: pagination
+    });
+  } catch (error) {
+    console.error(error);
+    if (req.query.format === 'json' || req.xhr) {
+      return res.json({ code: 'ERROR', message: error.message });
+    }
+    res.redirect(`/${global.pathAdmin}/user/list`);
+  }
+};
+
+// [PATCH] /admin/user/trash/change-multi
+module.exports.trashChangeMultiPatch = async (req, res) => {
+  try {
+    const { option, ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.json({ code: 'ERROR', message: 'Vui lòng chọn ít nhất 1 người dùng' });
+    }
+
+    switch (option) {
+      case "undo":
+        await Customer.updateMany({
+          _id: { $in: ids },
+          deleted: true
+        }, {
+          deleted: false,
+          deletedAt: null
+        });
+        req.flash('success', 'Khôi phục người dùng thành công');
+        break;
+      case "delete-permanent":
+        await Customer.deleteMany({
+          _id: { $in: ids }
+        });
+        req.flash('success', 'Xóa vĩnh viễn thành công');
+        break;
+      default:
+        return res.json({ code: 'ERROR', message: 'Hành động không hợp lệ' });
+    }
+
+    res.json({
+      code: "SUCCESS",
+      message: "Cập nhật thành công"
+    });
+  } catch (error) {
+    res.json({
+      code: "ERROR",
+      message: error.message
+    });
+  }
+};
