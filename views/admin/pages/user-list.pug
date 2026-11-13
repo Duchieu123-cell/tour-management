@@ -59,7 +59,21 @@ block main
             th(class="inner-center") Số điện thoại
             th Địa chỉ
             th(class="inner-center") Trạng thái
-            th Ngày tạo
+            th(class="inner-center inner-sortable" title="Nhấp để đổi thứ tự sắp xếp")
+              .inner-sort-wrap
+                span Ngày tạo
+                button(
+                  type="button"
+                  class=`button-sort ${(sortKey == 'createdAt' ? 'active' : '')}`
+                  button-sort="createdAt"
+                  data-value=(sortKey == 'createdAt' ? sortValue : 'desc')
+                )
+                  if (sortKey == 'createdAt' && sortValue == 'asc')
+                    <i class="fa-solid fa-arrow-up-wide-short"></i>
+                  else if (sortKey == 'createdAt' && sortValue == 'desc')
+                    <i class="fa-solid fa-arrow-down-wide-short"></i>
+                  else
+                    <i class="fa-solid fa-sort"></i>
             th Hành động 
         tbody
           if(userList && userList.length > 0)

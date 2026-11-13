@@ -58,8 +58,13 @@ module.exports.list = async (req, res) => {
 
     // Sắp xếp
     let sort = { createdAt: 'desc' };
+    let sortKey = 'createdAt';
+    let sortValue = 'desc';
+
     if (req.query.sortKey && req.query.sortValue) {
-      sort = { [req.query.sortKey]: req.query.sortValue };
+      sortKey = req.query.sortKey;
+      sortValue = req.query.sortValue;
+      sort = { [sortKey]: sortValue };
     }
 
     const userList = await Customer
@@ -84,6 +89,8 @@ module.exports.list = async (req, res) => {
       return res.json({
         code: 'SUCCESS',
         pagination: pagination,
+        sortKey: sortKey,
+        sortValue: sortValue,
         data: formattedUserList
       });
     }
@@ -92,7 +99,9 @@ module.exports.list = async (req, res) => {
     res.render('admin/pages/user-list', {
       pageTitle: 'Quản lý người dùng',
       userList: formattedUserList,
-      pagination: pagination
+      pagination: pagination,
+      sortKey: sortKey,
+      sortValue: sortValue
     });
   } catch (error) {
     console.error(error);
@@ -315,7 +324,6 @@ module.exports.undoPatch = async (req, res) => {
   }
 };
 
-
 // [DELETE] /admin/user/destroy/:id (Hard delete)
 module.exports.destroyDelete = async (req, res) => {
   try {
@@ -371,10 +379,21 @@ module.exports.trash = async (req, res) => {
       page: page
     };
 
+    // Sắp xếp
+    let sort = { deletedAt: 'desc' };
+    let sortKey = 'deletedAt';
+    let sortValue = 'desc';
+
+    if (req.query.sortKey && req.query.sortValue) {
+      sortKey = req.query.sortKey;
+      sortValue = req.query.sortValue;
+      sort = { [sortKey]: sortValue };
+    }
+
     const userList = await Customer
       .find(find)
       .select('-password')
-      .sort({ deletedAt: 'desc' })
+      .sort(sort)
       .limit(limitItems)
       .skip(skip);
 
@@ -389,6 +408,8 @@ module.exports.trash = async (req, res) => {
       return res.json({
         code: 'SUCCESS',
         pagination: pagination,
+        sortKey: sortKey,
+        sortValue: sortValue,
         data: formattedUserList
       });
     }
@@ -396,7 +417,9 @@ module.exports.trash = async (req, res) => {
     res.render('admin/pages/user-trash', {
       pageTitle: 'Thùng rác người dùng',
       userList: formattedUserList,
-      pagination: pagination
+      pagination: pagination,
+      sortKey: sortKey,
+      sortValue: sortValue
     });
   } catch (error) {
     console.error(error);

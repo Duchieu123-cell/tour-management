@@ -249,4 +249,36 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  // ==========================================
+  // Xử lý Sắp xếp cột bảng (Sort Column)
+  // ==========================================
+  const listButtonSort = document.querySelectorAll("[button-sort]");
+  if (listButtonSort.length > 0) {
+    listButtonSort.forEach((button) => {
+      button.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const sortKey = button.getAttribute("button-sort");
+        const currentValue = button.getAttribute("data-value") || "desc";
+        const nextSortValue = currentValue === "asc" ? "desc" : "asc";
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("sortKey", sortKey);
+        url.searchParams.set("sortValue", nextSortValue);
+        url.searchParams.delete("page");
+
+        window.location.href = url.href;
+      });
+    });
+  }
+
+  const listSortableTh = document.querySelectorAll("th.inner-sortable");
+  if (listSortableTh.length > 0) {
+    listSortableTh.forEach((th) => {
+      th.addEventListener("click", () => {
+        const btn = th.querySelector("[button-sort]");
+        if (btn) btn.click();
+      });
+    });
+  }
 });

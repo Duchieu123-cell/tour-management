@@ -37,7 +37,21 @@ block main
             th Email 
             th(class="inner-center") Số điện thoại
             th Địa chỉ
-            th(class="inner-center") Thời gian xóa
+            th(class="inner-center inner-sortable" title="Nhấp để đổi thứ tự sắp xếp")
+              .inner-sort-wrap
+                span Thời gian xóa
+                button(
+                  type="button"
+                  class=`button-sort ${(sortKey == 'deletedAt' ? 'active' : '')}`
+                  button-sort="deletedAt"
+                  data-value=(sortKey == 'deletedAt' ? sortValue : 'desc')
+                )
+                  if (sortKey == 'deletedAt' && sortValue == 'asc')
+                    <i class="fa-solid fa-arrow-up-wide-short"></i>
+                  else if (sortKey == 'deletedAt' && sortValue == 'desc')
+                    <i class="fa-solid fa-arrow-down-wide-short"></i>
+                  else
+                    <i class="fa-solid fa-sort"></i>
             th Hành động 
         tbody
           if(userList && userList.length > 0)
@@ -79,3 +93,5 @@ block main
         - for (let i = 1; i <= pagination.totalPages; i++)
           option(value=i) Trang #{i}
   //- End Section 7
+
+  script(src="/admin/assets/js/user.js")
