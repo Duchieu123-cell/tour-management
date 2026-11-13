@@ -100,3 +100,11 @@ All five areas identified from the Team Lead's feedback and our codebase/databas
 ### 11. Admin Filter Bar Multi-Row Layout & Clean Default Labels
 - **Intentional filter wrapping**: Updated `.section-4 .inner-wrap` in [style.css](public/admin/assets/css/style.css) so `.inner-label` spans the top as a full-width header with a bottom divider and select filter items flex evenly (`flex: 1 1 175px; min-width: 155px; max-width: 260px;`) across wrapped rows.
 - **Clean default option labels**: Removed `--` markers from default `<option>` labels in [bulk-action.pug](views/admin/mixins/bulk-action.pug) (`Chọn hành động`) and across admin filter views (`Tất cả trạng thái`, `Tất cả người tạo`, `Tất cả danh mục`, `Tất cả mức giá`, `Tất cả nhóm quyền`, `Tất cả PTTT`, `Tất cả thanh toán`).
+
+### 12. User View Navbar Category Tour Seeding
+- **Populated empty & sparse navbar categories in MongoDB**: Seeded 15 active tours with schedules, pricing, stock, locations, and Cloudinary images so every active navbar link on the client site has tours:
+  - **Tour xuyên Việt** (`/category/tour-xuyen-viet`): `0` $\rightarrow$ **4 active tours**
+  - **Tour Châu Mỹ** (`/category/tour-chau-my`): `0` $\rightarrow$ **4 active tours**
+  - **Châu Phi** (`/category/chau-phi`): `0` $\rightarrow$ **4 active tours**
+  - **Tour Châu Âu** (`/category/tour-chau-au`): `1` $\rightarrow$ **4 active tours**
+- **Verified**: Confirmed `controllers/client/category.controller.js` (`list`) returns `4` tours in `tourListSection9` for each of those slugs, bringing active tour totals to **52** under `Tour trong nước` and **18** under `Tour nước ngoài`.
