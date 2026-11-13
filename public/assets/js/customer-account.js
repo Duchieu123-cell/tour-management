@@ -63,3 +63,36 @@ if (customerRegisterForm) {
     );
   });
 }
+
+const customerForgotPasswordForm = document.querySelector('#customer-forgot-password-form');
+if (customerForgotPasswordForm) {
+  customerForgotPasswordForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const formData = new FormData(customerForgotPasswordForm);
+    submitCustomerAccountForm('/account/forgot-password', {
+      email: formData.get('email')
+    }, (data) => {
+      const status = document.querySelector('#customer-auth-error');
+      status.textContent = data.message;
+      status.classList.remove('is-error');
+      status.classList.add('is-success');
+      status.hidden = false;
+    });
+  });
+}
+
+const customerResetPasswordForm = document.querySelector('#customer-reset-password-form');
+if (customerResetPasswordForm) {
+  customerResetPasswordForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const formData = new FormData(customerResetPasswordForm);
+    submitCustomerAccountForm('/account/reset-password', {
+      email: formData.get('email'),
+      token: formData.get('token'),
+      password: formData.get('password'),
+      confirmPassword: formData.get('confirmPassword')
+    }, () => {
+      window.location.href = '/account/login?passwordReset=1';
+    });
+  });
+}

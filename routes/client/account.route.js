@@ -17,6 +17,11 @@ router.post('/login', accountValidate.loginPost, accountController.loginPost);
 router.get('/register', accountController.register);
 router.post('/register', accountValidate.registerPost, accountController.registerPost);
 
+router.get('/forgot-password', accountController.forgotPassword);
+router.post('/forgot-password', accountValidate.forgotPassword, accountController.forgotPasswordPost);
+router.get('/reset-password', accountController.resetPassword);
+router.post('/reset-password', accountValidate.resetPassword, accountController.resetPasswordPost);
+
 router.post('/logout', accountController.logoutPost);
 
 router.get('/orders', authMiddleware.requireCustomer, orderController.myOrders);
