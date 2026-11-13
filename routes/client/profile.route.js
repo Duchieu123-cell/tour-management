@@ -11,12 +11,7 @@ const upload = multer({ storage: cloudinaryHelper.storage });
 router.get('/', profileController.detail);
 
 // Cập nhật thông tin profile
-router.patch(
-  '/',
-  upload.single('avatar'),
-  profileValidate.updateProfile,
-  profileController.update
-);
+router.patch('/', upload.single('avatar'), profileValidate.updateProfile, profileController.update);
 
 // Xóa tài khoản (Soft delete)
 router.delete('/delete', profileController.deleteAccount);
