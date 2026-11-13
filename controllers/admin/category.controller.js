@@ -74,38 +74,36 @@ module.exports.list = async (req, res) => {
   };
   //Hết phân trang
 
-  const categoryList = await Category
-    .find(find)
-    .sort({ 
-      position: "desc"
-    })
-    .limit(limitItems)
-    .skip(skip)
+  const [categoryList, adminAccountList] = await Promise.all([
+    Category
+      .find(find)
+      .sort({
+        position: "desc"
+      })
+      .limit(limitItems)
+      .skip(skip),
+    AccountAdmin
+      .find({})
+      .select("_id fullName")
+      .lean()
+  ]);
+
+  const adminNameById = new Map(
+    adminAccountList.map((admin) => [String(admin._id), admin.fullName])
+  );
 
   for (const item of categoryList) {
     if(item.createdBy){
-      const accountCreated = await AccountAdmin.findOne({
-        _id: item.createdBy
-      });
-      item.createdByFullName = accountCreated ? accountCreated.fullName : "";
+      item.createdByFullName = adminNameById.get(String(item.createdBy)) || "";
     }
 
     if(item.updatedBy){
-      const accountUpdated = await AccountAdmin.findOne({
-        _id: item.updatedBy
-      });
-      item.updatedByFullName = accountUpdated ? accountUpdated.fullName : "";
+      item.updatedByFullName = adminNameById.get(String(item.updatedBy)) || "";
     }
 
     item.createdAtFormatted = moment(item.createdAt).format('HH:mm - DD/MM/YYYY');
     item.updatedAtFormatted = moment(item.updatedAt).format('HH:mm - DD/MM/YYYY');
   }
-
-  //Danh sách tài khoản quản trị
-  const adminAccountList = await AccountAdmin
-    .find({})
-    .select("_id fullName");
-  //Hết danh sách tài khoản quản trị
 
   res.render('admin/pages/category-list', {
     pageTitle: 'Quản lý danh mục',

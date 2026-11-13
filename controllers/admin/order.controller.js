@@ -1,4 +1,5 @@
 const moment = require('moment');
+const mongoose = require('mongoose');
 
 const Order = require('../../models/order.model');
 const Tour = require('../../models/tour.model');
@@ -31,60 +32,70 @@ module.exports.list = async (req, res) => {
     .limit(pagination.limitItems)
     .skip(pagination.skip);
 
+  const tourIds = [
+    ...new Set(
+      orderList.flatMap((order) => (order.items || []).map((item) => item.tourId))
+    )
+  ].filter((id) => mongoose.isValidObjectId(id));
+
+  const tours = tourIds.length > 0
+    ? await Tour.find({ _id: { $in: tourIds } }).select("_id name avatar").lean()
+    : [];
+  const tourById = new Map(tours.map((tour) => [String(tour._id), tour]));
+
   for (const orderDetail of orderList) {
     for(const item of orderDetail.items){
-      const tourInfo = await Tour.findOne({
-        _id: item.tourId
-      });
+      const tourInfo = tourById.get(String(item.tourId));
       if(tourInfo){
         item.name = tourInfo.name;
         item.avatar = tourInfo.avatar;
       }
-      switch(orderDetail.paymentMethod){
-        case 'money':
-          orderDetail.paymentMethodName = "Thanh toán tiền mặt";
-          break;
-        case 'momo':
-          orderDetail.paymentMethodName = "Ví MoMo";
-          break;
-        case 'bank':
-          orderDetail.paymentMethodName = "Chuyển khoản ngân hàng";
-          break;
-        case 'zalopay':
-          orderDetail.paymentMethodName = "ZaloPay";
-          break;
-        case 'vnpay':
-          orderDetail.paymentMethodName = "VNPay";
-          break;
-      }
-  
-      switch(orderDetail.paymentStatus){
-        case 'unpaid':
-          orderDetail.paymentStatusName = "Chưa thanh toán";
-          break;
-        case 'paid':
-          orderDetail.paymentStatusName = "Đã thanh toán";
-          break;
-      }
-  
-      switch(orderDetail.status){
-        case 'initial':
-          orderDetail.statusName = "Khởi tạo";
-          orderDetail.statusColor = "orange";
-          break;
-        case 'done':
-          orderDetail.statusName = "Hoàn thành";
-          orderDetail.statusColor = "green";
-          break;
-        case 'cancel':
-          orderDetail.statusName = "Hủy";
-          orderDetail.statusColor = "red";
-          break;
-      }
-  
-      orderDetail.createdAtFormatTime = moment(orderDetail.createdAt).format('HH:mm');
-      orderDetail.createdAtFormatDate = moment(orderDetail.createdAt).format('DD/MM/YYYY');
     }
+
+    switch(orderDetail.paymentMethod){
+      case 'money':
+        orderDetail.paymentMethodName = "Thanh toán tiền mặt";
+        break;
+      case 'momo':
+        orderDetail.paymentMethodName = "Ví MoMo";
+        break;
+      case 'bank':
+        orderDetail.paymentMethodName = "Chuyển khoản ngân hàng";
+        break;
+      case 'zalopay':
+        orderDetail.paymentMethodName = "ZaloPay";
+        break;
+      case 'vnpay':
+        orderDetail.paymentMethodName = "VNPay";
+        break;
+    }
+
+    switch(orderDetail.paymentStatus){
+      case 'unpaid':
+        orderDetail.paymentStatusName = "Chưa thanh toán";
+        break;
+      case 'paid':
+        orderDetail.paymentStatusName = "Đã thanh toán";
+        break;
+    }
+
+    switch(orderDetail.status){
+      case 'initial':
+        orderDetail.statusName = "Khởi tạo";
+        orderDetail.statusColor = "orange";
+        break;
+      case 'done':
+        orderDetail.statusName = "Hoàn thành";
+        orderDetail.statusColor = "green";
+        break;
+      case 'cancel':
+        orderDetail.statusName = "Hủy";
+        orderDetail.statusColor = "red";
+        break;
+    }
+
+    orderDetail.createdAtFormatTime = moment(orderDetail.createdAt).format('HH:mm');
+    orderDetail.createdAtFormatDate = moment(orderDetail.createdAt).format('DD/MM/YYYY');
   }
 
   res.render('admin/pages/order-list', {

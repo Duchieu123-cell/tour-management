@@ -122,43 +122,43 @@ module.exports.list = async (req, res) => {
   };
   //Hết phân trang
 
-  const tourList = await Tour
-    .find(find)
-    .sort({ 
-      position: "desc"
-    })
-    .limit(limitItems)
-    .skip(skip)
+  const [tourList, adminAccountList, categoryList] = await Promise.all([
+    Tour
+      .find(find)
+      .sort({
+        position: "desc"
+      })
+      .limit(limitItems)
+      .skip(skip),
+    AccountAdmin
+      .find({})
+      .select("_id fullName")
+      .lean(),
+    Category
+      .find({
+        deleted: false
+      })
+      .lean()
+  ]);
+
+  const adminNameById = new Map(
+    adminAccountList.map((admin) => [String(admin._id), admin.fullName])
+  );
 
   for (const item of tourList) {
     if(item.createdBy){
-      const accountCreated = await AccountAdmin.findOne({
-        _id: item.createdBy
-      });
-      item.createdByFullName = accountCreated ? accountCreated.fullName : "";
+      item.createdByFullName = adminNameById.get(String(item.createdBy)) || "";
     }
 
     if(item.updatedBy){
-      const accountUpdated = await AccountAdmin.findOne({
-        _id: item.updatedBy
-      });
-      item.updatedByFullName = accountUpdated ? accountUpdated.fullName : "";
+      item.updatedByFullName = adminNameById.get(String(item.updatedBy)) || "";
     }
 
     item.createdAtFormatted = moment(item.createdAt).format('HH:mm - DD/MM/YYYY');
     item.updatedAtFormatted = moment(item.updatedAt).format('HH:mm - DD/MM/YYYY');
   }
 
-  //Danh sách tài khoản quản trị
-  const adminAccountList = await AccountAdmin
-    .find({})
-    .select("_id fullName");
-  //Hết danh sách tài khoản quản trị
-
   // Danh sách phân cấp danh mục
-  const categoryList = await Category.find({
-    deleted: false
-  });
   const categoryTree = CategoryHelper.buildCategoryTree(categoryList, "");
   // Hết danh sách phân cấp danh mục
 
@@ -428,12 +428,15 @@ module.exports.trash = async (req, res) => {
     .limit(limitItems)
     .skip(skip);
 
+  const deletedByIds = [...new Set(tourList.map((item) => item.deletedBy).filter(Boolean))];
+  const deletedAdmins = deletedByIds.length > 0
+    ? await AccountAdmin.find({ _id: { $in: deletedByIds } }).select("_id fullName").lean()
+    : [];
+  const deletedAdminMap = new Map(deletedAdmins.map((admin) => [String(admin._id), admin.fullName]));
+
   for (const item of tourList) {
     if(item.deletedBy){
-      const accountDeleted = await AccountAdmin.findOne({
-        _id: item.deletedBy
-      });
-      item.deletedByFullName = accountDeleted ? accountDeleted.fullName : "";
+      item.deletedByFullName = deletedAdminMap.get(String(item.deletedBy)) || "";
     }
 
     item.deletedAtFormatted = moment(item.deletedAt).format('HH:mm - DD/MM/YYYY');

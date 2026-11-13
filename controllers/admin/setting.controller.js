@@ -7,6 +7,7 @@ const PaginationHelper = require('../../helpers/pagination.helper');
 const FilterHelper = require('../../helpers/filter.helper');
 
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 
 module.exports.list = async (req, res) => {
   res.render('admin/pages/setting-list', {
@@ -84,15 +85,20 @@ module.exports.accountAdminList = async (req, res) => {
     .limit(pagination.limitItems)
     .skip(pagination.skip);
 
+  const roleIds = [
+    ...new Set(accountAdminList.map((item) => item.role))
+  ].filter((id) => mongoose.isValidObjectId(id));
+
+  const roles = roleIds.length > 0
+    ? await Role.find({ _id: { $in: roleIds }, deleted: false }).select("_id name").lean()
+    : [];
+  const roleNameById = new Map(roles.map((role) => [String(role._id), role.name]));
+
   for(const item of accountAdminList) {
     if(item.role){
-      const roleDetail = await Role.findOne({
-        _id: item.role,
-        deleted: false
-      });
-
-      if(roleDetail) {
-        item.roleName = roleDetail.name;
+      const roleName = roleNameById.get(String(item.role));
+      if(roleName) {
+        item.roleName = roleName;
       }
     }
   }

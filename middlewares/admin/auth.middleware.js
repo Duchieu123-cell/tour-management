@@ -18,7 +18,7 @@ module.exports.verifyToken = async (req, res, next) => {
       _id: id,
       email: email,
       status: "active"
-    });
+    }).select("fullName avatar role email status").lean();
 
     if(!existAccount){
       res.clearCookie("token");
@@ -27,7 +27,7 @@ module.exports.verifyToken = async (req, res, next) => {
 
     const roleDetail = await Role.findOne({
       _id: existAccount.role,
-    });
+    }).select("name permissions").lean();
 
     req.account = existAccount;
     req.role = roleDetail;
@@ -35,8 +35,8 @@ module.exports.verifyToken = async (req, res, next) => {
     res.locals.account = {
       fullName: existAccount.fullName,
       avatar: existAccount.avatar,
-      roleName: roleDetail.name,
-      permissions: roleDetail.permissions
+      roleName: roleDetail ? roleDetail.name : "",
+      permissions: roleDetail ? roleDetail.permissions : []
     };
 
     next();
