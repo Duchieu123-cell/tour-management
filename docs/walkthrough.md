@@ -63,3 +63,12 @@ All five areas identified from the Team Lead's feedback and our codebase/databas
 | **Admin User List & Trash** | **Passed** | `userController.list` (9 active customers with full Vietnamese profiles) and `userController.trash` (3 soft-deleted customers) rendered cleanly with modals and sorting. |
 | **Client Homepage & Header** | **Passed** | `home.pug` rendered cleanly (`32,415` bytes), zero `Giảm -%` badges, domestic vs. international sections accurately separated, `.header-actions` and `.header-account-dropdown` verified. |
 | **Admin Dashboard** | **Passed** | All 4 stat cards (`Doanh thu`, `Đơn đặt`, `Chưa thanh toán`, `Khách hàng mới`) and cumulative revenue chart populated with Oct vs. Nov 2026 comparison metrics. |
+
+---
+
+## Additional Fixes
+
+### 6. Client Tour Detail Page (`/tour/detail/:slug`)
+- **Fixed blank space in "Thông tin tour" block**: In [style.css](public/assets/css/style.css) `.box-tour-info .inner-content` used a fixed `height: 500px`, leaving blank space for short content until "Xem tất cả" was clicked. It now uses `max-height: 500px`, so short content fits its natural height.
+- **Smart collapse in [script.js](public/assets/js/script.js)**: the block is only collapsed when content exceeds 500px. Otherwise a `no-collapse` class is applied and the "Xem tất cả" button is hidden. The check re-runs on window `load` and as images finish loading.
+- **Reordered blocks in [tour-detail.pug](views/client/pages/tour-detail.pug)**: "Thông tin tour" now sits below the timeline (`box-tour-schedule`) block.

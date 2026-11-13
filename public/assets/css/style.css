@@ -2626,12 +2626,17 @@ ul{
 }
 
 .box-tour-info .inner-content {
-    height: 500px;
+    max-height: 500px;
     overflow: hidden;
 }
 
-.box-tour-info.active .inner-content {
-    height: auto;
+.box-tour-info.active .inner-content,
+.box-tour-info.no-collapse .inner-content {
+    max-height: none;
+}
+
+.box-tour-info.no-collapse .inner-read-more {
+    display: none;
 }
 
 .box-tour-info .inner-content p {

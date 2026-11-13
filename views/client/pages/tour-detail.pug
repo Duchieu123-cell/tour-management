@@ -57,13 +57,7 @@ block main
                           alt="" 
                           src=image
                           )
-          // Box Tour Info
-          .box-tour-info
-            .inner-title Thông tin tour
-            .inner-content !{tourDetail.information}
-            .inner-read-more
-              button.button-outline Xem tất cả
-          // End Box Tour Info
+          // Box Tour Schedule
           .box-tour-schedule
             .inner-title-main
               .inner-list
@@ -71,6 +65,14 @@ block main
                   .inner-item
                     .inner-title #{item.title}
                     .inner-content !{item.description}
+          // End Box Tour Schedule
+          // Box Tour Info
+          .box-tour-info
+            .inner-title Thông tin tour
+            .inner-content !{tourDetail.information}
+            .inner-read-more
+              button.button-outline Xem tất cả
+          // End Box Tour Info
         .inner-right
           .box-tour-detail
             .inner-title-main Chuyến đi của bạn

@@ -190,6 +190,26 @@ if(buttonFilterMobile){
 const boxTourInfo = document.querySelector(".section-10 .box-tour-info");
 if(boxTourInfo){
 	const buttonReadMore = boxTourInfo.querySelector(".inner-read-more .button-outline");
+	const infoContent = boxTourInfo.querySelector(".inner-content");
+
+	// Chỉ thu gọn khi nội dung dài hơn chiều cao tối đa; nội dung ngắn hiển thị vừa khít, ẩn nút
+	const updateCollapse = () => {
+		if(boxTourInfo.classList.contains("active")){
+			return;
+		}
+		boxTourInfo.classList.remove("no-collapse");
+		if(infoContent.scrollHeight <= infoContent.clientHeight + 1){
+			boxTourInfo.classList.add("no-collapse");
+		}
+	};
+	updateCollapse();
+	window.addEventListener("load", updateCollapse);
+	infoContent.querySelectorAll("img").forEach((img) => {
+		if(!img.complete){
+			img.addEventListener("load", updateCollapse);
+		}
+	});
+
 	buttonReadMore.addEventListener("click", () => {
 		if(!boxTourInfo.classList.contains("active")){
 			boxTourInfo.classList.add("active");
