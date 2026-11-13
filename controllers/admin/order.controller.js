@@ -3,17 +3,33 @@ const moment = require('moment');
 const Order = require('../../models/order.model');
 const Tour = require('../../models/tour.model');
 const City = require('../../models/province-city.model');
+const PaginationHelper = require('../../helpers/pagination.helper');
+const FilterHelper = require('../../helpers/filter.helper');
 
 module.exports.list = async (req, res) => {
   const find = {
     deleted: false
   };
 
+  if (req.query.status) {
+    find.status = req.query.status;
+  }
+
+  const createdAtRange = FilterHelper.buildDateRange(req.query.startDate, req.query.endDate);
+  if (createdAtRange) {
+    find.createdAt = createdAtRange;
+  }
+
+  const totalRecords = await Order.countDocuments(find);
+  const pagination = PaginationHelper.buildPagination(req.query.page, totalRecords, 10);
+
   const orderList = await Order
     .find(find)
     .sort({
       createdAt: "desc"
-    });
+    })
+    .limit(pagination.limitItems)
+    .skip(pagination.skip);
 
   for (const orderDetail of orderList) {
     for(const item of orderDetail.items){
@@ -73,7 +89,8 @@ module.exports.list = async (req, res) => {
 
   res.render('admin/pages/order-list', {
     pageTitle: 'Quản lý đơn hàng',
-    orderList: orderList
+    orderList: orderList,
+    pagination: pagination
   });
 }
 

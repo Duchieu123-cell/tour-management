@@ -1,4 +1,5 @@
 extends ../layouts/layout-default.pug
+include ../mixins/pagination.pug
 
 block main
   h1.box-title Quản lý người dùng
@@ -9,14 +10,19 @@ block main
       .inner-item.inner-label
         <i class="fa-solid fa-filter"></i> Bộ lọc
       .inner-item
+        span.inner-field-label Trạng thái
         select(filter-status)
-          option(value="") Trạng thái
+          option(value="") -- Tất cả trạng thái --
           option(value="active") Hoạt động 
           option(value="inactive") Tạm dừng
       .inner-item.inner-date
-        input(type="date" filter-start-date)
-        span -
-        input(type="date" filter-end-date)
+        span.inner-field-label Ngày tạo
+        .inner-date-inputs
+          span.inner-date-label Từ
+          input(type="date" filter-start-date aria-label="Từ ngày")
+          span.inner-date-sep -
+          span.inner-date-label Đến
+          input(type="date" filter-end-date aria-label="Đến ngày")
       .inner-item.inner-reset(filter-reset)
         <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
   //- End Section 4
@@ -74,7 +80,7 @@ block main
                     <i class="fa-solid fa-arrow-down-wide-short"></i>
                   else
                     <i class="fa-solid fa-sort"></i>
-            th Hành động 
+            th.inner-center Hành động 
         tbody
           if(userList && userList.length > 0)
             each item in userList
@@ -106,8 +112,8 @@ block main
                       data-status="active"
                       title="Nhấp để chuyển sang Hoạt động"
                     ) Tạm dừng
-                td(class="inner-center") #{item.createdAtFormatted}
-                td
+                td(class="inner-center inner-nowrap") #{item.createdAtFormatted}
+                td.inner-center
                   .inner-buttons
                     button(
                       class="inner-edit" 
@@ -128,12 +134,7 @@ block main
   //- End Section 6
 
   //- Section 7: Phân trang
-  if(pagination && pagination.totalRecords > 0)
-    .section-7  
-      span.inner-label Hiển thị #{pagination.skip + 1} - #{pagination.skip + userList.length} của #{pagination.totalRecords}
-      select(class="inner-pagination" pagination)
-        - for (let i = 1; i <= pagination.totalPages; i++)
-          option(value=i) Trang #{i}
+  +pagination(pagination, userList ? userList.length : 0)
   //- End Section 7
 
   //- Include Modals

@@ -3,6 +3,8 @@ const Role = require('../../models/role.model');
 const AccountAdmin = require('../../models/accounts-admin.model');
 
 const permissionConfig = require('../../config/permission');
+const PaginationHelper = require('../../helpers/pagination.helper');
+const FilterHelper = require('../../helpers/filter.helper');
 
 const bcrypt = require('bcryptjs');
 
@@ -58,13 +60,29 @@ module.exports.websiteInfoPatch = async (req, res) => {
 }
 
 module.exports.accountAdminList = async (req, res) => {
-  const accountAdminList = await AccountAdmin
-  .find({
+  const find = {
     deleted: false
-  })
-  .sort({
-    createdAt: "desc"
-  });
+  };
+
+  if (req.query.status) {
+    find.status = req.query.status;
+  }
+
+  const createdAtRange = FilterHelper.buildDateRange(req.query.startDate, req.query.endDate);
+  if (createdAtRange) {
+    find.createdAt = createdAtRange;
+  }
+
+  const totalRecords = await AccountAdmin.countDocuments(find);
+  const pagination = PaginationHelper.buildPagination(req.query.page, totalRecords, 10);
+
+  const accountAdminList = await AccountAdmin
+    .find(find)
+    .sort({
+      createdAt: "desc"
+    })
+    .limit(pagination.limitItems)
+    .skip(pagination.skip);
 
   for(const item of accountAdminList) {
     if(item.role){
@@ -81,7 +99,8 @@ module.exports.accountAdminList = async (req, res) => {
 
   res.render('admin/pages/setting-account-admin-list', {
     pageTitle: 'Tài khoản quản trị',
-    accountAdminList: accountAdminList
+    accountAdminList: accountAdminList,
+    pagination: pagination
   });
 }
 

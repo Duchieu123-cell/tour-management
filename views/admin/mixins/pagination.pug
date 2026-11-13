@@ -1,0 +1,45 @@
+mixin pagination(pagination, itemCount)
+  if pagination
+    - const totalRecords = pagination.totalRecords || 0;
+    - const totalPages = Math.max(1, pagination.totalPages || 1);
+    - const limitItems = pagination.limitItems || 10;
+    - const skip = pagination.skip || 0;
+    - const currentPage = pagination.currentPage || Math.min(totalPages, Math.floor(skip / limitItems) + 1);
+    - const count = itemCount || 0;
+    - const startItem = totalRecords > 0 && count > 0 ? skip + 1 : 0;
+    - const endItem = totalRecords > 0 && count > 0 ? skip + count : 0;
+    .section-7
+      if totalRecords > 0
+        span.inner-label Hiển thị #{startItem} - #{endItem} của #{totalRecords} bản ghi
+      else
+        span.inner-label Không có bản ghi nào
+      .inner-pagination-controls(pagination data-total-pages=totalPages data-current-page=currentPage)
+        button.inner-page-btn(
+          type="button"
+          pagination-prev
+          disabled=(currentPage <= 1)
+          aria-label="Trang trước"
+          title="Trang trước"
+        )
+          i.fa-solid.fa-chevron-left
+          span Trước
+        .inner-page-jump
+          span.inner-page-text Trang
+          input.inner-page-input(
+            type="number"
+            min="1"
+            max=totalPages
+            value=currentPage
+            pagination-input
+            aria-label="Nhập số trang"
+          )
+          span.inner-page-total / #{totalPages}
+        button.inner-page-btn(
+          type="button"
+          pagination-next
+          disabled=(currentPage >= totalPages)
+          aria-label="Trang sau"
+          title="Trang sau"
+        )
+          span Sau
+          i.fa-solid.fa-chevron-right

@@ -1,4 +1,5 @@
 extends ../layouts/layout-default.pug
+include ../mixins/pagination.pug
 
 block main
   if(account.permissions.includes("tour-trash"))
@@ -40,24 +41,24 @@ block main
               th(class="inner-center") Vị trí 
               th(class="inner-center") Trạng thái
               th Xóa bởi
-              th Hành động 
+              th.inner-center Hành động 
           tbody
             if(tourList && tourList.length > 0)
               each item in tourList
                 tr
                   td(class="inner-center")
                     input(type="checkbox" class="inner-check" check-item=item.id)
-                  td #{item.name}
+                  td.inner-col-title #{item.name}
                   td 
                     img(src=item.avatar, class="inner-avatar")
                   td
-                    div NL: #{(item.newPriceAdult > 0 ? item.newPriceAdult : item.priceAdult).toLocaleString("vi-VN")}đ
-                    div TE: #{(item.newPriceChildren > 0 ? item.newPriceChildren : item.priceChildren).toLocaleString("vi-VN")}đ
-                    div EB: #{(item.newPriceBaby > 0 ? item.newPriceBaby : item.priceBaby).toLocaleString("vi-VN")}đ
+                    div.inner-nowrap NL: #{(item.newPriceAdult > 0 ? item.newPriceAdult : item.priceAdult).toLocaleString("vi-VN")}đ
+                    div.inner-nowrap TE: #{(item.newPriceChildren > 0 ? item.newPriceChildren : item.priceChildren).toLocaleString("vi-VN")}đ
+                    div.inner-nowrap EB: #{(item.newPriceBaby > 0 ? item.newPriceBaby : item.priceBaby).toLocaleString("vi-VN")}đ
                   td
-                    div NL: #{item.stockAdult}
-                    div TE: #{item.stockChildren}
-                    div EB: #{item.stockBaby}
+                    div.inner-nowrap NL: #{item.stockAdult}
+                    div.inner-nowrap TE: #{item.stockChildren}
+                    div.inner-nowrap EB: #{item.stockBaby}
                   td(class="inner-center") #{item.position}
                   td(class="inner-center")
                     if(item.status == "active")
@@ -67,9 +68,9 @@ block main
                     else if(item.status == "deleted")
                       .badge.badge-orange Xóa
                   td 
-                    div #{item.deletedByFullName}
-                    div.inner-time #{item.deletedAtFormatted} 
-                  td
+                    div.inner-nowrap #{item.deletedByFullName}
+                    div.inner-time.inner-nowrap #{item.deletedAtFormatted} 
+                  td.inner-center
                     .inner-buttons
                       button(
                         class="inner-undo"
@@ -87,10 +88,5 @@ block main
     //- End Section 6
 
     //- Section 7
-    if(pagination && pagination.totalRecords > 0)
-      .section-7  
-        span.inner-label Hiển thị #{pagination.skip + 1} - #{pagination.skip + tourList.length} của #{pagination.totalRecords}
-        select(class="inner-pagination" pagination)
-          - for (let i = 1; i <= pagination.totalPages; i++)
-            option(value=i) Trang #{i}
+    +pagination(pagination, tourList ? tourList.length : 0)
     //- End Section 7

@@ -1244,6 +1244,7 @@ if (filterStatus) {
       url.searchParams.delete("status");
     }
 
+    url.searchParams.delete("page");
     window.location.href = url.href;
   });
 
@@ -1271,6 +1272,7 @@ if (filterCreatedBy) {
       url.searchParams.delete("createdBy");
     }
 
+    url.searchParams.delete("page");
     window.location.href = url.href;
   });
 
@@ -1298,6 +1300,7 @@ if (filterStartDate) {
       url.searchParams.delete("startDate");
     }
 
+    url.searchParams.delete("page");
     window.location.href = url.href;
   });
 
@@ -1325,6 +1328,7 @@ if (filterEndDate) {
       url.searchParams.delete("endDate");
     }
 
+    url.searchParams.delete("page");
     window.location.href = url.href;
   });
 
@@ -1476,6 +1480,7 @@ if(inputSearch){
         url.searchParams.delete("keyword");
       }
 
+      url.searchParams.delete("page");
       window.location.href = url.href;
       }
   })
@@ -1490,25 +1495,79 @@ if(inputSearch){
 
 // Pagination
 const pagination = document.querySelector("[pagination]");
-if(pagination){
+if (pagination) {
   const url = new URL(window.location.href);
 
-  // Lắng nghe sự kiện change
-  pagination.addEventListener("change", () => {
-    const value = pagination.value;
-    if(value){
-      url.searchParams.set("page", value);
-    }
-    else {
+  const goToPage = (targetPage) => {
+    if (targetPage && targetPage > 1) {
+      url.searchParams.set("page", targetPage);
+    } else {
       url.searchParams.delete("page");
     }
     window.location.href = url.href;
-  })
+  };
 
-  // Hiển thị lựa chọn mặc định
-  const valueCurrent = url.searchParams.get("page");
-  if (valueCurrent) {
-    pagination.value = valueCurrent;
+  if (pagination.tagName === "SELECT") {
+    pagination.addEventListener("change", () => {
+      goToPage(parseInt(pagination.value, 10));
+    });
+
+    const valueCurrent = url.searchParams.get("page");
+    if (valueCurrent) {
+      pagination.value = valueCurrent;
+    }
+  } else {
+    const totalPages = Math.max(1, parseInt(pagination.getAttribute("data-total-pages"), 10) || 1);
+    const paramPage = parseInt(url.searchParams.get("page"), 10);
+    const attrPage = parseInt(pagination.getAttribute("data-current-page"), 10) || 1;
+    const currentPage = Math.min(totalPages, Math.max(1, Number.isNaN(paramPage) ? attrPage : paramPage));
+
+    const prevBtn = pagination.querySelector("[pagination-prev]");
+    const nextBtn = pagination.querySelector("[pagination-next]");
+    const pageInput = pagination.querySelector("[pagination-input]");
+
+    if (prevBtn) {
+      prevBtn.disabled = currentPage <= 1;
+      prevBtn.addEventListener("click", () => {
+        if (currentPage > 1) {
+          goToPage(currentPage - 1);
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.disabled = currentPage >= totalPages;
+      nextBtn.addEventListener("click", () => {
+        if (currentPage < totalPages) {
+          goToPage(currentPage + 1);
+        }
+      });
+    }
+
+    if (pageInput) {
+      pageInput.value = currentPage;
+      const submitInputPage = () => {
+        const parsed = parseInt(pageInput.value, 10);
+        if (Number.isNaN(parsed)) {
+          pageInput.value = currentPage;
+          return;
+        }
+        const clamped = Math.min(totalPages, Math.max(1, parsed));
+        pageInput.value = clamped;
+        if (clamped !== currentPage) {
+          goToPage(clamped);
+        }
+      };
+
+      pageInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          submitInputPage();
+        }
+      });
+
+      pageInput.addEventListener("change", submitInputPage);
+    }
   }
 }
 // End Pagination

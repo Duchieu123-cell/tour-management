@@ -1,4 +1,5 @@
 extends ../layouts/layout-default.pug
+include ../mixins/pagination.pug
 
 block main
   h1.box-title Thông tin liên hệ
@@ -9,10 +10,14 @@ block main
       .inner-item.inner-label
         <i class="fa-solid fa-filter"></i> Bộ lọc
       .inner-item.inner-date
-        input(type="date")
-        span -
-        input(type="date")
-      .inner-item.inner-reset
+        span.inner-field-label Ngày gửi
+        .inner-date-inputs
+          span.inner-date-label Từ
+          input(type="date" filter-start-date aria-label="Từ ngày")
+          span.inner-date-sep -
+          span.inner-date-label Đến
+          input(type="date" filter-end-date aria-label="Đến ngày")
+      .inner-item.inner-reset(filter-reset)
         <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
   //- End Section 4
 
@@ -61,10 +66,5 @@ block main
   //- End Section 6
 
   //- Section 7
-  .section-7  
-    span.inner-label Hiển thị 1 - 9 của 78
-    select(class="inner-pagination")
-      option Trang 1
-      option Trang 2
-      option Trang 3
+  +pagination(pagination, contactList ? contactList.length : 0)
   //- End Section 7

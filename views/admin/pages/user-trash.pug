@@ -1,4 +1,5 @@
 extends ../layouts/layout-default.pug
+include ../mixins/pagination.pug
 
 block main
   h1.box-title Thùng rác người dùng
@@ -52,7 +53,7 @@ block main
                     <i class="fa-solid fa-arrow-down-wide-short"></i>
                   else
                     <i class="fa-solid fa-sort"></i>
-            th Hành động 
+            th.inner-center Hành động 
         tbody
           if(userList && userList.length > 0)
             each item in userList
@@ -65,8 +66,8 @@ block main
                 td #{item.email}
                 td(class="inner-center") #{item.phone || "---"}
                 td #{item.address || "---"}
-                td(class="inner-center") #{item.deletedAtFormatted}
-                td
+                td(class="inner-center inner-nowrap") #{item.deletedAtFormatted}
+                td.inner-center
                   .inner-buttons
                     button(
                       class="inner-undo"
@@ -86,12 +87,7 @@ block main
   //- End Section 6
 
   //- Section 7
-  if(pagination && pagination.totalRecords > 0)
-    .section-7  
-      span.inner-label Hiển thị #{pagination.skip + 1} - #{pagination.skip + userList.length} của #{pagination.totalRecords}
-      select(class="inner-pagination" pagination)
-        - for (let i = 1; i <= pagination.totalPages; i++)
-          option(value=i) Trang #{i}
+  +pagination(pagination, userList ? userList.length : 0)
   //- End Section 7
 
   script(src="/admin/assets/js/user.js")
