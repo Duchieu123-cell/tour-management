@@ -612,6 +612,24 @@ if(aiSearchForm){
 	const aiTourResults = document.querySelector("[ai-tour-results]");
 	const aiTourMessage = aiTourResults.querySelector("[ai-tour-message]");
 	const aiTourSuggestions = aiTourResults.querySelector("[ai-tour-suggestions]");
+	const quickPromptButtons = aiSearchForm.querySelectorAll("[ai-quick-prompt]");
+
+	quickPromptButtons.forEach((chip) => {
+		chip.addEventListener("click", () => {
+			const promptText = chip.getAttribute("ai-quick-prompt");
+			if(promptText){
+				aiTourRequest.value = promptText;
+				aiTourRequest.focus();
+			}
+		});
+	});
+
+	aiTourRequest.addEventListener("keydown", (event) => {
+		if(event.key === "Enter" && !event.shiftKey && !event.isComposing){
+			event.preventDefault();
+			aiSearchForm.requestSubmit();
+		}
+	});
 
 	aiSearchForm.addEventListener("submit", async (event) => {
 		event.preventDefault();
