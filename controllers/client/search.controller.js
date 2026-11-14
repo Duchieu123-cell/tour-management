@@ -1,6 +1,7 @@
 const moment = require('moment');
 const Tour = require('../../models/tour.model');
 const { slugifyVietnamese } = require('../../helpers/slug.helper');
+const { getTodayStart } = require('../../helpers/tour-date.helper');
 
 const normalizeDuration = (value) => String(value || '')
   .normalize('NFD')
@@ -397,7 +398,8 @@ const buildAiSearchSummary = (query) => {
 const buildTourQuery = (query) => {
   const find = {
     deleted: false,
-    status: "active"
+    status: "active",
+    departureDate: { $gte: getTodayStart() }
   };
 
   if(query.locationFrom){
@@ -418,7 +420,11 @@ const buildTourQuery = (query) => {
   if(typeof query.departureDate === 'string' && query.departureDate){
     const departureDateFormat = new Date(query.departureDate);
     if(!Number.isNaN(departureDateFormat.getTime())){
-      find.departureDate = departureDateFormat;
+      const targetEnd = new Date(departureDateFormat.getTime() + 24 * 60 * 60 * 1000);
+      find.departureDate = {
+        $gte: new Date(Math.max(departureDateFormat.getTime(), getTodayStart().getTime())),
+        $lt: targetEnd
+      };
     }
   }
 
