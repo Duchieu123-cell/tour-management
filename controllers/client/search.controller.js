@@ -154,9 +154,17 @@ const buildHardDestinationQuery = (query) => {
 
   const destinations = parseDestinationList(query.locationTo);
   if (destinations.length === 1) {
-    find.slug = destinations[0].regex;
+    find.$or = [
+      { slug: destinations[0].regex },
+      { name: new RegExp(escapeRegex(destinations[0].label), 'i') }
+    ];
   } else if (destinations.length > 1) {
-    find.slug = new RegExp(destinations.map((d) => `(?:${d.pattern})`).join('|'), 'i');
+    const slugRegex = new RegExp(destinations.map((d) => `(?:${d.pattern})`).join('|'), 'i');
+    const nameRegex = new RegExp(destinations.map((d) => `(?:${escapeRegex(d.label)})`).join('|'), 'i');
+    find.$or = [
+      { slug: slugRegex },
+      { name: nameRegex }
+    ];
   }
 
   return find;
@@ -208,7 +216,11 @@ const scoreAndRankTours = (tours, query) => {
   const scored = tours.map((tour) => {
     let destinationRank = 0;
     if (hasDestination) {
-      const idx = destinationList.findIndex((d) => d.regex.test(String(tour.slug || '')));
+      const slugStr = String(tour.slug || '');
+      const nameStr = String(tour.name || '');
+      const idx = destinationList.findIndex(
+        (d) => d.regex.test(slugStr) || new RegExp(escapeRegex(d.label), 'i').test(nameStr)
+      );
       destinationRank = idx >= 0 ? idx : destinationList.length;
     }
 

@@ -53,7 +53,10 @@ const KNOWN_DESTINATIONS = [
   'Đắk Lắk', 'Pleiku', 'Gia Lai', 'Măng Đen', 'Kon Tum', 'Lý Sơn', 'Quảng Ngãi',
   'Tam Đảo', 'Vĩnh Phúc', 'Yên Tử', 'Thái Nguyên', 'Bắc Ninh', 'Bình Ba', 'Cam Ranh',
   'Thái Lan', 'Bangkok', 'Pattaya', 'Singapore', 'Malaysia', 'Hàn Quốc', 'Seoul',
-  'Nhật Bản', 'Tokyo', 'Trung Quốc', 'Đài Loan', 'Châu Âu', 'Pháp', 'Úc', 'Bali'
+  'Nhật Bản', 'Tokyo', 'Trung Quốc', 'Bắc Kinh', 'Thượng Hải', 'Đài Loan',
+  'Châu Âu', 'Pháp', 'Thụy Sĩ', 'Ý', 'Đức', 'Áo', 'Séc', 'Hungary', 'Úc', 'Bali',
+  'Châu Phi', 'Ai Cập', 'Nam Phi', 'Ma-Rốc', 'Ma Rốc', 'Kenya', 'Dubai',
+  'Châu Mỹ', 'Hoa Kỳ', 'Mỹ', 'Canada', 'Brazil'
 ];
 
 const normalizeText = (str) => String(str || '')
@@ -179,10 +182,21 @@ const tryFastParseTourRequest = (rawRequest) => {
     return null;
   }
 
-  // If the user mentioned "đi <somewhere>" or "tour <somewhere>" that wasn't in our known destination list,
-  // let Gemini extract the custom place name accurately unless we already matched a known destination.
-  if (!matchedDestination && /\b(di|den|tai|o)\s+[a-z]{3,}/.test(norm)) {
-    return null;
+  // If no known destination was explicitly matched, only fast-parse if the prompt is purely
+  // duration/budget with no descriptive vibe, scenery, or unknown place words.
+  if (!matchedDestination) {
+    const stripped = norm
+      .replace(/\b\d{1,2}\s*(?:ngay|n)\s*\d{1,2}\s*(?:dem|d)\b/g, ' ')
+      .replace(/\b\d{1,2}\s*ngay\b/g, ' ')
+      .replace(/\b(?:duoi|toi da|khong qua|nho hon|tren|tu|it nhat|lon hon|gia|ngan sach|khoang|tam|muc gia|tro len|den|toi)\b/g, ' ')
+      .replace(/\b\d+(?:[.,]\d+)?\s*(?:trieu|tr|cu|m|k|nghin|ngan|d|vnd)?\b/g, ' ')
+      .replace(/\b(?:toi|minh|em|anh|chi|ban|muon|can|tim|kiem|dat|di|du|lich|tour|cho|goi|y|nao|dai|ngan|nhat|phu|hop|voi|va|co|the)\b/g, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+
+    if (stripped.length > 0) {
+      return null;
+    }
   }
 
   return {
@@ -282,14 +296,14 @@ module.exports.analyzeTourRequest = async (request) => {
     'isTourSearch=false nếu câu không liên quan đến du lịch hoặc tìm tour.',
     'hasSpecificCriteria=false nếu không xác định được ít nhất một điểm đến, mô tả sở thích/cảnh quan, thời lượng hoặc ngân sách.',
     `Danh sách điểm đến hiện có: ${catalogDestinations.join(', ')}.`,
-    `destinations: mảng tối đa ${MAX_AI_DESTINATIONS} điểm đến tiếng Việt có dấu lấy từ danh sách trên (sắp xếp từ phù hợp nhất đến ít phù hợp hơn). Nếu khách nêu tên địa điểm cụ thể, trả về địa điểm đó. Nếu khách mô tả cảnh quan, khí hậu hoặc trải nghiệm (ví dụ: núi cao mát mẻ -> Đà Lạt, Sapa, Mộc Châu; biển đảo -> Phú Quốc, Nha Trang, Quy Nhơn), hãy suy luận các điểm đến phù hợp nhất trong danh sách trên. Trả mảng rỗng [] nếu hoàn toàn không có gợi ý điểm đến.`,
+    `destinations: mảng tối đa ${MAX_AI_DESTINATIONS} điểm đến tiếng Việt có dấu lấy từ danh sách trên (sắp xếp từ phù hợp nhất đến ít phù hợp hơn). Nếu khách nêu tên địa điểm cụ thể, trả về địa điểm đó. Nếu khách mô tả cảnh quan, khí hậu, địa hình hoặc trải nghiệm (ví dụ: núi cao mát mẻ -> Đà Lạt, Sapa, Mộc Châu; biển đảo -> Phú Quốc, Nha Trang, Quy Nhơn; sa mạc, nắng gắt, kim tự tháp -> Ma-Rốc, Ai Cập, Mũi Né, Dubai; safari hoang dã -> Kenya, Nam Phi), BẮT BUỘC suy luận các điểm đến phù hợp nhất trong danh sách trên (độc lập với số ngày hay ngân sách khách nêu). Chỉ trả [] nếu khách hoàn toàn không mô tả địa điểm, cảnh quan hay trải nghiệm nào.`,
     'time: thời lượng dạng "N ngày M đêm" (chuỗi rỗng nếu không nêu).',
     'priceMin, priceMax (VND/1 người lớn): khoảng giá -> min..max; "dưới X" -> 0..X; "trên X" -> X..0; "khoảng/giá X" -> X..X; không nêu -> 0..0.',
     'priceAdult: bằng priceMax nếu priceMax > 0, ngược lại bằng priceMin (nếu tổng nhiều người thì chia số người lớn).',
     `Câu yêu cầu: ${JSON.stringify(request)}`
   ].join('\n');
 
-  const model = process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash';
+  const model = process.env.GEMINI_MODEL?.trim() || 'gemini-3.5-flash-lite';
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
   const requestConfig = {
