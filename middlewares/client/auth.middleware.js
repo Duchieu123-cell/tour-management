@@ -40,8 +40,13 @@ module.exports.optionalCustomer = async (req, res, next) => {
     return next();
   }
 
-  res.locals.customer = customer;
-  req.customer = customer;
+  const customerWithId = {
+    ...customer,
+    id: String(customer._id)
+  };
+
+  res.locals.customer = customerWithId;
+  req.customer = customerWithId;
   return next();
 };
 

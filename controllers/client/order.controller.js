@@ -115,7 +115,7 @@ module.exports.createPost = async (req, res) => {
   req.body.code = `OD${generateHelper.generateRandomNumber(10)}`;
 
   // Chủ đơn lấy từ phiên đăng nhập, không nhận từ body
-  req.body.customerId = res.locals.customer.id;
+  req.body.customerId = res.locals.customer.id || String(res.locals.customer._id);
 
   // Thanh toán
   // Tạm tính
@@ -146,9 +146,14 @@ module.exports.createPost = async (req, res) => {
 
 module.exports.myOrders = async (req, res) => {
   const status = Object.keys(ORDER_STATUS_QUERIES).includes(req.query.status) ? req.query.status : '';
+  const customerId = res.locals.customer?.id || (res.locals.customer?._id ? String(res.locals.customer._id) : '');
+
+  if (!customerId) {
+    return res.redirect('/account/login');
+  }
 
   const find = {
-    customerId: res.locals.customer.id,
+    customerId,
     deleted: false
   };
   if (status) {
@@ -203,10 +208,18 @@ module.exports.myOrders = async (req, res) => {
 };
 
 module.exports.cancelMyOrder = async (req, res) => {
+  const customerId = res.locals.customer?.id || (res.locals.customer?._id ? String(res.locals.customer._id) : '');
+  if (!customerId) {
+    return res.status(401).json({
+      code: 'ERROR',
+      message: 'Vui lòng đăng nhập để tiếp tục'
+    });
+  }
+
   // Lọc theo chủ đơn và trạng thái trong cùng một lệnh để không hoàn chỗ hai lần
   const order = await Order.findOneAndUpdate({
     code: req.params.code,
-    customerId: res.locals.customer.id,
+    customerId,
     deleted: false,
     status: ORDER_STATUS_QUERIES.done
   }, {
@@ -308,10 +321,11 @@ module.exports.success = async (req, res) => {
       }
     }
 
+    const customerId = res.locals.customer?.id || (res.locals.customer?._id ? String(res.locals.customer._id) : '');
     res.render('client/pages/order-success', {
       pageTitle: "Đặt hàng thành công",
       orderDetail: orderDetail,
-      canCancel: orderDetail.customerId === res.locals.customer.id && orderDetail.status !== 'cancel'
+      canCancel: Boolean(customerId && orderDetail.customerId === customerId && orderDetail.status !== 'cancel')
     });
   } else {
     res.redirect('/');
