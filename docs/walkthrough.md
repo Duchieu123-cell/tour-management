@@ -164,3 +164,10 @@ All five areas identified from the Team Lead's feedback and our codebase/databas
 ### 25. Collapsible Admin Side Panel with Hover-to-Extend
 - **Icon rail & hover overlay (`views/admin/partials/sider.pug`, `public/admin/assets/css/style.css`)**: Wrapped sidebar menu labels in `.inner-label`, added a `.sider-toggle` button (`Thu gọn` / `Mở rộng`), and added desktop `body.sider-collapsed` styles shrinking `.sider` from `240px` to `72px` while expanding `.main` to `calc(100% - 72px)` (`+168px` horizontal space for tables). When collapsed, icons stay centered and hovering `.sider` temporarily extends it back to `240px` as an elevated overlay without shifting `.main`.
 - **Persistent state (`views/admin/layouts/layout-default.pug`, `public/admin/assets/js/script.js`)**: Restored `body.sider-collapsed` from `localStorage` (`adminSiderCollapsed`) before paint to prevent layout flash and wired `.sider-toggle` click handling with `aria-expanded` / `aria-label` updates.
+
+### 26. Seed Tours for AI Search Quick Prompts
+- **New idempotent seed script (`scripts/seed-ai-prompt-tours.js`)**: Added and executed a seed script inserting 9 active tours with future departure dates, verified travel photos, and full schedules to ensure every AI search quick-prompt chip (`home.pug` & `search.pug`) returns exact matches:
+  - **Nha Trang 3N2Đ · 5–10tr**: `Tour Nha Trang - VinWonders - Đảo Bình Ba 3N2Đ` (6,990,000 đ) and `Tour Biển Nha Trang - Hòn Tằm Resort 3N2Đ` (8,490,000 đ).
+  - **Đà Lạt 2N1Đ · dưới 5tr**: `Tour Đà Lạt 2N1Đ: Săn Mây Cầu Đất - Thung Lũng Tình Yêu` (2,890,000 đ) and `Tour Đà Lạt 2N1Đ: Thành Phố Ngàn Hoa - Puppy Farm` (3,690,000 đ).
+  - **Phú Quốc 4N3Đ · ~8tr & Tour biển ~8tr**: `Tour Phú Quốc 4N3Đ: Grand World - Hòn Thơm - Đảo Ngọc` (7,990,000 đ), `Tour Biển Phú Quốc 4N3Đ: Cano 4 Đảo - Sunset Town` (8,290,000 đ), and `Tour Biển Quy Nhơn - Kỳ Co - Eo Gió 4N3Đ` (7,890,000 đ).
+  - **Tour Châu Âu 8N7Đ**: `Tour Châu Âu 8N7Đ: Pháp - Thụy Sĩ - Ý Lãng Mạn` (54,900,000 đ) and `Tour Châu Âu 8N7Đ: Đức - Áo - Séc - Hungary` (49,900,000 đ).
