@@ -113,17 +113,50 @@ const isAiPriorityQuery = (query) => Boolean(
   || query.priceAdult
 );
 
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const parseDestinationList = (rawLocationTo) => {
+  if (typeof rawLocationTo !== 'string' || !rawLocationTo.trim()) {
+    return [];
+  }
+
+  const seen = new Set();
+  const list = [];
+  for (const part of rawLocationTo.split(',')) {
+    const label = part.trim();
+    if (!label) continue;
+    const slug = slugifyVietnamese(label);
+    if (!slug || seen.has(slug)) continue;
+    seen.add(slug);
+
+    const patterns = [escapeRegex(slug)];
+    if (slug === 'sapa') {
+      patterns.push('sa-pa');
+    } else if (slug === 'sa-pa') {
+      patterns.push('sapa');
+    }
+
+    list.push({
+      label,
+      slug,
+      regex: new RegExp(patterns.join('|'), 'i'),
+      pattern: patterns.join('|')
+    });
+  }
+  return list;
+};
+
 const buildHardDestinationQuery = (query) => {
   const find = {
     deleted: false,
     status: 'active'
   };
 
-  if (typeof query.locationTo === 'string' && query.locationTo.trim()) {
-    const keyword = slugifyVietnamese(query.locationTo);
-    if (keyword) {
-      find.slug = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-    }
+  const destinations = parseDestinationList(query.locationTo);
+  if (destinations.length === 1) {
+    find.slug = destinations[0].regex;
+  } else if (destinations.length > 1) {
+    find.slug = new RegExp(destinations.map((d) => `(?:${d.pattern})`).join('|'), 'i');
   }
 
   return find;
@@ -169,9 +202,16 @@ const scoreAndRankTours = (tours, query) => {
   const targetDuration = hasDurationCriterion ? parseDuration(query.time) : null;
   const targetTimeRegex = hasDurationCriterion ? durationRegex(query.time) : null;
   const priceBounds = parsePriceBounds(query);
-  const hasDestination = typeof query.locationTo === 'string' && Boolean(query.locationTo.trim());
+  const destinationList = parseDestinationList(query.locationTo);
+  const hasDestination = destinationList.length > 0;
 
   const scored = tours.map((tour) => {
+    let destinationRank = 0;
+    if (hasDestination) {
+      const idx = destinationList.findIndex((d) => d.regex.test(String(tour.slug || '')));
+      destinationRank = idx >= 0 ? idx : destinationList.length;
+    }
+
     // 1. Đánh giá độ khớp và khoảng cách Thời lượng (Duration)
     let isDurationMatch = false;
     let durationDiff = 0;
@@ -221,6 +261,7 @@ const scoreAndRankTours = (tours, query) => {
 
     return {
       tour,
+      destinationRank,
       matchedCount,
       isDurationMatch,
       isPriceMatch,
@@ -250,12 +291,16 @@ const scoreAndRankTours = (tours, query) => {
 
   // Sắp xếp theo thứ tự ưu tiên:
   // 1. Số tiêu chí khớp (Cả thời lượng & giá > Khớp 1 > Không khớp chính xác nhưng gần nhất)
-  // 2. Ưu tiên khớp / gần Thời lượng trước (durationDiff tăng dần)
-  // 3. Ưu tiên khớp / gần Khoảng giá (priceDiff tăng dần, sau đó midpointDiff tăng dần)
-  // 4. position giảm dần
+  // 2. Thứ tự ưu tiên điểm đến do AI gợi ý (destinationRank tăng dần)
+  // 3. Ưu tiên khớp / gần Thời lượng trước (durationDiff tăng dần)
+  // 4. Ưu tiên khớp / gần Khoảng giá (priceDiff tăng dần, sau đó midpointDiff tăng dần)
+  // 5. position giảm dần
   filteredScored.sort((a, b) => {
     if (b.matchedCount !== a.matchedCount) {
       return b.matchedCount - a.matchedCount;
+    }
+    if (a.destinationRank !== b.destinationRank) {
+      return a.destinationRank - b.destinationRank;
     }
     if (a.durationDiff !== b.durationDiff) {
       return a.durationDiff - b.durationDiff;
@@ -291,10 +336,16 @@ const buildAiSearchSummary = (query) => {
   }
 
   const chips = [];
-  if (typeof query.locationTo === 'string' && query.locationTo.trim()) {
+  const destinations = parseDestinationList(query.locationTo);
+  if (destinations.length > 1) {
+    chips.push({
+      label: 'Điểm đến gợi ý',
+      value: destinations.map((d) => d.label).join(', ')
+    });
+  } else if (destinations.length === 1) {
     chips.push({
       label: 'Điểm đến',
-      value: query.locationTo.trim()
+      value: destinations[0].label
     });
   }
 
@@ -341,11 +392,11 @@ const buildTourQuery = (query) => {
     find.locations = query.locationFrom;
   }
 
-  if(typeof query.locationTo === 'string' && query.locationTo.trim()){
-    const keyword = slugifyVietnamese(query.locationTo);
-    if(keyword){
-      find.slug = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-    }
+  const destinations = parseDestinationList(query.locationTo);
+  if (destinations.length === 1) {
+    find.slug = destinations[0].regex;
+  } else if (destinations.length > 1) {
+    find.slug = new RegExp(destinations.map((d) => `(?:${d.pattern})`).join('|'), 'i');
   }
 
   if(typeof query.time === 'string' && query.time.trim()){

@@ -33,7 +33,9 @@ module.exports.searchPost = async (req, res) => {
     if (promptText) {
       searchParams.set('prompt', promptText);
     }
-    if (criteria.name) {
+    if (Array.isArray(criteria.destinations) && criteria.destinations.length > 0) {
+      searchParams.set('locationTo', criteria.destinations.join(','));
+    } else if (criteria.name) {
       searchParams.set('locationTo', criteria.name);
     }
     if (criteria.time) {
