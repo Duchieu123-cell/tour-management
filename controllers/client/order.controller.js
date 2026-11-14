@@ -46,12 +46,37 @@ const formatPassengers = (item) => {
     .join(', ');
 };
 
+const getCustomerId = (res) => {
+  const customer = res.locals.customer;
+  if (!customer) return null;
+  return customer.id || (customer._id ? String(customer._id) : null);
+};
+
+const buildCustomerOrderFilter = (customer) => {
+  const customerId = customer?.id || (customer?._id ? String(customer._id) : null);
+  if (!customerId) return null;
+
+  const customerIdConditions = mongoose.isValidObjectId(customerId)
+    ? [customerId, new mongoose.Types.ObjectId(customerId)]
+    : [customerId];
+
+  return { customerId: { $in: customerIdConditions } };
+};
+
 module.exports.createPost = async (req, res) => {
+  const customerId = getCustomerId(res);
+  if (!customerId) {
+    return res.status(401).json({
+      code: "ERROR",
+      message: "Vui lòng đăng nhập để đặt tour"
+    });
+  }
+
   // Mã đơn hàng
   req.body.code = `OD${generateHelper.generateRandomNumber(10)}`;
 
   // Chủ đơn lấy từ phiên đăng nhập, không nhận từ body
-  req.body.customerId = res.locals.customer.id;
+  req.body.customerId = customerId;
 
   // Danh sách tour
   for (const item of req.body.items){
@@ -104,10 +129,16 @@ module.exports.createPost = async (req, res) => {
 }
 
 module.exports.myOrders = async (req, res) => {
+  const customer = res.locals.customer;
+  const accountFilter = buildCustomerOrderFilter(customer);
+  if (!accountFilter) {
+    return res.redirect('/account/login');
+  }
+
   const status = Object.keys(ORDER_STATUS_QUERIES).includes(req.query.status) ? req.query.status : '';
 
   const find = {
-    customerId: res.locals.customer.id,
+    ...accountFilter,
     deleted: false
   };
   if (status) {
@@ -162,10 +193,19 @@ module.exports.myOrders = async (req, res) => {
 };
 
 module.exports.cancelMyOrder = async (req, res) => {
+  const customer = res.locals.customer;
+  const accountFilter = buildCustomerOrderFilter(customer);
+  if (!accountFilter) {
+    return res.status(401).json({
+      code: 'ERROR',
+      message: 'Vui lòng đăng nhập để thực hiện thao tác này'
+    });
+  }
+
   // Lọc theo chủ đơn và trạng thái trong cùng một lệnh để không hoàn chỗ hai lần
   const order = await Order.findOneAndUpdate({
     code: req.params.code,
-    customerId: res.locals.customer.id,
+    ...accountFilter,
     deleted: false,
     status: ORDER_STATUS_QUERIES.done
   }, {
@@ -267,10 +307,17 @@ module.exports.success = async (req, res) => {
       }
     }
 
+    const customerId = getCustomerId(res);
+    const isOwner = Boolean(
+      customerId &&
+      orderDetail.customerId &&
+      String(orderDetail.customerId) === String(customerId)
+    );
+
     res.render('client/pages/order-success', {
       pageTitle: "Đặt hàng thành công",
       orderDetail: orderDetail,
-      canCancel: orderDetail.customerId === res.locals.customer.id && orderDetail.status !== 'cancel'
+      canCancel: isOwner && orderDetail.status !== 'cancel'
     });
   } else {
     res.redirect('/');

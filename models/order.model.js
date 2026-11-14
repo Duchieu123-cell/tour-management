@@ -4,7 +4,10 @@ mongoose.plugin(slug);
 
 const schema = new mongoose.Schema({
   code: String,
-  customerId: String,
+  customerId: {
+    type: String,
+    index: true
+  },
   fullName: String,
   phoneNumber: String,
   note: String,

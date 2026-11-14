@@ -667,9 +667,24 @@ async function run() {
       ];
 
       for (const ord of sampleOctOrders) {
+        if (!ord.customerId && ord.phoneNumber) {
+          const matchedCustomer = await Customer.findOne({ phone: ord.phoneNumber, deleted: { $ne: true } }).select('_id');
+          if (matchedCustomer) {
+            ord.customerId = String(matchedCustomer._id);
+          }
+        }
         await Order.collection.updateOne({ code: ord.code }, { $set: ord }, { upsert: true });
       }
       console.log('Seeded October 2026 comparison orders for Dashboard chart.');
+    }
+
+    // Link customerId for orders that match customer phone numbers
+    const customersWithPhone = await Customer.find({ phone: { $exists: true, $ne: '' }, deleted: { $ne: true } }).select('_id phone');
+    for (const cust of customersWithPhone) {
+      await Order.updateMany(
+        { phoneNumber: cust.phone, $or: [{ customerId: null }, { customerId: { $exists: false } }, { customerId: '' }] },
+        { $set: { customerId: String(cust._id) } }
+      );
     }
 
     // Mark completed November 2026 orders as paid so Dashboard shows realistic paid vs unpaid figures
