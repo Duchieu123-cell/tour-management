@@ -1,21 +1,25 @@
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+const { pathAdmin } = require('../../config/variable');
 const AccountAdmin = require('../../models/accounts-admin.model');
 const Role = require('../../models/role.model');
 
 module.exports.edit = async (req, res) => {
-  const profileDetail = await AccountAdmin.findOne({
-    _id: req.account.id
-  });
+  const accountId = req.account?.id || req.account?._id;
+  const profileDetail = accountId
+    ? await AccountAdmin.findOne({ _id: accountId }).lean()
+    : null;
 
-  if (profileDetail) {
-    const roleDetail = await Role.findOne({
-      _id: profileDetail.role
-    });
-
-    profileDetail.roleName = roleDetail.name;
+  if (!profileDetail) {
+    return res.redirect(`/${pathAdmin}/dashboard`);
   }
 
-  console.log(profileDetail);
+  let roleName = '';
+  if (profileDetail.role && mongoose.isValidObjectId(profileDetail.role)) {
+    const roleDetail = await Role.findOne({ _id: profileDetail.role }).select('name').lean();
+    roleName = roleDetail ? roleDetail.name : '';
+  }
+  profileDetail.roleName = roleName;
 
   res.render('admin/pages/profile-edit', {
     pageTitle: 'Thông tin cá nhân',

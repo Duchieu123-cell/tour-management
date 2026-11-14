@@ -29,7 +29,10 @@ module.exports.verifyToken = async (req, res, next) => {
       _id: existAccount.role,
     }).select("name permissions").lean();
 
-    req.account = existAccount;
+    req.account = {
+      ...existAccount,
+      id: String(existAccount._id)
+    };
     req.role = roleDetail;
 
     res.locals.account = {
