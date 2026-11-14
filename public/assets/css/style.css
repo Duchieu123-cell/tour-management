@@ -3942,6 +3942,10 @@ ul{
     color: #B42318;
 }
 
+.customer-auth-error.is-success{
+    color: #067647;
+}
+
 @media (max-width: 575.98px){
     .customer-auth-page{
         padding: 30px 15px;

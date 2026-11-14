@@ -141,3 +141,50 @@ module.exports.changePassword = (req, res, next) => {
 
   next();
 };
+
+module.exports.forgotPassword = (req, res, next) => {
+  const schema = Joi.object({
+    email: Joi.string().trim().email().required()
+  });
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    return respondWithError(res, error);
+  }
+
+  req.body.email = value.email.toLowerCase();
+  next();
+};
+
+module.exports.resetPassword = (req, res, next) => {
+  const schema = Joi.object({
+    email: Joi.string().trim().email().required(),
+    token: Joi.string().hex().length(64).required(),
+    password: Joi.string()
+      .min(8)
+      .custom((value, helpers) => {
+        if (!/[A-Z]/.test(value)) return helpers.error('password.uppercase');
+        if (!/[a-z]/.test(value)) return helpers.error('password.lowercase');
+        if (!/\d/.test(value)) return helpers.error('password.number');
+        if (!/[@$!%*?&]/.test(value)) return helpers.error('password.special');
+        return value;
+      })
+      .required()
+      .messages({
+        'string.min': 'Mật khẩu ít nhất 8 ký tự',
+        'password.uppercase': 'Mật khẩu cần có ít nhất 1 chữ cái in hoa',
+        'password.lowercase': 'Mật khẩu cần có ít nhất 1 chữ cái in thường',
+        'password.number': 'Mật khẩu cần có ít nhất 1 chữ số',
+        'password.special': 'Mật khẩu cần có ít nhất 1 ký tự đặc biệt (@$!%*?&)'
+      }),
+    confirmPassword: Joi.string().valid(Joi.ref('password')).required().messages({
+      'any.only': 'Mật khẩu nhập lại không khớp'
+    })
+  });
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    return respondWithError(res, error);
+  }
+
+  req.body.email = value.email.toLowerCase();
+  next();
+};

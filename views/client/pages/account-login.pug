@@ -7,6 +7,10 @@ block main
       p.inner-desc Đăng nhập vào tài khoản khách hàng của bạn
       if registered
         .alert.alert-success Đăng ký thành công. Bạn có thể đăng nhập.
+      if passwordReset
+        .alert.alert-success Đặt lại mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.
+      p.customer-auth-switch
+        a(href="/account/forgot-password") Quên mật khẩu?
       form#customer-login-form(action="/account/login" method="post")
         .customer-auth-field
           label(for="customer-email") Email
