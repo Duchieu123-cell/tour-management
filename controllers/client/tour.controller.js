@@ -2,6 +2,7 @@ const moment = require('moment');
 const Tour = require('../../models/tour.model');
 const Category = require('../../models/category.model');
 const City = require('../../models/province-city.model');
+const { getTodayStart } = require('../../helpers/tour-date.helper');
 
 module.exports.detail = async (req, res) => {
   const slug = req.params.slug;
@@ -9,7 +10,8 @@ module.exports.detail = async (req, res) => {
   const tourDetail = await Tour.findOne({
     slug: slug,
     deleted: false,
-    status: 'active'
+    status: 'active',
+    departureDate: { $gte: getTodayStart() }
   }).lean();
 
   if (!tourDetail) {

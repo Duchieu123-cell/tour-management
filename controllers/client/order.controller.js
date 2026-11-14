@@ -8,6 +8,7 @@ const sortHelper = require('../../helpers/sort.helper');
 const Tour = require('../../models/tour.model');
 const Order = require('../../models/order.model');
 const City = require('../../models/province-city.model');
+const { getTodayStart } = require('../../helpers/tour-date.helper');
 
 const ORDER_STATUS_NAMES = {
   done: 'Đã đặt',
@@ -73,6 +74,7 @@ module.exports.createPost = async (req, res) => {
       _id: item.tourId,
       status: 'active',
       deleted: false,
+      departureDate: { $gte: getTodayStart() },
       stockAdult: { $gte: quantities.stockAdult },
       stockChildren: { $gte: quantities.stockChildren },
       stockBaby: { $gte: quantities.stockBaby }
@@ -88,9 +90,12 @@ module.exports.createPost = async (req, res) => {
       for (const reservation of reservations) {
         await Tour.updateOne({ _id: reservation.tourId }, { $inc: reservation.quantities });
       }
-      const currentTour = await Tour.findById(item.tourId).select('name stockAdult stockChildren stockBaby').lean();
+      const currentTour = await Tour.findById(item.tourId).select('name departureDate stockAdult stockChildren stockBaby').lean();
       if (!currentTour) {
         return res.status(400).json({ code: 'ERROR', message: 'Một tour trong giỏ hàng không còn khả dụng.' });
+      }
+      if (!currentTour.departureDate || currentTour.departureDate < getTodayStart()) {
+        return res.status(409).json({ code: 'ERROR', message: `Tour "${currentTour.name}" đã qua ngày khởi hành nên không thể đặt.` });
       }
       const labels = [
         ['quantityAdult', 'stockAdult', 'người lớn'],

@@ -2,6 +2,7 @@ const moment = require('moment');
 const Tour = require('../../models/tour.model');
 const SettingWebsiteInfo = require('../../models/setting-website-info.model');
 const Category = require('../../models/category.model');
+const { getTodayStart } = require('../../helpers/tour-date.helper');
 
 const CATEGORY_ID_SECTION_4 = '68cfb881bc7ca4013cc1c560';
 const CATEGORY_ID_SECTION_6 = '68d72bbaf8ba79a882b8fe72';
@@ -34,17 +35,20 @@ module.exports.home = async (req, res) => {
     Tour.find({
       newPriceAdult: { $gt: 0 },
       deleted: false,
-      status: 'active'
+      status: 'active',
+      departureDate: { $gte: getTodayStart() }
     }).sort({ position: 'desc' }).limit(6).lean(),
     Tour.find({
       category: { $in: listCategorySection4 },
       deleted: false,
-      status: 'active'
+      status: 'active',
+      departureDate: { $gte: getTodayStart() }
     }).sort({ position: 'desc' }).limit(8).lean(),
     Tour.find({
       category: { $in: listCategorySection6 },
       deleted: false,
-      status: 'active'
+      status: 'active',
+      departureDate: { $gte: getTodayStart() }
     }).sort({ position: 'desc' }).limit(8).lean()
   ]);
 

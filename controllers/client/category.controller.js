@@ -4,6 +4,7 @@ const Tour = require('../../models/tour.model');
 const City = require('../../models/province-city.model');
 const PaginationHelper = require('../../helpers/pagination.helper');
 const locationHelper = require('../../helpers/location.helper');
+const { getTodayStart } = require('../../helpers/tour-date.helper');
 
 const collectDescendantIds = (categories, rootId) => {
   const childrenByParent = new Map();
@@ -74,7 +75,8 @@ module.exports.list = async (req, res) => {
   const find = {
     category: { $in: [category._id, ...allCategoryChildren] },
     deleted: false,
-    status: 'active'
+    status: 'active',
+    departureDate: { $gte: getTodayStart() }
   };
 
   const requestedPage = parseInt(req.query.page, 10);
