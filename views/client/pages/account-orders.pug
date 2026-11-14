@@ -1,0 +1,78 @@
+extends ../layouts/default.pug
+include ../mixins/account-sidebar.pug
+
+block main
+  .customer-profile-page
+    .container
+      .customer-profile-layout
+        +accountSidebar('orders')
+
+        .customer-profile-main
+          h1.customer-profile-heading Đơn đặt tour của tôi
+
+          nav.customer-profile-tabs.customer-orders-filter(aria-label="Lọc theo trạng thái đơn")
+            each filter in statusFilters
+              a(
+                href=(filter.value ? `/account/orders?status=${filter.value}` : '/account/orders')
+                aria-current=(filter.value === status ? 'page' : false)
+              ) #{filter.label}
+
+          if orders.length
+            .customer-orders-list
+              each order in orders
+                article.customer-profile-card.customer-order(order-cancel-scope)
+                  .customer-order-head
+                    div
+                      strong Mã đơn #{order.code}
+                      span Đặt lúc #{order.createdAtFormat}
+                    span.customer-order-badge(class=`is-${order.status}`) #{order.statusName}
+
+                  each item in order.items
+                    .customer-order-item
+                      if item.avatar
+                        img.customer-order-image(src=item.avatar alt=item.name)
+                      else
+                        .customer-order-image.customer-order-image-empty(aria-hidden="true")
+                          i.fa-solid.fa-image
+                      .customer-order-info
+                        if item.slug
+                          a.customer-order-name(href=`/tour/detail/${item.slug}`) #{item.name}
+                        else
+                          span.customer-order-name #{item.name}
+                        ul
+                          if item.departureDateFormat
+                            li
+                              i.fa-regular.fa-calendar
+                              | Khởi hành: #{item.departureDateFormat}
+                          if item.locationFromName
+                            li
+                              i.fa-solid.fa-location-dot
+                              | Điểm đi: #{item.locationFromName}
+                          li
+                            i.fa-solid.fa-user-group
+                            | #{item.passengers}
+
+                  .customer-order-foot
+                    .customer-order-payment
+                      span #{order.paymentMethodName}
+                      span.customer-order-badge(class=`is-${order.paymentStatus}`) #{order.paymentStatusName}
+                    .customer-order-total
+                      span Tổng tiền
+                      strong #{order.total.toLocaleString("vi-VN")}đ
+                    .customer-order-actions
+                      if order.status !== 'cancel'
+                        button.customer-order-cancel(type="button" order-cancel=order.code) Hủy đơn
+                      a.customer-profile-button-outline(href=order.detailUrl) Xem chi tiết
+                    p.customer-profile-error.customer-order-error(role="alert" hidden)
+          else
+            .customer-profile-card.customer-orders-empty
+              i.fa-solid.fa-suitcase-rolling(aria-hidden="true")
+              if status
+                h2 Không có đơn nào ở trạng thái này
+                a.customer-profile-button-outline(href="/account/orders") Xem tất cả đơn
+              else
+                h2 Bạn chưa có đơn đặt tour nào
+                p Các đơn bạn đặt từ tài khoản này sẽ hiển thị tại đây.
+                a.customer-profile-button(href="/") Khám phá tour
+
+  script(src="/assets/js/customer-orders.js")

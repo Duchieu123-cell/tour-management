@@ -4,7 +4,10 @@ block main
   .container
     .section-11(style="padding-top: 20px;")
       .inner-wrap
-        h4 Cảm ơn quý khách đã đặt tour! Chúng tôi sẽ liên hệ lại với quý khách trong thời gian sớm nhất.
+        if orderDetail.status === 'cancel'
+          h4 Đơn đặt tour này đã được hủy.
+        else
+          h4 Cảm ơn quý khách đã đặt tour! Chúng tôi sẽ liên hệ lại với quý khách trong thời gian sớm nhất.
         .inner-head
           .inner-title Thông tin đơn hàng
         p Mã đơn hàng: #{orderDetail.code}
@@ -15,6 +18,11 @@ block main
         p Trạng thái thanh toán: #{orderDetail.paymentStatusName}
         p Trạng thái đơn hàng: #{orderDetail.statusName}
         p Ngày đặt: #{orderDetail.createdAtFormat}
+        if canCancel
+          .customer-order-detail-actions(order-cancel-scope)
+            button.customer-order-cancel(type="button" order-cancel=orderDetail.code) Hủy đơn
+            p.customer-profile-error.customer-order-error(role="alert" hidden)
+          script(src="/assets/js/customer-orders.js")
 
     .section-11(style="padding-top: 20px;")
       .inner-wrap

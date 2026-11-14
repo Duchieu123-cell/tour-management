@@ -6,36 +6,63 @@ block main
   .section-1
     .container
       .inner-wrap
+        .inner-badge(
+          data-aos-duration="700"
+          data-aos="fade-up"
+          )
+          i.fa-solid.fa-wand-magic-sparkles
+          span Trợ lý tìm kiếm tour thông minh
         h1.inner-title(
           data-aos-duration="800" 
           data-aos="fade-up"
           )
           | SmartTour
           br
-          | Al-Assisted Catalog Tour Booking Platform
+          | AI-Assisted Catalog Tour Booking Platform
         p.inner-desc(
           data-aos-delay="150" 
           data-aos-duration="800" 
           data-aos="fade-up"
           )
-          | Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis
-          |   earum iste nesciunt eveniet facilis! Incidunt dolorum fugiat ipsa
-          |   esse provident molestias molestiae ea sit. Illum consequatur non
-          |   doloremque consectetur similique.
-        form.ai-search-box#ai-search-form
-          label(for="ai-tour-request")
-            i.fa-solid.fa-wand-magic-sparkles
-            | Tìm tour bằng AI
+          | Khám phá hàng trăm hành trình trong nước và quốc tế với mức giá ưu đãi nhất.
+          |   Chỉ cần mô tả mong muốn của bạn, trợ lý AI sẽ gợi ý lịch trình và điểm đến
+          |   phù hợp nhất cho kỳ nghỉ trọn vẹn.
+        form.ai-search-box#ai-search-form(
+          data-aos-delay="220"
+          data-aos-duration="800"
+          data-aos="fade-up"
+          )
+          .ai-search-header
+            label(for="ai-tour-request")
+              i.fa-solid.fa-wand-magic-sparkles
+              span Mô tả chuyến đi mơ ước của bạn
           textarea#ai-tour-request(
             name="aiTourRequest"
             maxlength="500"
+            rows="2"
             placeholder="Ví dụ: Tôi muốn tour du lịch đi Nha Trang, 3 ngày 2 đêm, giá 5 - 10 triệu."
           )
-          button.ai-search-button(type="submit")
-            i.fa-solid.fa-wand-magic-sparkles
-            | Tìm tour
+          .ai-quick-prompts(aria-label="Gợi ý nhanh")
+            span.ai-quick-label Gợi ý nhanh:
+            button.ai-quick-chip(type="button" ai-quick-prompt="Tôi muốn tour đi Nha Trang 3 ngày 2 đêm giá 5 - 10 triệu") Nha Trang 3N2Đ · 5–10tr
+            button.ai-quick-chip(type="button" ai-quick-prompt="Tìm tour Đà Lạt 2 ngày 1 đêm giá dưới 5 triệu") Đà Lạt 2N1Đ · dưới 5tr
+            button.ai-quick-chip(type="button" ai-quick-prompt="Đi Phú Quốc 4 ngày 3 đêm khoảng 8 triệu") Phú Quốc 4N3Đ · ~8tr
+            button.ai-quick-chip(type="button" ai-quick-prompt="Tour du lịch Châu Âu 8 ngày 7 đêm") Tour Châu Âu 8N7Đ
+          .ai-search-footer
+            span.ai-search-hint
+              kbd Enter
+              |  để tìm · 
+              kbd Shift
+              | +
+              kbd Enter
+              |  để xuống dòng
+            button.ai-search-button(type="submit")
+              i.fa-solid.fa-wand-magic-sparkles
+              span Tìm tour ngay
         section.ai-tour-results(ai-tour-results hidden aria-live="polite")
-          p.ai-tour-results-message(ai-tour-message)
+          .ai-tour-status
+            span.ai-tour-spinner(aria-hidden="true")
+            p.ai-tour-results-message(ai-tour-message)
           .ai-tour-suggestions(ai-tour-suggestions)
   // End Section 1
 
@@ -140,7 +167,7 @@ block main
             | ƯU ĐÃI 2026
             br
             | TOUR GIỜ CHÓT
-          p.inner-desc Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          p.inner-desc Săn ngay các tour trọn gói khởi hành gần với mức giảm giá đặc biệt số lượng có hạn.
           .inner-clock-title Kết thúc sau
           .inner-clock-number(clock-expire=clockExpire)
             .inner-item

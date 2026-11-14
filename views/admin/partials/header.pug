@@ -1,17 +1,14 @@
-header.header 
-  .inner-logo 
+header.header
+  .inner-logo
     a(href=`/${pathAdmin}/dashboard`)
-        span Bat
-        span man 
+      i.fa-solid.fa-plane-departure(aria-hidden="true")
+      span Tour Admin
   .inner-wrap
-    .inner-notify
-        img(src="/admin/assets/images/icon-bell.svg", alt="icon-bell")
-        span 6
     .inner-account
       .inner-avatar
         img(src=account.avatar, alt="avatar")
       .inner-text
         .inner-name #{account.fullName}
         .inner-role #{account.roleName}
-    button.inner-button-menu
+    button.inner-button-menu(type="button" aria-label="Mở menu")
       <i class="fa-solid fa-bars"></i>

@@ -1,6 +1,7 @@
 const moment = require('moment');
 const CryptoJS = require('crypto-js');
 const axios = require('axios');
+const mongoose = require('mongoose');
 
 const generateHelper = require('../../helpers/generate.helper');
 const sortHelper = require('../../helpers/sort.helper');
@@ -8,9 +9,49 @@ const Tour = require('../../models/tour.model');
 const Order = require('../../models/order.model');
 const City = require('../../models/province-city.model');
 
+const ORDER_STATUS_NAMES = {
+  done: 'Đã đặt',
+  cancel: 'Đã hủy'
+};
+
+// Đơn được xác nhận ngay khi đặt; đơn cũ còn "initial" cũng tính là đã đặt
+const ORDER_STATUS_QUERIES = {
+  done: { $in: ['initial', 'done'] },
+  cancel: 'cancel'
+};
+
+const getCustomerOrderStatus = (status) => (status === 'initial' ? 'done' : status);
+
+const PAYMENT_STATUS_NAMES = {
+  unpaid: 'Chưa thanh toán',
+  paid: 'Đã thanh toán'
+};
+
+const PAYMENT_METHOD_NAMES = {
+  money: 'Thanh toán tiền mặt',
+  momo: 'Ví MoMo',
+  bank: 'Chuyển khoản ngân hàng',
+  zalopay: 'ZaloPay',
+  vnpay: 'VNPay'
+};
+
+const formatPassengers = (item) => {
+  return [
+    [item.quantityAdult, 'người lớn'],
+    [item.quantityChildren, 'trẻ em'],
+    [item.quantityBaby, 'em bé']
+  ]
+    .filter(([quantity]) => quantity > 0)
+    .map(([quantity, label]) => `${quantity} ${label}`)
+    .join(', ');
+};
+
 module.exports.createPost = async (req, res) => {
   // Mã đơn hàng
   req.body.code = `OD${generateHelper.generateRandomNumber(10)}`;
+
+  // Chủ đơn lấy từ phiên đăng nhập, không nhận từ body
+  req.body.customerId = res.locals.customer.id;
 
   // Danh sách tour
   for (const item of req.body.items){
@@ -50,7 +91,7 @@ module.exports.createPost = async (req, res) => {
   req.body.paymentStatus = 'unpaid'; // paid, unpaid
 
   // Trạng thái đơn hàng
-  req.body.status = 'initial'; // initial, done, cancel
+  req.body.status = 'done'; // initial, done, cancel
 
   const newRecord = new Order(req.body);
   await newRecord.save();
@@ -61,6 +102,103 @@ module.exports.createPost = async (req, res) => {
     orderCode: req.body.code
   });
 }
+
+module.exports.myOrders = async (req, res) => {
+  const status = Object.keys(ORDER_STATUS_QUERIES).includes(req.query.status) ? req.query.status : '';
+
+  const find = {
+    customerId: res.locals.customer.id,
+    deleted: false
+  };
+  if (status) {
+    find.status = ORDER_STATUS_QUERIES[status];
+  }
+
+  const orders = await Order.find(find).sort({ createdAt: 'desc' }).lean();
+  const items = orders.flatMap((order) => order.items);
+
+  const tourIds = [...new Set(items.map((item) => item.tourId))].filter(mongoose.isValidObjectId);
+  const cityIds = [...new Set(items.map((item) => item.locationFrom))].filter(mongoose.isValidObjectId);
+
+  const [tours, cities] = await Promise.all([
+    Tour.find({ _id: { $in: tourIds } }).select('name slug avatar').lean(),
+    City.find({ _id: { $in: cityIds } }).select('name').lean()
+  ]);
+
+  const tourById = new Map(tours.map((tour) => [String(tour._id), tour]));
+  const cityById = new Map(cities.map((city) => [String(city._id), city]));
+
+  const orderList = orders.map((order) => ({
+    ...order,
+    status: getCustomerOrderStatus(order.status),
+    statusName: ORDER_STATUS_NAMES[getCustomerOrderStatus(order.status)] || order.status,
+    paymentStatusName: PAYMENT_STATUS_NAMES[order.paymentStatus] || order.paymentStatus,
+    paymentMethodName: PAYMENT_METHOD_NAMES[order.paymentMethod] || order.paymentMethod,
+    createdAtFormat: moment(order.createdAt).format('HH:mm - DD/MM/YYYY'),
+    detailUrl: `/order/success?code=${encodeURIComponent(order.code)}&phoneNumber=${encodeURIComponent(order.phoneNumber)}`,
+    items: order.items.map((item) => {
+      const tour = tourById.get(String(item.tourId));
+      return {
+        ...item,
+        name: tour ? tour.name : 'Tour không còn tồn tại',
+        slug: tour && tour.slug,
+        avatar: tour && tour.avatar,
+        departureDateFormat: item.departureDate ? moment(item.departureDate).format('DD/MM/YYYY') : '',
+        locationFromName: cityById.get(String(item.locationFrom))?.name,
+        passengers: formatPassengers(item)
+      };
+    })
+  }));
+
+  res.render('client/pages/account-orders', {
+    pageTitle: 'Đơn đặt tour của tôi',
+    orders: orderList,
+    status,
+    statusFilters: [
+      { value: '', label: 'Tất cả' },
+      ...Object.keys(ORDER_STATUS_QUERIES).map((value) => ({ value, label: ORDER_STATUS_NAMES[value] }))
+    ]
+  });
+};
+
+module.exports.cancelMyOrder = async (req, res) => {
+  // Lọc theo chủ đơn và trạng thái trong cùng một lệnh để không hoàn chỗ hai lần
+  const order = await Order.findOneAndUpdate({
+    code: req.params.code,
+    customerId: res.locals.customer.id,
+    deleted: false,
+    status: ORDER_STATUS_QUERIES.done
+  }, {
+    status: 'cancel'
+  });
+
+  if (!order) {
+    return res.status(400).json({
+      code: 'ERROR',
+      message: 'Không thể hủy đơn này'
+    });
+  }
+
+  // Hoàn lại số chỗ đã trừ khi đặt
+  for (const item of order.items) {
+    await Tour.updateOne({
+      _id: item.tourId
+    }, {
+      $inc: {
+        stockAdult: item.quantityAdult,
+        stockChildren: item.quantityChildren,
+        stockBaby: item.quantityBaby
+      }
+    });
+  }
+
+  req.flash('success', `Đã hủy đơn ${order.code}`);
+
+  res.json({
+    code: 'SUCCESS',
+    message: 'Hủy đơn thành công'
+  });
+};
 
 module.exports.success = async (req, res) => {
   const { code, phoneNumber } = req.query;
@@ -100,13 +238,13 @@ module.exports.success = async (req, res) => {
 
     switch(orderDetail.status){
       case 'initial':
-        orderDetail.statusName = "Khởi tạo";
+        orderDetail.statusName = "Đã đặt";
         break;
       case 'done':
-        orderDetail.statusName = "Hoàn thành";
+        orderDetail.statusName = "Đã đặt";
         break;
-      case 'cacel':
-        orderDetail.statusName = "Hủy";
+      case 'cancel':
+        orderDetail.statusName = "Đã hủy";
         break;
     }
 
@@ -131,7 +269,8 @@ module.exports.success = async (req, res) => {
 
     res.render('client/pages/order-success', {
       pageTitle: "Đặt hàng thành công",
-      orderDetail: orderDetail
+      orderDetail: orderDetail,
+      canCancel: orderDetail.customerId === res.locals.customer.id && orderDetail.status !== 'cancel'
     });
   } else {
     res.redirect('/');

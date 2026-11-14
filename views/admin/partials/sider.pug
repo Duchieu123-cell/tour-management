@@ -1,27 +1,48 @@
 nav.sider 
+  button.sider-toggle(type="button" aria-label="Thu gọn thanh bên" aria-expanded="true")
+    i.fa-solid.fa-angles-left(aria-hidden="true")
+    span.inner-label Thu gọn
   ul.inner-menu 
     if(account.permissions.includes('dashboard-view'))
       li
-        a(href=`/${pathAdmin}/dashboard`) <i class="fa-solid fa-gauge"></i> Tổng quan 
+        a(href=`/${pathAdmin}/dashboard`)
+          i.fa-solid.fa-gauge(aria-hidden="true")
+          span.inner-label Tổng quan
     if(account.permissions.includes('category-view'))
       li
-        a(href=`/${pathAdmin}/category/list`) <i class="fa-solid fa-border-all"></i> Quản lý danh mục
+        a(href=`/${pathAdmin}/category/list`)
+          i.fa-solid.fa-border-all(aria-hidden="true")
+          span.inner-label Quản lý danh mục
     if(account.permissions.includes('tour-view'))
       li
-        a(href=`/${pathAdmin}/tour/list`) <i class="fa-solid fa-database"></i> Quản lý tour
+        a(href=`/${pathAdmin}/tour/list`)
+          i.fa-solid.fa-database(aria-hidden="true")
+          span.inner-label Quản lý tour
     li
-      a(href=`/${pathAdmin}/order/list`) <i class="fa-solid fa-list-check"></i> Quản lý đơn hàng
+      a(href=`/${pathAdmin}/order/list`)
+        i.fa-solid.fa-list-check(aria-hidden="true")
+        span.inner-label Quản lý đơn hàng
     li
-      a(href=`/${pathAdmin}/user/list`) <i class="fa-solid fa-user"></i> Quản lý người dùng
+      a(href=`/${pathAdmin}/user/list`)
+        i.fa-solid.fa-user(aria-hidden="true")
+        span.inner-label Quản lý người dùng
     li
-      a(href=`/${pathAdmin}/contact/list`) <i class="fa-solid fa-users"></i> Thông tin liên hệ
+      a(href=`/${pathAdmin}/contact/list`)
+        i.fa-solid.fa-users(aria-hidden="true")
+        span.inner-label Thông tin liên hệ
   hr
   ul.inner-menu 
     li
-      a(href=`/${pathAdmin}/setting/list`) <i class="fa-solid fa-gear"></i> Cài đặt chung
+      a(href=`/${pathAdmin}/setting/list`)
+        i.fa-solid.fa-gear(aria-hidden="true")
+        span.inner-label Cài đặt chung
     li
-      a(href=`/${pathAdmin}/profile/edit`) <i class="fa-solid fa-user-gear"></i> Thông tin cá nhân
+      a(href=`/${pathAdmin}/profile/edit`)
+        i.fa-solid.fa-user-gear(aria-hidden="true")
+        span.inner-label Thông tin cá nhân
     li
-      a(href="javascript:;" class="inner-logout") <i class="fa-solid fa-power-off"></i> Đăng xuất
+      a(href="javascript:;" class="inner-logout")
+        i.fa-solid.fa-power-off(aria-hidden="true")
+        span.inner-label Đăng xuất
 
 .sider-overlay

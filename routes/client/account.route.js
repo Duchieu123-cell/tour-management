@@ -2,6 +2,9 @@ const router = require('express').Router();
 
 const accountController = require('../../controllers/client/account.controller');
 const accountValidate = require('../../validates/client/account.validate');
+const orderController = require('../../controllers/client/order.controller');
+const profileController = require('../../controllers/client/profile.controller');
+const profileValidate = require('../../validates/client/profile.validate');
 const authMiddleware = require('../../middlewares/client/auth.middleware');
 
 router.get('/login', accountController.login);
@@ -11,6 +14,10 @@ router.get('/register', accountController.register);
 router.post('/register', accountValidate.registerPost, accountController.registerPost);
 
 router.post('/logout', accountController.logoutPost);
+
+router.get('/orders', authMiddleware.requireCustomer, orderController.myOrders);
+router.post('/orders/:code/cancel', authMiddleware.requireCustomerApi, orderController.cancelMyOrder);
+
 router.post(
   '/change-password',
   authMiddleware.requireCustomerApi,

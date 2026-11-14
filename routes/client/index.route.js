@@ -13,9 +13,27 @@ const settingMiddleware = require('../../middlewares/client/setting.middleware')
 const categoryMiddleware = require('../../middlewares/client/category.middleware');
 const authMiddleware = require('../../middlewares/client/auth.middleware');
 
-router.use(settingMiddleware.websiteInfo);
-router.use(categoryMiddleware.list);
-router.use(authMiddleware.optionalCustomer);
+const runMiddleware = (middleware, req, res) => new Promise((resolve, reject) => {
+  middleware(req, res, (err) => {
+    if (err) {
+      return reject(err);
+    }
+    return resolve();
+  });
+});
+
+router.use(async (req, res, next) => {
+  try {
+    await Promise.all([
+      runMiddleware(settingMiddleware.websiteInfo, req, res),
+      runMiddleware(categoryMiddleware.list, req, res),
+      runMiddleware(authMiddleware.optionalCustomer, req, res)
+    ]);
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+});
 
 router.use('/account', accountRoutes);
 router.use(authMiddleware.requireCustomer);

@@ -26,6 +26,42 @@ if(buttonMenuMobile){
 }
 // End Menu Mobile
 
+// Header Active Nav Link
+const headerNavLinks = document.querySelectorAll(".header .inner-menu a");
+if(headerNavLinks.length){
+	const currentPath = window.location.pathname;
+	headerNavLinks.forEach((link) => {
+		const linkPath = link.getAttribute("href");
+		const isExactHome = linkPath === "/" && currentPath === "/";
+		const isCategoryMatch = linkPath !== "/" && (currentPath === linkPath || currentPath.startsWith(`${linkPath}/`));
+		link.classList.toggle("active", isExactHome || isCategoryMatch);
+	});
+}
+// End Header Active Nav Link
+
+// Header Account Dropdown
+const headerAccountDropdown = document.querySelector("[header-account-dropdown]");
+if(headerAccountDropdown){
+	const trigger = headerAccountDropdown.querySelector("[header-account-trigger]");
+	if(trigger){
+		trigger.addEventListener("click", (event) => {
+			event.stopPropagation();
+			const isOpen = headerAccountDropdown.classList.toggle("is-open");
+			trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+		});
+	}
+
+	document.addEventListener("click", (event) => {
+		if(!headerAccountDropdown.contains(event.target)){
+			headerAccountDropdown.classList.remove("is-open");
+			if(trigger){
+				trigger.setAttribute("aria-expanded", "false");
+			}
+		}
+	});
+}
+// End Header Account Dropdown
+
 
 // Box Address Section 1
 const boxAddressSection1 = document.querySelector(".section-1 .inner-form .inner-address");
@@ -167,6 +203,26 @@ if(buttonFilterMobile){
 const boxTourInfo = document.querySelector(".section-10 .box-tour-info");
 if(boxTourInfo){
 	const buttonReadMore = boxTourInfo.querySelector(".inner-read-more .button-outline");
+	const infoContent = boxTourInfo.querySelector(".inner-content");
+
+	// Chỉ thu gọn khi nội dung dài hơn chiều cao tối đa; nội dung ngắn hiển thị vừa khít, ẩn nút
+	const updateCollapse = () => {
+		if(boxTourInfo.classList.contains("active")){
+			return;
+		}
+		boxTourInfo.classList.remove("no-collapse");
+		if(infoContent.scrollHeight <= infoContent.clientHeight + 1){
+			boxTourInfo.classList.add("no-collapse");
+		}
+	};
+	updateCollapse();
+	window.addEventListener("load", updateCollapse);
+	infoContent.querySelectorAll("img").forEach((img) => {
+		if(!img.complete){
+			img.addEventListener("load", updateCollapse);
+		}
+	});
+
 	buttonReadMore.addEventListener("click", () => {
 		if(!boxTourInfo.classList.contains("active")){
 			boxTourInfo.classList.add("active");
@@ -569,22 +625,52 @@ if(aiSearchForm){
 	const aiTourResults = document.querySelector("[ai-tour-results]");
 	const aiTourMessage = aiTourResults.querySelector("[ai-tour-message]");
 	const aiTourSuggestions = aiTourResults.querySelector("[ai-tour-suggestions]");
+	const quickPromptButtons = document.querySelectorAll("[ai-quick-prompt]");
+
+	quickPromptButtons.forEach((chip) => {
+		chip.addEventListener("click", () => {
+			const promptText = chip.getAttribute("ai-quick-prompt");
+			if(promptText){
+				aiTourRequest.value = promptText;
+				aiTourRequest.focus();
+				aiTourRequest.scrollIntoView({ behavior: "smooth", block: "center" });
+			}
+		});
+	});
+
+	aiTourRequest.addEventListener("keydown", (event) => {
+		if(event.key === "Enter" && !event.shiftKey && !event.isComposing){
+			event.preventDefault();
+			aiSearchForm.requestSubmit();
+		}
+	});
+
+	const setAiStatus = (state, message) => {
+		aiTourResults.classList.remove("is-loading", "is-success", "is-warning", "is-error");
+		if(state){
+			aiTourResults.classList.add(`is-${state}`);
+		}
+		aiTourResults.hidden = false;
+		aiTourMessage.textContent = message;
+	};
 
 	aiSearchForm.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const request = aiTourRequest.value.trim();
 		if(!request){
 			aiTourRequest.focus();
-			aiTourResults.hidden = false;
-			aiTourMessage.textContent = "Hãy mô tả điểm đến, thời lượng hoặc ngân sách bạn mong muốn.";
+			aiTourSuggestions.replaceChildren();
+			setAiStatus("warning", "Hãy mô tả điểm đến, thời lượng hoặc ngân sách bạn mong muốn.");
 			return;
 		}
 
 		aiSearchButton.disabled = true;
 		aiSearchButton.classList.add("is-loading");
-		aiTourResults.hidden = false;
-		aiTourMessage.textContent = "AI đang phân tích yêu cầu...";
+		setAiStatus("loading", "AI đang phân tích yêu cầu của bạn...");
 		aiTourSuggestions.replaceChildren();
+
+		const controller = new AbortController();
+		const timeoutId = window.setTimeout(() => controller.abort(), 15000);
 
 		try{
 			const response = await fetch("/search/ai", {
@@ -592,23 +678,37 @@ if(aiSearchForm){
 				headers: {
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({ request })
+				body: JSON.stringify({ request }),
+				signal: controller.signal
 			});
 
 			if(response.redirected && new URL(response.url).pathname === "/account/login"){
 				window.location.href = response.url;
 				return;
 			}
-			if(!response.headers.get("content-type")?.includes("application/json")){
-				throw new Error("Phiên đăng nhập có thể đã hết hạn. Vui lòng đăng nhập lại.");
+
+			let data = null;
+			try{
+				data = await response.json();
+			}
+			catch{
+				if(response.status === 401){
+					throw new Error("Phiên đăng nhập có thể đã hết hạn. Vui lòng đăng nhập lại.");
+				}
+				if(response.status === 429){
+					throw new Error("Gemini đang giới hạn lượt gọi hoặc đã hết quota. Vui lòng thử lại sau.");
+				}
+				if(response.status === 504){
+					throw new Error("AI phản hồi quá thời gian chờ. Vui lòng thử lại.");
+				}
+				throw new Error("Không thể phân tích yêu cầu lúc này. Vui lòng thử lại sau.");
 			}
 
-			const data = await response.json();
 			if(!response.ok || data.code === "ERROR"){
-				throw new Error(data.message || "Không thể phân tích yêu cầu.");
+				throw new Error(data?.message || "Không thể phân tích yêu cầu lúc này. Vui lòng thử lại sau.");
 			}
 
-			aiTourMessage.textContent = data.message;
+			setAiStatus(data.code === "SUCCESS" ? "success" : "warning", data.message);
 			(data.suggestions || []).forEach((suggestion) => {
 				const button = document.createElement("button");
 				button.type = "button";
@@ -629,9 +729,13 @@ if(aiSearchForm){
 			}
 		}
 		catch(error){
-			aiTourMessage.textContent = error.message || "Không thể tìm tour lúc này. Vui lòng thử lại.";
+			const message = error.name === "AbortError"
+				? "AI phản hồi quá thời gian chờ. Vui lòng thử lại."
+				: (error.message || "Không thể tìm tour lúc này. Vui lòng thử lại.");
+			setAiStatus("error", message);
 		}
 		finally{
+			window.clearTimeout(timeoutId);
 			aiSearchButton.disabled = false;
 			aiSearchButton.classList.remove("is-loading");
 		}
@@ -671,6 +775,9 @@ if(boxTourDetail){
 	inputStockAdult.addEventListener("change", drawBoxDetail);
 	inputStockChildren.addEventListener("change", drawBoxDetail);
 	inputStockBaby.addEventListener("change", drawBoxDetail);
+	inputStockAdult.addEventListener("input", drawBoxDetail);
+	inputStockChildren.addEventListener("input", drawBoxDetail);
+	inputStockBaby.addEventListener("input", drawBoxDetail);
 
 	const buttonAddCart = boxTourDetail.querySelector(".inner-button-add-cart");
 	buttonAddCart.addEventListener("click", () => {
@@ -721,7 +828,7 @@ if(miniCart){
 
 // Page Cart
 const drawCart = () => {
-	const cart = localStorage.getItem("cart");
+	const cart = localStorage.getItem("cart") || "[]";
 	fetch('/cart/detail', {
 		method: 'POST',
 		headers: {
@@ -732,9 +839,37 @@ const drawCart = () => {
 		.then(res => res.json())
 		.then(data => {
 			if(data.code == "SUCCESS"){
+				const cartCountLabel = pageCart.querySelector("[cart-count-label]");
+				if(cartCountLabel){
+					cartCountLabel.textContent = `${data.cart.length} tour`;
+				}
+
+				const cartList = pageCart.querySelector("[cart-list]");
+				if(data.cart.length === 0){
+					cartList.innerHTML = `
+						<div class="cart-empty-state">
+							<div class="cart-empty-icon">
+								<i class="fa-solid fa-cart-shopping"></i>
+							</div>
+							<h3 class="cart-empty-title">Giỏ hàng của bạn đang trống</h3>
+							<p class="cart-empty-desc">Hãy khám phá các hành trình hấp dẫn và thêm tour yêu thích vào giỏ hàng để đặt chỗ nhanh chóng.</p>
+							<a class="cart-empty-btn" href="/category/tour-trong-nuoc">
+								<i class="fa-solid fa-compass"></i>
+								<span>Khám phá tour ngay</span>
+							</a>
+						</div>
+					`;
+					miniCart.innerHTML = 0;
+					localStorage.setItem("cart", JSON.stringify([]));
+					pageCart.querySelector("[cart-sub-total]").innerHTML = "0";
+					pageCart.querySelector("[cart-discount]").innerHTML = "0";
+					pageCart.querySelector("[cart-total]").innerHTML = "0";
+					return;
+				}
+
 				// Hiển thị item
 				const htmlCart = data.cart.map(item => `
-				<div class="inner-tour-item">
+				<div class="inner-tour-item ${item.checked ? "is-checked" : ""}">
 					<div class="inner-action">
 						<button class="inner-delete" button-delete tour-id="${item.tourId}">
 							<i class="fa-solid fa-xmark"></i>
@@ -823,7 +958,6 @@ const drawCart = () => {
 				</div>	
 				`)
 
-				const cartList = pageCart.querySelector("[cart-list]");
 				cartList.innerHTML = htmlCart.join("");
 
 				// Hết hiển thị item
@@ -912,3 +1046,24 @@ if(pageCart){
 	drawCart();
 }
 // End Page Cart
+
+// Client Pagination
+const clientPagination = document.querySelector("[client-pagination]");
+if(clientPagination){
+	const buttons = clientPagination.querySelectorAll("[data-page]");
+	buttons.forEach((button) => {
+		button.addEventListener("click", () => {
+			if(button.disabled || button.classList.contains("active")) return;
+			const targetPage = parseInt(button.getAttribute("data-page"), 10);
+			if(Number.isNaN(targetPage) || targetPage < 1) return;
+			const url = new URL(window.location.href);
+			if(targetPage > 1){
+				url.searchParams.set("page", targetPage);
+			} else {
+				url.searchParams.delete("page");
+			}
+			window.location.href = url.href;
+		});
+	});
+}
+// End Client Pagination

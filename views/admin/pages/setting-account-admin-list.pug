@@ -1,4 +1,5 @@
 extends ../layouts/layout-default.pug
+include ../mixins/pagination.pug
 
 block main
   h1.box-title Tài khoản quản trị
@@ -9,36 +10,34 @@ block main
       .inner-item.inner-label
         <i class="fa-solid fa-filter"></i> Bộ lọc
       .inner-item
-        select
-          option(value="") Trạng thái
-          option(value="") Hoạt động 
-          option(value="") Tạm dừng
+        span.inner-field-label Trạng thái
+        select(filter-status)
+          option(value="") Tất cả trạng thái
+          option(value="active") Hoạt động 
+          option(value="inactive") Tạm dừng
+          option(value="initial") Khởi tạo
       .inner-item.inner-date
-        input(type="date")
-        span -
-        input(type="date")
+        span.inner-field-label Ngày tạo
+        .inner-date-inputs
+          span.inner-date-label Từ
+          input(type="date" filter-start-date aria-label="Từ ngày")
+          span.inner-date-sep -
+          span.inner-date-label Đến
+          input(type="date" filter-end-date aria-label="Đến ngày")
       .inner-item
+        span.inner-field-label Nhóm quyền
         select
-          option(value="") Nhóm quyền 
+          option(value="") Tất cả nhóm quyền
           option(value="") Quản trị viên 
           option(value="") Quản lý tour 
           option(value="") Quản lý đơn hàng  
-      .inner-item.inner-reset
+      .inner-item.inner-reset(filter-reset)
         <i class="fa-solid fa-rotate-left"></i> Xóa bộ lọc
   //- End Section 4
 
   //- Section 5
   .section-5 
     .inner-wrap
-      .inner-change-status
-        .inner-item
-          select
-            option(value="") --Hành động--
-            option(value="") Hoạt động
-            option(value="") Dừng hoạt động
-            option(value="") Xóa
-        .inner-item
-          button Áp dụng
       .inner-search
         <i class="fa-solid fa-magnifying-glass"></i>
         input(type="text" placeholder="Tìm kiếm")  
@@ -52,28 +51,24 @@ block main
       table
         thead
           tr
-            th(class="inner-center")
-              input(type="checkbox" class="inner-check")
             th Họ tên
-            th Ảnh đại diện
+            th(class="inner-center") Ảnh đại diện
             th Email 
             th(class="inner-center") Số điện thoại
             th Nhóm quyền 
             th Chức vụ 
             th(class="inner-center") Trạng thái
-            th Hành động 
+            th.inner-center Hành động 
         tbody
           each admin in accountAdminList
             tr
-              td(class="inner-center")
-                input(type="checkbox" class="inner-check")
-              td #{admin.fullName}
-              td 
+              td.inner-col-name #{admin.fullName}
+              td.inner-center
                 img(src=admin.avatar, class="inner-avatar") 
-              td #{admin.email}
-              td(class="inner-center") #{admin.phoneNumber}
-              td #{admin.roleName}
-              td #{admin.positionCompany}
+              td.inner-col-email #{admin.email}
+              td(class="inner-center inner-nowrap") #{admin.phoneNumber}
+              td.inner-nowrap #{admin.roleName}
+              td.inner-nowrap #{admin.positionCompany}
               td(class="inner-center")
                 if admin.status == 'inactive'
                   .badge.badge-red Dừng hoạt động
@@ -81,7 +76,7 @@ block main
                   .badge.badge-green Hoạt động
                 else if admin.status == 'initial'
                   .badge.badge-orange Khởi tạo
-              td
+              td.inner-center
                 .inner-buttons
                   a(
                     href=`/${pathAdmin}/setting/account-admin/edit/${admin._id}`
@@ -95,10 +90,5 @@ block main
   //- End Section 6
 
   //- Section 7
-  .section-7  
-    span.inner-label Hiển thị 1 - 9 của 78
-    select(class="inner-pagination")
-      option Trang 1
-      option Trang 2
-      option Trang 3
+  +pagination(pagination, accountAdminList ? accountAdminList.length : 0)
   //- End Section 7

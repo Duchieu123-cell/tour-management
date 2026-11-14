@@ -2,6 +2,14 @@ const moment = require('moment');
 const bcrypt = require('bcryptjs');
 const Customer = require('../../models/customer.model');
 
+const hasPermission = (req, perm) => {
+  if (!req.role || !Array.isArray(req.role.permissions)) return true;
+  // Allow if role explicitly has the permission or if user-* permissions haven't been assigned to the role yet
+  const hasAnyUserPerm = req.role.permissions.some((p) => p.startsWith('user-'));
+  if (!hasAnyUserPerm && req.role.permissions.includes('tour-view')) return true;
+  return req.role.permissions.includes(perm);
+};
+
 // [GET] /admin/user/list
 module.exports.list = async (req, res) => {
   try {
@@ -28,7 +36,8 @@ module.exports.list = async (req, res) => {
 
     // Tìm kiếm theo Họ tên, Email, Số điện thoại
     if (req.query.keyword) {
-      const keywordRegex = new RegExp(req.query.keyword.trim(), 'i');
+      const escaped = req.query.keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const keywordRegex = new RegExp(escaped, 'i');
       find.$or = [
         { fullName: keywordRegex },
         { email: keywordRegex },
@@ -134,6 +143,10 @@ module.exports.detail = async (req, res) => {
 // [POST] /admin/user/create
 module.exports.createPost = async (req, res) => {
   try {
+    if (!hasPermission(req, 'user-create')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền thêm người dùng' });
+    }
+
     const { email, password } = req.body;
 
     const existEmail = await Customer.findOne({
@@ -181,6 +194,10 @@ module.exports.createPost = async (req, res) => {
 // [PATCH] /admin/user/edit/:id
 module.exports.editPatch = async (req, res) => {
   try {
+    if (!hasPermission(req, 'user-edit')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền chỉnh sửa người dùng' });
+    }
+
     const { id } = req.params;
 
     const existUser = await Customer.findOne({ _id: id, deleted: false });
@@ -233,6 +250,10 @@ module.exports.editPatch = async (req, res) => {
 // [PATCH] /admin/user/change-status/:status/:id
 module.exports.changeStatusPatch = async (req, res) => {
   try {
+    if (!hasPermission(req, 'user-edit')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền đổi trạng thái người dùng' });
+    }
+
     const { id, status } = req.params;
 
     if (!['active', 'inactive'].includes(status)) {
@@ -262,12 +283,18 @@ module.exports.changeMultiPatch = async (req, res) => {
     }
 
     if (option === 'active' || option === 'inactive') {
+      if (!hasPermission(req, 'user-edit')) {
+        return res.json({ code: 'ERROR', message: 'Bạn không có quyền đổi trạng thái người dùng' });
+      }
       await Customer.updateMany({ _id: { $in: ids } }, { status: option });
       req.flash('success', 'Đổi trạng thái thành công');
       return res.json({ code: 'SUCCESS', message: 'Đổi trạng thái thành công' });
     }
 
     if (option === 'delete') {
+      if (!hasPermission(req, 'user-delete')) {
+        return res.json({ code: 'ERROR', message: 'Bạn không có quyền xóa người dùng' });
+      }
       await Customer.updateMany(
         { _id: { $in: ids } },
         { deleted: true, deletedAt: new Date() }
@@ -285,6 +312,10 @@ module.exports.changeMultiPatch = async (req, res) => {
 // [PATCH] /admin/user/delete/:id (Soft delete)
 module.exports.deletePatch = async (req, res) => {
   try {
+    if (!hasPermission(req, 'user-delete')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền xóa người dùng' });
+    }
+
     const { id } = req.params;
 
     await Customer.updateOne(
@@ -306,6 +337,10 @@ module.exports.deletePatch = async (req, res) => {
 // [PATCH] /admin/user/undo/:id (Restore)
 module.exports.undoPatch = async (req, res) => {
   try {
+    if (!hasPermission(req, 'user-trash')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền khôi phục người dùng' });
+    }
+
     const { id } = req.params;
 
     await Customer.updateOne(
@@ -324,9 +359,13 @@ module.exports.undoPatch = async (req, res) => {
   }
 };
 
-// [DELETE] /admin/user/destroy/:id (Hard delete)
+// [PATCH/DELETE] /admin/user/destroy/:id (Hard delete)
 module.exports.destroyDelete = async (req, res) => {
   try {
+    if (!hasPermission(req, 'user-trash')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền xóa vĩnh viễn người dùng' });
+    }
+
     const { id } = req.params;
 
     await Customer.deleteOne({ _id: id });
@@ -351,7 +390,8 @@ module.exports.trash = async (req, res) => {
 
     // Tìm kiếm theo Họ tên, Email, Số điện thoại
     if (req.query.keyword) {
-      const keywordRegex = new RegExp(req.query.keyword.trim(), 'i');
+      const escaped = req.query.keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const keywordRegex = new RegExp(escaped, 'i');
       find.$or = [
         { fullName: keywordRegex },
         { email: keywordRegex },
@@ -433,6 +473,10 @@ module.exports.trash = async (req, res) => {
 // [PATCH] /admin/user/trash/change-multi
 module.exports.trashChangeMultiPatch = async (req, res) => {
   try {
+    if (!hasPermission(req, 'user-trash')) {
+      return res.json({ code: 'ERROR', message: 'Bạn không có quyền thao tác thùng rác người dùng' });
+    }
+
     const { option, ids } = req.body;
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {

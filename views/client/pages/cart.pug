@@ -1,5 +1,4 @@
 extends ../layouts/default.pug
-//- include ../mixins/box-breadcrumb.pug
 
 block main
   // Section 11
@@ -7,160 +6,44 @@ block main
     .container
       .inner-wrap
         .inner-head
-          .inner-title Giỏ hàng
-          a.inner-back(href="#")
-            | Quay lại mua hàng
+          .cart-title-group
+            .cart-title-icon
+              i.fa-solid.fa-bag-shopping
+            .inner-title Giỏ hàng của bạn
+            span.cart-count-pill(cart-count-label) 0 tour
+          a.inner-back(href="/category/tour-trong-nuoc")
+            span Tiếp tục xem tour
             i.fa-solid.fa-angle-right
-        .inner-tour-list(cart-list)
-          //- .inner-tour-item
-          //-   .inner-action
-          //-     button.inner-delete
-          //-       i.fa-solid.fa-xmark
-          //-     input.inner-check(type="checkbox")
-          //-   .inner-product
-          //-     .inner-image
-          //-       a(href="#")
-          //-         img(
-          //-           alt="" 
-          //-           src="/assets/images/image 142.jpg"
-          //-           )
-          //-     .inner-content
-          //-       .inner-title
-          //-         a(href="#") Tour Châu Âu đón Noel 11N10Đ | Pháp - Thụy Sỹ - Ý
-          //-       .inner-meta
-          //-         .inner-meta-item
-          //-           | Mã tour:
-          //-           b 123456789
-          //-         .inner-meta-item
-          //-           | Ngày khởi hành:
-          //-           b 20/10/2024
-          //-         .inner-meta-item
-          //-           | Khởi hành tại:
-          //-           b Hà Nội
-          //-   .inner-quantity
-          //-     .inner-label Số lượng hành khách
-          //-     .inner-list
-          //-       .inner-item
-          //-         .inner-item-label Người lớn:
-          //-         input.inner-item-input(
-          //-           value="1" 
-          //-           min="1" 
-          //-           type="number"
-          //-           )
-          //-         .inner-item-price
-          //-           span 1
-          //-           span x
-          //-           span.inner-highlight 10.000.000
-          //-       .inner-item
-          //-         .inner-item-label Trẻ em:
-          //-         input.inner-item-input(
-          //-           value="0" 
-          //-           min="0" 
-          //-           type="number"
-          //-           )
-          //-         .inner-item-price
-          //-           span 0
-          //-           span x
-          //-           span.inner-highlight 7.990.000
-          //-       .inner-item
-          //-         .inner-item-label Em bé:
-          //-         input.inner-item-input(
-          //-           value="0" 
-          //-           min="0" 
-          //-           type="number"
-          //-           )
-          //-         .inner-item-price
-          //-           span 0
-          //-           span x
-          //-           span.inner-highlight 5.990.000
-          //- .inner-tour-item
-            .inner-action
-              button.inner-delete
-                i.fa-solid.fa-xmark
-              input.inner-check(type="checkbox")
-            .inner-product
-              .inner-image
-                a(href="#")
-                  img(
-                    alt="" 
-                    src="/assets/images/image 142.jpg"
-                    )
-              .inner-content
-                .inner-title
-                  a(href="#") Tour Châu Âu đón Noel 11N10Đ | Pháp - Thụy Sỹ - Ý
-                .inner-meta
-                  .inner-meta-item
-                    | Mã tour:
-                    b 123456789
-                  .inner-meta-item
-                    | Ngày khởi hành:
-                    b 20/10/2024
-                  .inner-meta-item
-                    | Khởi hành tại:
-                    b Hà Nội
-            .inner-quantity
-              .inner-label Số lượng hành khách
-              .inner-list
-                .inner-item
-                  .inner-item-label Người lớn:
-                  input.inner-item-input(
-                    value="1" 
-                    min="1" 
-                    type="number"
-                    )
-                  .inner-item-price
-                    span 1
-                    span x
-                    span.inner-highlight 10.000.000
-                .inner-item
-                  .inner-item-label Trẻ em:
-                  input.inner-item-input(
-                    value="0" 
-                    min="0" 
-                    type="number"
-                    )
-                  .inner-item-price
-                    span 0
-                    span x
-                    span.inner-highlight 7.990.000
-                .inner-item
-                  .inner-item-label Em bé:
-                  input.inner-item-input(
-                    value="0" 
-                    min="0" 
-                    type="number"
-                    )
-                  .inner-item-price
-                    span 0
-                    span x
-                    span.inner-highlight 5.990.000
-        .inner-coupon
-          form#coupon-form(action="")
-            input#coupon-input(
-              placeholder="Nhập mã giảm giá" 
-              name="coupon" 
-              type="text"
-              )
-            button Dùng mã
-        .inner-list-price
-          .inner-item
-            .inner-label Tạm tính:
-            .inner-price 
-              span(cart-sub-total) 0 
-              span đ
-          .inner-item
-            .inner-label Giảm:
-            .inner-price 
-              span -
-              span(cart-discount) 0 
-              span đ
-          .inner-item
-            .inner-label Thanh toán:
-            .inner-price-highlight
-              span(cart-total) 0 
-              span đ
-  // End Section 11
 
+        .inner-tour-list(cart-list)
+
+        .cart-summary-card
+          .inner-coupon
+            form#coupon-form(action="")
+              input#coupon-input(
+                placeholder="Nhập mã giảm giá"
+                name="coupon"
+                type="text"
+              )
+              button(type="submit") Áp dụng mã
+          .inner-list-price
+            .inner-item
+              .inner-label Tạm tính:
+              .inner-price
+                span(cart-sub-total) 0
+                |  đ
+            .inner-item
+              .inner-label Giảm giá:
+              .inner-price.is-discount
+                span -
+                span(cart-discount) 0
+                |  đ
+            .inner-item.is-total
+              .inner-label Tổng thanh toán:
+              .inner-price-highlight
+                span(cart-total) 0
+                |  đ
+  // End Section 11
 
   // Section 12
   .section-12
@@ -168,67 +51,78 @@ block main
       .inner-wrap
         form#order-form(action="")
           .inner-info
-            .inner-title-main Thông tin khách hàng
+            .cart-section-head
+              .inner-title-main
+                i.fa-regular.fa-address-card
+                span Thông tin khách hàng
+              p.cart-section-sub Vui lòng điền thông tin liên hệ để chúng tôi xác nhận giữ chỗ cho bạn.
             .inner-inputs
               .inner-input
                 input#fullname-input(
-                  placeholder="Họ và tên" 
-                  name="fullName" 
+                  placeholder="Họ và tên"
+                  name="fullName"
                   type="text"
-                  )
+                )
               .inner-input
                 input#phone-input(
-                  placeholder="Số điện thoại" 
-                  name="phoneNumber" 
+                  placeholder="Số điện thoại"
+                  name="phoneNumber"
                   type="number"
-                  )
+                )
             textarea(
-              placeholder="Ghi chú" 
+              placeholder="Ghi chú thêm (yêu cầu phòng, suất ăn, giờ đón...)"
               name="note"
-              )
+            )
           .inner-method
-            .inner-title-main Chọn phương thức thanh toán
+            .cart-section-head
+              .inner-title-main
+                i.fa-regular.fa-credit-card
+                span Chọn phương thức thanh toán
             .inner-list
               .inner-item
                 input#methodMoney(
-                  value="money" 
-                  name="method" 
+                  value="money"
+                  name="method"
                   type="radio"
-                  )
-                label(for="methodMoney") Thanh toán tiền mặt
+                )
+                label(for="methodMoney") Thanh toán tiền mặt tại văn phòng
               .inner-item
                 input#methodMomo(
-                  value="momo" 
-                  name="method" 
+                  value="momo"
+                  name="method"
                   type="radio"
-                  )
-                label(for="methodMomo") Ví Momo
+                )
+                label(for="methodMomo") Ví MoMo
               .inner-item
                 input#methodZalopay(
-                  value="zalopay" 
-                  name="method" 
+                  value="zalopay"
+                  name="method"
                   type="radio"
-                  )
-                label(for="methodZalopay") Zalopay
+                )
+                label(for="methodZalopay") ZaloPay
               .inner-item
                 input#methodVnpay(
-                  value="vnpay" 
-                  name="method" 
+                  value="vnpay"
+                  name="method"
                   type="radio"
-                  )
-                label(for="methodVnpay") Vnpay
+                )
+                label(for="methodVnpay") VNPay
               .inner-item
                 input#methodBank(
-                  value="bank" 
-                  name="method" 
+                  value="bank"
+                  name="method"
                   type="radio"
-                  )
-                label(for="methodBank") Thanh toán ngân hàng
+                )
+                label(for="methodBank") Chuyển khoản ngân hàng
             .inner-info-bank
-              .inner-title Thông tin chuyển khoản
+              .inner-title
+                i.fa-solid.fa-building-columns
+                span Thông tin chuyển khoản
               .inner-text Ngân hàng: Vietcombank
               .inner-text Tên tài khoản: Le Van A
               .inner-text STK: 0123456789
           .inner-button
-            button Đặt Tour
+            button(type="submit")
+              i.fa-solid.fa-check-circle
+              span Đặt Tour Ngay
   // End Section 12
