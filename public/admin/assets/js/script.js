@@ -1206,6 +1206,11 @@ const listButtonDelete = document.querySelectorAll("[button-delete]");
 if (listButtonDelete.length > 0) {
   listButtonDelete.forEach((button) => {
     button.addEventListener("click", () => {
+      const confirmMessage = button.getAttribute("data-confirm");
+      if (confirmMessage && !window.confirm(confirmMessage)) {
+        return;
+      }
+
       const dataApi = button.getAttribute("data-api");
 
       fetch(dataApi, {
@@ -1219,7 +1224,8 @@ if (listButtonDelete.length > 0) {
           else {
             alert(data.message);
           }
-        });
+        })
+        .catch(() => alert("Không thể xử lý yêu cầu. Vui lòng thử lại."));
     })
   });
 }
