@@ -47,34 +47,75 @@ const formatPassengers = (item) => {
 };
 
 module.exports.createPost = async (req, res) => {
+  const items = req.body.items;
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ code: 'ERROR', message: 'Vui lòng chọn ít nhất một tour.' });
+  }
+
+  const reservations = [];
+  const invalidQuantity = items.some((item) =>
+    ['quantityAdult', 'quantityChildren', 'quantityBaby'].some((key) =>
+      !Number.isSafeInteger(Number(item[key])) || Number(item[key]) < 0
+    ) || (Number(item.quantityAdult) + Number(item.quantityChildren) + Number(item.quantityBaby) <= 0)
+  );
+  if (invalidQuantity) {
+    return res.status(400).json({ code: 'ERROR', message: 'Số lượng hành khách không hợp lệ.' });
+  }
+
+  // Reserve each requested quantity atomically so concurrent bookings cannot oversell a tour.
+  for (const item of items) {
+    const quantities = {
+      stockAdult: Number(item.quantityAdult),
+      stockChildren: Number(item.quantityChildren),
+      stockBaby: Number(item.quantityBaby)
+    };
+    const tour = await Tour.findOneAndUpdate({
+      _id: item.tourId,
+      status: 'active',
+      deleted: false,
+      stockAdult: { $gte: quantities.stockAdult },
+      stockChildren: { $gte: quantities.stockChildren },
+      stockBaby: { $gte: quantities.stockBaby }
+    }, {
+      $inc: {
+        stockAdult: -quantities.stockAdult,
+        stockChildren: -quantities.stockChildren,
+        stockBaby: -quantities.stockBaby
+      }
+    }, { new: false });
+
+    if (!tour) {
+      for (const reservation of reservations) {
+        await Tour.updateOne({ _id: reservation.tourId }, { $inc: reservation.quantities });
+      }
+      const currentTour = await Tour.findById(item.tourId).select('name stockAdult stockChildren stockBaby').lean();
+      if (!currentTour) {
+        return res.status(400).json({ code: 'ERROR', message: 'Một tour trong giỏ hàng không còn khả dụng.' });
+      }
+      const labels = [
+        ['quantityAdult', 'stockAdult', 'người lớn'],
+        ['quantityChildren', 'stockChildren', 'trẻ em'],
+        ['quantityBaby', 'stockBaby', 'em bé']
+      ];
+      const shortage = labels.find(([quantity, stock]) => Number(item[quantity]) > (currentTour[stock] || 0));
+      const message = shortage
+        ? `Tour "${currentTour.name}" chỉ còn ${currentTour[shortage[1]] || 0} ${shortage[2]}; vui lòng điều chỉnh số lượng.`
+        : `Tour "${currentTour.name}" vừa hết chỗ hoặc không còn khả dụng. Vui lòng tải lại giỏ hàng.`;
+      return res.status(409).json({ code: 'ERROR', message });
+    }
+    reservations.push({ tourId: item.tourId, quantities });
+
+    item.newPriceAdult = tour.newPriceAdult;
+    item.newPriceChildren = tour.newPriceChildren;
+    item.newPriceBaby = tour.newPriceBaby;
+    item.departureDate = tour.departureDate;
+  }
+
   // Mã đơn hàng
   req.body.code = `OD${generateHelper.generateRandomNumber(10)}`;
 
   // Chủ đơn lấy từ phiên đăng nhập, không nhận từ body
   req.body.customerId = res.locals.customer.id;
-
-  // Danh sách tour
-  for (const item of req.body.items){
-    const infoTour = await Tour.findOne({
-      _id: item.tourId
-    });
-    // Thêm giá
-    item.newPriceAdult = infoTour.newPriceAdult;
-    item.newPriceChildren = infoTour.newPriceChildren;
-    item.newPriceBaby = infoTour.newPriceBaby;
-    
-    // Thêm ngày khởi hành
-    item.departureDate = infoTour.departureDate;
-
-    // Cập nhật lại số lượng còn lại của tour
-    await Tour.updateOne({
-      _id: item.tourId
-    }, {
-      stockAdult: infoTour.stockAdult - item.quantityAdult,
-      stockChildren: infoTour.stockChildren - item.quantityChildren,
-      stockBaby: infoTour.stockBaby - item.quantityBaby,
-    });
-  }
 
   // Thanh toán
   // Tạm tính

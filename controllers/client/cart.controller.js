@@ -34,16 +34,6 @@ module.exports.detailPost = async (req, res) => {
       item.stockChildren = tourInfo.stockChildren;
       item.stockBaby = tourInfo.stockBaby;
 
-      if(item.quantityAdult > item.stockAdult) {
-        item.quantityAdult = item.stockAdult;
-      }
-      if(item.quantityChildren > item.stockChildren) {
-        item.quantityChildren = item.stockChildren;
-      }
-      if(item.quantityBaby > item.stockBaby) {
-        item.quantityBaby = item.stockBaby;
-      }
-
       item.newPriceAdult = tourInfo.newPriceAdult;
       item.newPriceChildren = tourInfo.newPriceChildren;
       item.newPriceBaby = tourInfo.newPriceBaby;
