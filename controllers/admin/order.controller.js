@@ -7,6 +7,30 @@ const City = require('../../models/province-city.model');
 const PaginationHelper = require('../../helpers/pagination.helper');
 const FilterHelper = require('../../helpers/filter.helper');
 
+const cancelOrderAndRestoreSeats = async (id) => {
+  const order = await Order.findOneAndUpdate({
+    _id: id,
+    deleted: false,
+    status: { $in: ['initial', 'done'] }
+  }, {
+    status: 'cancel'
+  }, { new: false });
+
+  if (!order) return null;
+
+  for (const item of order.items || []) {
+    await Tour.updateOne({ _id: item.tourId }, {
+      $inc: {
+        stockAdult: Number(item.quantityAdult) || 0,
+        stockChildren: Number(item.quantityChildren) || 0,
+        stockBaby: Number(item.quantityBaby) || 0
+      }
+    });
+  }
+
+  return order;
+};
+
 module.exports.list = async (req, res) => {
   const find = {
     deleted: false
@@ -143,6 +167,22 @@ module.exports.editPatch = async (req, res) => {
   try {
     const id = req.params.id;
 
+    const existingOrder = await Order.findOne({ _id: id, deleted: false });
+    if (!existingOrder) {
+      return res.status(404).json({ code: 'ERROR', message: 'Không tìm thấy đơn hàng.' });
+    }
+
+    if (existingOrder.status === 'cancel' && req.body.status && req.body.status !== 'cancel') {
+      return res.status(400).json({ code: 'ERROR', message: 'Đơn đã hủy không thể chuyển lại trạng thái đang hoạt động.' });
+    }
+
+    if (req.body.status === 'cancel' && existingOrder.status !== 'cancel') {
+      const cancelledOrder = await cancelOrderAndRestoreSeats(id);
+      if (!cancelledOrder) {
+        return res.status(409).json({ code: 'ERROR', message: 'Đơn hàng vừa được xử lý bởi một yêu cầu khác.' });
+      }
+    }
+
     await Order.updateOne({
       _id: id,
       deleted: false
@@ -154,6 +194,23 @@ module.exports.editPatch = async (req, res) => {
       code: "SUCCESS"
     });
   } catch (error) {
-    res.redirect(`/${pathAdmin}/orders/list`);
+    res.status(500).json({ code: 'ERROR', message: error.message });
   }
 }
+
+module.exports.deletePatch = async (req, res) => {
+  try {
+    const order = await cancelOrderAndRestoreSeats(req.params.id);
+    if (!order) {
+      return res.status(409).json({
+        code: 'ERROR',
+        message: 'Không thể hủy đơn này. Đơn có thể đã được hủy hoặc không còn tồn tại.'
+      });
+    }
+
+    req.flash('success', `Đã hủy đơn ${order.code} và hoàn lại số chỗ.`);
+    return res.json({ code: 'SUCCESS' });
+  } catch (error) {
+    return res.status(500).json({ code: 'ERROR', message: error.message });
+  }
+};
